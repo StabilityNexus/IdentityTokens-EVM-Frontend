@@ -1,0 +1,43 @@
+# Dependencies
+node_modules
+**/node_modules
+*/node_modules
+apps/*/node_modules
+packages/*/node_modules
+
+# Turbo / Monorepo build outputs
+**/dist
+**/.next
+**/build
+**/out
+**/.turbo
+.turbo
+
+# Local environment & configs
+.env
+.env.*  
+!.env.example
+
+# Logs
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+pnpm-debug.log
+**/*.log
+
+# Misc
+.git
+.gitignore
+Dockerfile
+Docker.*        # ignore all custom docker files except when using -f
+docker-compose.yml
+.vscode
+.idea
+.DS_Store
+*.md
+
+# Temp / OS
+Thumbs.db
+*.tmp
+*.swp
+*.swo

@@ -11,7 +11,9 @@
   "dependencies": {
     "next": "16.1.4",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "ethers": "^6.16.0",
+    "wagmi": "^3.4.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -20,9 +22,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.4",
-    "ethers": "^6.16.0",
     "tailwindcss": "^4",
-    "typescript": "^5",
-    "wagmi": "^3.4.1"
+    "typescript": "^5"
   }
 }

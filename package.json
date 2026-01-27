@@ -1,5 +1,5 @@
 {
-  "name": "identity-tokens-evn-frontend",
+  "name": "identity-tokens-evm-frontend",
   "version": "0.1.0",
   "private": true,
   "scripts": {

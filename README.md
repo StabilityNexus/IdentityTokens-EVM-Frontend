@@ -4,7 +4,7 @@
 <!-- Organization Logo -->
 <div align="center" style="display: flex; align-items: center; justify-content: center; gap: 16px;">
   <img alt="Stability Nexus" src="public/stability.svg" width="175">
-  <img src="public/todo-project-logo.svg" width="175" />
+  <img src="public/assets/logo.svg" width="175" />
 </div>
 
 &nbsp;
@@ -12,9 +12,7 @@
 <!-- Organization Name -->
 <div align="center">
 
-[![Static Badge](https://img.shields.io/badge/Stability_Nexus-/TODO-228B22?style=for-the-badge&labelColor=FFC517)](https://TODO.stability.nexus/)
-
-<!-- Correct deployed url to be added -->
+[![Static Badge](https://img.shields.io/badge/Stability_Nexus-DIT-228B22?style=for-the-badge&labelColor=FFC517)](https://dit.stability.nexus/)
 
 </div>
 
@@ -48,19 +46,17 @@
 ---
 
 <div align="center">
-<h1>TODO: Project Name</h1>
+<h1>Decentralized Identity Token (DIT)</h1>
 </div>
 
-[TODO](https://TODO.stability.nexus/) is a ... TODO: Project Description.
+[DIT](https://dit.stability.nexus/) is a portable, recoverable, and self-sovereign identity system built on EVM chains. Users can mint ERC-721 identity tokens and build an on-chain endorsement graph for trust and reputation.
 
 ---
 
 ## Project Maturity
 
-TODO: In the checklist below, mark the items that have been completed and delete items that are not applicable to the current project:
-
-- [ ] The project has a logo.
-- [ ] The project has a favicon.
+- [x] The project has a logo.
+- [x] The project has a favicon.
 - [ ] The protocol:
   - [ ] has been described and formally specified in a paper.
   - [ ] has had its main properties mathematically proven.
@@ -76,41 +72,32 @@ TODO: In the checklist below, mark the items that have been completed and delete
       - [ ] Polygon
       - [ ] BSC
       - [ ] Base
-- [ ] The mobile app:
-  - [ ] has an _About_ page containing the Stability Nexus's logo and pointing to the social media accounts of the Stability Nexus.
-  - [ ] is available for download as a release in this repo.
-  - [ ] is available in the relevant app stores.
 - [ ] The web frontend:
-  - [ ] has proper title and metadata.
+  - [x] has proper title and metadata.
   - [ ] has proper open graph metadata, to ensure that it is shown well when shared in social media (Discord, Telegram, Twitter, LinkedIn).
-  - [ ] has a footer, containing the Stability Nexus's logo and pointing to the social media accounts of the Stability Nexus.
+  - [x] has a footer, containing the Stability Nexus's logo and pointing to the social media accounts of the Stability Nexus.
   - [ ] is fully static and client-side.
   - [ ] is deployed to Github Pages via a Github Workflow.
-  - [ ] is accessible through the https://TODO:PROJECT-NAME.stability.nexus domain.
+  - [ ] is accessible through the https://dit.stability.nexus domain.
 - [ ] the project is listed in [https://stability.nexus/protocols](https://stability.nexus/protocols).
 
 ---
 
 ## Tech Stack
 
-TODO:
-
 ### Frontend
 
-TODO:
+- [Next.js](https://nextjs.org/) 16 (React 19)
+- [TypeScript](https://www.typescriptlang.org/)
+- [TailwindCSS](https://tailwindcss.com/) v4
+- [Framer Motion](https://www.framer.com/motion/) (animations)
 
-- Next.js 14+ (React)
-- TypeScript
-- TailwindCSS
-- shadcn/ui
+### Blockchain / Web3
 
-### Blockchain
-
-TODO:
-
-- Wagmi
-- Solidity Smart Contracts
-- Ethers.js
+- [wagmi](https://wagmi.sh/) v2 (React hooks for Ethereum)
+- [viem](https://viem.sh/) v2 (TypeScript interface for Ethereum)
+- [RainbowKit](https://www.rainbowkit.com/) v2 (wallet connection UI)
+- Solidity Smart Contracts (ERC-721)
 
 ---
 
@@ -118,48 +105,43 @@ TODO:
 
 ### Prerequisites
 
-TODO
-
-- Node.js 18+
-- npm/yarn/pnpm
+- **Node.js ≥20.9** (required by Next.js 16)
+- npm (v10+)
 - MetaMask or any other web3 wallet browser extension
+- A [WalletConnect Project ID](https://cloud.reown.com/) (free)
 
 ### Installation
-
-TODO
 
 #### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/StabilityNexus/TODO.git
-cd TODO
+git clone https://github.com/StabilityNexus/IdentityTokens-EVM-Frontend.git
+cd IdentityTokens-EVM-Frontend
 ```
 
 #### 2. Install Dependencies
 
-Using your preferred package manager:
-
 ```bash
 npm install
-# or
-yarn install
-# or
-pnpm install
 ```
 
-#### 3. Run the Development Server
+#### 3. Configure Environment Variables
 
-Start the app locally:
+Copy the example environment file and add your WalletConnect project ID:
+
+```bash
+cp .env.example .env.local
+```
+
+Edit `.env.local` and replace `your_project_id_here` with your actual project ID from [Reown (WalletConnect)](https://cloud.reown.com/).
+
+#### 4. Run the Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
 ```
 
-#### 4. Open your Browser
+#### 5. Open your Browser
 
 Navigate to [http://localhost:3000](http://localhost:3000) to see the application.
 
@@ -172,9 +154,9 @@ We welcome contributions of all kinds! To contribute:
 1. Fork the repository and create your feature branch (`git checkout -b feature/AmazingFeature`).
 2. Commit your changes (`git commit -m 'Add some AmazingFeature'`).
 3. Run the development workflow commands to ensure code quality:
-   - `npm run format:write`
-   - `npm run lint:fix`
-   - `npm run typecheck`
+   - `npm run format` — auto-format all files with Prettier
+   - `npm run check-format` — check formatting without writing
+   - `npm run lint` — lint with ESLint
 4. Push your branch (`git push origin feature/AmazingFeature`).
 5. Open a Pull Request for review.
 

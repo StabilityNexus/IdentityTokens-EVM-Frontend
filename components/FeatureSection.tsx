@@ -1,41 +1,10 @@
 "use client";
 import React, { useRef } from "react";
-import FeatureCard from "./cards/FeatureCard";
-
-interface FeatureData {
-  image: string;
-  title: string;
-}
+import FeatureCard from "@/components/cards/FeatureCard";
+import { FEATURES_DATA } from "@/lib/constants";
 
 export const FeatureSection: React.FC = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-
-  const features: FeatureData[] = [
-    {
-      image: "/cards/FeatureCard1.png",
-      title: "Build and Earn Reputation from Endorsements",
-    },
-    {
-      image: "/cards/FeatureCard2.png",
-      title: "Showcase your on-chain reputation instantly.",
-    },
-    {
-      image: "/cards/FeatureCard3.png",
-      title: "Level up your credibility with every endorsement.",
-    },
-    {
-      image: "/cards/FeatureCard4.png",
-      title: "Your Identity travels with you across wallets!",
-    },
-    {
-      image: "/cards/FeatureCard5.png",
-      title: "You own the lock, You own the key Recover your identity",
-    },
-    {
-      image: "/cards/FeatureCard6.png",
-      title: "Mint your Identity Join the community.",
-    },
-  ];
 
   const getScrollAmount = () => {
     if (typeof window === "undefined") return 466 + 42;
@@ -43,19 +12,11 @@ export const FeatureSection: React.FC = () => {
     return isMobile ? window.innerWidth * 0.85 + 16 : 466 + 42;
   };
 
-  const scrollLeft = () => {
+  const scroll = (direction: "left" | "right") => {
     if (scrollContainerRef.current) {
+      const amount = getScrollAmount();
       scrollContainerRef.current.scrollBy({
-        left: -getScrollAmount(),
-        behavior: "smooth",
-      });
-    }
-  };
-
-  const scrollRight = () => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({
-        left: getScrollAmount(),
+        left: direction === "left" ? -amount : amount,
         behavior: "smooth",
       });
     }
@@ -78,7 +39,7 @@ export const FeatureSection: React.FC = () => {
           {/* Navigation Arrows */}
           <div className="absolute right-0 bottom-2 hidden gap-4 md:flex">
             <button
-              onClick={scrollLeft}
+              onClick={() => scroll("left")}
               aria-label="Scroll left"
               className="group flex h-12 w-12 items-center justify-center rounded-full bg-brand-blue transition-colors hover:bg-brand-blue-hover"
             >
@@ -99,7 +60,7 @@ export const FeatureSection: React.FC = () => {
               </svg>
             </button>
             <button
-              onClick={scrollRight}
+              onClick={() => scroll("right")}
               aria-label="Scroll Right"
               className="group flex h-12 w-12 items-center justify-center rounded-full bg-brand-blue transition-colors hover:bg-brand-blue-hover"
             >
@@ -128,7 +89,7 @@ export const FeatureSection: React.FC = () => {
           className="scrollbar-hide flex snap-x snap-mandatory items-center overflow-x-auto pb-10"
         >
           <div className="flex gap-4 md:gap-[42px]">
-            {features.map((item, index) => (
+            {FEATURES_DATA.map((item, index) => (
               <div key={index} className="shrink-0 snap-center">
                 <FeatureCard
                   bgImage={item.image}
@@ -148,5 +109,3 @@ export const FeatureSection: React.FC = () => {
     </section>
   );
 };
-
-export default FeatureSection;

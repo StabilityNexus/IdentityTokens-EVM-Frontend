@@ -55,6 +55,16 @@
 
 ---
 
+## Project Workflow
+
+![Identity Workflow](docs/workflow.svg)
+
+The diagram above gives an overview of the identity token flow: self-issued identity minting, on-chain storage of identities, endorsements between holders, optional revocation, frontend interaction with chain data, and external verification by third-party services.
+
+For more details, see [docs/workflow.md](docs/workflow.md).
+
+---
+
 ## Project Maturity
 
 TODO: In the checklist below, mark the items that have been completed and delete items that are not applicable to the current project:

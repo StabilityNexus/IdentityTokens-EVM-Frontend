@@ -3,35 +3,23 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "../lib/utils";
+import { cn } from "@/lib/utils";
+import { STEPS_DATA } from "@/lib/constants";
 
-const STEPS = [
-  {
-    id: 1,
-    title: "Mint",
-    image: "/assets/Step1.png",
-  },
-  {
-    id: 2,
-    title: "Get Endorsed!",
-    image: "/assets/Step2.png",
-  },
-  {
-    id: 3,
-    title: "Share",
-    image: "/assets/Step3.png",
-  },
-];
-
-export function HowItWorks() {
+export default function HowItWorks() {
   const [activeStep, setActiveStep] = useState(1);
+  const totalSteps = STEPS_DATA.length;
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setActiveStep((prev) => (prev === 3 ? 1 : prev + 1));
+      setActiveStep((prev) => (prev === totalSteps ? 1 : prev + 1));
     }, 4000);
     return () => clearInterval(timer);
-  }, []);
+  }, [totalSteps]);
+
+  // Find current step data safely
+  const currentStepData =
+    STEPS_DATA.find((s) => s.id === activeStep) || STEPS_DATA[0];
 
   return (
     <section className="mt-[2px] flex w-full flex-col items-center justify-center bg-landing-bg px-4 py-12 md:py-16 dark:bg-landing-bg-dark">
@@ -48,7 +36,6 @@ export function HowItWorks() {
               fill
               className="object-contain dark:hidden"
             />
-            {/* for dark theme logo */}
             <Image
               src="/assets/Isologo-dark.svg"
               alt="Logo Dark"
@@ -78,7 +65,7 @@ export function HowItWorks() {
             <motion.div
               className="absolute top-[30px] left-[29px] hidden w-[2px] origin-top bg-step-active md:block"
               animate={{
-                height: `${((activeStep - 1) / (STEPS.length - 1)) * 100}%`,
+                height: `${totalSteps > 1 ? ((activeStep - 1) / (totalSteps - 1)) * 100 : 0}%`,
               }}
               style={{ maxHeight: "calc(100% - 60px)" }}
               transition={{ duration: 0.5, ease: "easeInOut" }}
@@ -89,14 +76,14 @@ export function HowItWorks() {
             <motion.div
               className="absolute top-[16px] left-[16px] h-[2px] origin-left bg-step-active md:hidden"
               animate={{
-                width: `${((activeStep - 1) / (STEPS.length - 1)) * 100}%`,
+                width: `${((activeStep - 1) / (totalSteps - 1)) * 100}%`,
               }}
               style={{ maxWidth: "calc(100% - 32px)" }}
               transition={{ duration: 0.5, ease: "easeInOut" }}
             />
 
             {/* === THE STEPS === */}
-            {STEPS.map((step, index) => {
+            {STEPS_DATA.map((step, index) => {
               const isActive = activeStep >= step.id;
 
               return (
@@ -106,11 +93,10 @@ export function HowItWorks() {
                     "group relative z-10 flex cursor-pointer",
                     "md:flex-row md:items-center",
                     "flex-col items-center",
-                    index !== STEPS.length - 1 ? "md:mb-[90px]" : "md:mb-0"
+                    index !== totalSteps - 1 ? "md:mb-[90px]" : "md:mb-0"
                   )}
                   onClick={() => setActiveStep(step.id)}
                 >
-                  {/* NUMBER CIRCLE */}
                   <div
                     className={cn(
                       "flex items-center justify-center rounded-full border-2 bg-step-card font-utsaha transition-all duration-300",
@@ -123,7 +109,6 @@ export function HowItWorks() {
                     {step.id}
                   </div>
 
-                  {/* TEXT LABEL */}
                   <h3
                     className={cn(
                       "font-utsaha transition-colors duration-300",
@@ -155,8 +140,8 @@ export function HowItWorks() {
                 className="relative h-full w-full"
               >
                 <Image
-                  src={STEPS[activeStep - 1].image}
-                  alt={STEPS[activeStep - 1].title}
+                  src={currentStepData.image}
+                  alt={currentStepData.title}
                   fill
                   className="object-contain"
                   priority

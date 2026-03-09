@@ -183,4 +183,4 @@ If you encounter bugs, need help, or have feature requests:
 - Please open an issue in this repository providing detailed information.
 - Describe the problem clearly and include any relevant logs or screenshots.
 
-We appreciate your feedback and contributions
+We appreciate your feedback and contributions.

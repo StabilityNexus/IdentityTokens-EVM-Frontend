@@ -17,11 +17,11 @@ const CTASection = () => {
             mixBlendMode: "overlay",
           }}
         />
-        <h2 className="mx-auto mt-8 max-w-[90%] px-4 font-utsaha text-2xl tracking-tight text-black md:mt-[72px] md:max-w-[768px] md:px-0 md:text-6xl">
+        <h2 className="mx-auto mt-8 max-w-[90%] px-4 font-utsaha text-2xl tracking-tight text-black md:mt-[72px] md:max-w-[768px] md:px-0 md:text-6xl dark:text-white">
           By Stability Nexus, For Everyone
         </h2>
 
-        <p className="mt-5 px-4 font-utsaha text-lg text-black md:mt-[24px] md:text-2xl">
+        <p className="mt-5 px-4 font-utsaha text-lg text-black md:mt-[24px] md:text-2xl dark:text-gray-300">
           Mint your Decentralized ID today
         </p>
 

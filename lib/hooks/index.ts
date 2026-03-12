@@ -7,9 +7,15 @@ export { useEndorseIdentity } from "./useEndorseIdentity";
 export { useRevokeEndorsement } from "./useRevokeEndorsement";
 
 // Read hooks — pure on-chain queries
-export { useGetEndorsements, useGetEndorsementCount } from "./useGetEndorsements";
+export {
+  useGetEndorsements,
+  useGetEndorsementCount,
+} from "./useGetEndorsements";
 export type { Endorsement } from "./useGetEndorsements";
-export { useGetGivenEndorsements, useGetGivenEndorsementCount } from "./useGetGivenEndorsements";
+export {
+  useGetGivenEndorsements,
+  useGetGivenEndorsementCount,
+} from "./useGetGivenEndorsements";
 export type { GivenEndorsement } from "./useGetGivenEndorsements";
 export { useGetIdentityState } from "./useGetIdentityState";
 export type { IdentityState } from "./useGetIdentityState";

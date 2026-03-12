@@ -1,14 +1,14 @@
 "use client";
 
 import { useReadContract, useChainId } from "wagmi";
-import TNT_ABI from "@/lib/abi/TNT.abi.json";
+import CLIENT_ABI from "@/lib/abi/TNT.client.abi.json";
 import { getTNTAddress } from "@/lib/contracts";
 
 export interface IdentityState {
-    isCompromised: boolean;
-    backupWallet: `0x${string}`;
-    pendingBackupWallet: `0x${string}`;
-    backupUnlockTime: bigint;
+  isCompromised: boolean;
+  backupWallet: `0x${string}`;
+  pendingBackupWallet: `0x${string}`;
+  backupUnlockTime: bigint;
 }
 
 /**
@@ -21,21 +21,21 @@ export interface IdentityState {
  *   if (state?.isCompromised) { ... }
  */
 export function useGetIdentityState(tokenId: bigint | undefined) {
-    const chainId = useChainId();
-    const address = getTNTAddress(chainId);
+  const chainId = useChainId();
+  const address = getTNTAddress(chainId);
 
-    const { data, isLoading, error, refetch } = useReadContract({
-        address,
-        abi: TNT_ABI,
-        functionName: "getIdentityState",
-        args: [tokenId!],
-        query: { enabled: !!address && tokenId !== undefined },
-    });
+  const { data, isLoading, error, refetch } = useReadContract({
+    address,
+    abi: CLIENT_ABI,
+    functionName: "getIdentityState",
+    args: [tokenId!],
+    query: { enabled: !!address && tokenId !== undefined },
+  });
 
-    return {
-        state: data as IdentityState | undefined,
-        isLoading,
-        error,
-        refetch,
-    } as const;
+  return {
+    state: data as IdentityState | undefined,
+    isLoading,
+    error,
+    refetch,
+  } as const;
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useReadContract, useChainId } from "wagmi";
-import TNT_ABI from "@/lib/abi/TNT.abi.json";
+import CLIENT_ABI from "@/lib/abi/TNT.client.abi.json";
 import { getTNTAddress } from "@/lib/contracts";
 
 /**
@@ -14,16 +14,21 @@ import { getTNTAddress } from "@/lib/contracts";
  *   const { uri } = useTokenURI(1n);
  */
 export function useTokenURI(tokenId: bigint | undefined) {
-    const chainId = useChainId();
-    const address = getTNTAddress(chainId);
+  const chainId = useChainId();
+  const address = getTNTAddress(chainId);
 
-    const { data, isLoading, error, refetch } = useReadContract({
-        address,
-        abi: TNT_ABI,
-        functionName: "tokenURI",
-        args: [tokenId!],
-        query: { enabled: !!address && tokenId !== undefined },
-    });
+  const { data, isLoading, error, refetch } = useReadContract({
+    address,
+    abi: CLIENT_ABI,
+    functionName: "tokenURI",
+    args: [tokenId!],
+    query: { enabled: !!address && tokenId !== undefined },
+  });
 
-    return { uri: data as string | undefined, isLoading, error, refetch } as const;
+  return {
+    uri: data as string | undefined,
+    isLoading,
+    error,
+    refetch,
+  } as const;
 }

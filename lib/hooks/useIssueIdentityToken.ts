@@ -1,7 +1,11 @@
 "use client";
 
-import { useWriteContract, useWaitForTransactionReceipt, useChainId } from "wagmi";
-import TNT_ABI from "@/lib/abi/TNT.abi.json";
+import {
+  useWriteContract,
+  useWaitForTransactionReceipt,
+  useChainId,
+} from "wagmi";
+import CLIENT_ABI from "@/lib/abi/TNT.client.abi.json";
 import { getTNTAddress } from "@/lib/contracts";
 
 /**
@@ -20,13 +24,17 @@ export function useIssueIdentityToken() {
 
   const { writeContract, data: hash, isPending, error } = useWriteContract();
 
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash });
+  const {
+    isLoading: isConfirming,
+    isSuccess,
+    error: receiptError,
+  } = useWaitForTransactionReceipt({ hash });
 
   function issueToken() {
     if (!address) throw new Error(`TNT not deployed on chain ${chainId}`);
     writeContract({
       address,
-      abi: TNT_ABI,
+      abi: CLIENT_ABI,
       functionName: "issueToken",
     });
   }
@@ -36,6 +44,6 @@ export function useIssueIdentityToken() {
     hash,
     isPending: isPending || isConfirming,
     isSuccess,
-    error,
+    error: error ?? receiptError,
   } as const;
 }

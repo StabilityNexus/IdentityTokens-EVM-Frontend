@@ -1,8 +1,12 @@
 "use client";
 
-import { useWriteContract, useWaitForTransactionReceipt, useChainId } from "wagmi";
-import { encodeAbiParameters, parseAbiParameters, type Hex } from "viem";
-import TNT_ABI from "@/lib/abi/TNT.abi.json";
+import {
+  useWriteContract,
+  useWaitForTransactionReceipt,
+  useChainId,
+} from "wagmi";
+import { keccak256, toBytes, type Hex } from "viem";
+import CLIENT_ABI from "@/lib/abi/TNT.client.abi.json";
 import { getTNTAddress } from "@/lib/contracts";
 
 export type KnownAttributeKey =
@@ -15,21 +19,11 @@ export type KnownAttributeKey =
   | "age_group";
 
 /**
- * Returns the bytes32 key hash for a well-known attribute name.
- * Matches the pattern used on-chain: keccak256(abi.encodePacked(key)).
+ * Returns the bytes32 key hash for an attribute name.
+ * Matches Solidity's keccak256(abi.encodePacked(key)).
  */
 export function attributeKeyHash(key: string): Hex {
-  return encodeAbiParameters(parseAbiParameters("bytes32"), [
-    // viem's keccak256 of an ABI-encoded string is not the same as solidity's keccak256(abi.encodePacked(key))
-    // We use the raw bytes approach via TextEncoder to match Solidity's keccak256(bytes(key)).
-    (() => {
-      const bytes = new TextEncoder().encode(key);
-      // Pad to 32 bytes (right-zero-padded, which is how bytes32 literals work in Solidity)
-      const padded = new Uint8Array(32);
-      padded.set(bytes.slice(0, 32));
-      return ("0x" + [...padded].map((b) => b.toString(16).padStart(2, "0")).join("")) as Hex;
-    })(),
-  ]).slice(0, 66) as Hex; // keep only the bytes32 (66 hex chars incl. 0x)
+  return keccak256(toBytes(key));
 }
 
 /**
@@ -48,7 +42,11 @@ export function useSetAttribute() {
 
   const { writeContract, data: hash, isPending, error } = useWriteContract();
 
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash });
+  const {
+    isLoading: isConfirming,
+    isSuccess,
+    error: receiptError,
+  } = useWaitForTransactionReceipt({ hash });
 
   function setAttribute({
     tokenId,
@@ -71,11 +69,17 @@ export function useSetAttribute() {
 
     writeContract({
       address,
-      abi: TNT_ABI,
+      abi: CLIENT_ABI,
       functionName: "setAttribute",
       args: [tokenId, keyHash, encoded],
     });
   }
 
-  return { setAttribute, hash, isPending: isPending || isConfirming, isSuccess, error } as const;
+  return {
+    setAttribute,
+    hash,
+    isPending: isPending || isConfirming,
+    isSuccess,
+    error: error ?? receiptError,
+  } as const;
 }

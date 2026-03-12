@@ -1,7 +1,11 @@
 "use client";
 
-import { useWriteContract, useWaitForTransactionReceipt, useChainId } from "wagmi";
-import TNT_ABI from "@/lib/abi/TNT.abi.json";
+import {
+  useWriteContract,
+  useWaitForTransactionReceipt,
+  useChainId,
+} from "wagmi";
+import CLIENT_ABI from "@/lib/abi/TNT.client.abi.json";
 import { getTNTAddress } from "@/lib/contracts";
 
 /**
@@ -17,22 +21,32 @@ import { getTNTAddress } from "@/lib/contracts";
  *   setTokenURI({ tokenId: 1n, uri: "ipfs://Qm..." });
  */
 export function useSetTokenURI() {
-    const chainId = useChainId();
-    const address = getTNTAddress(chainId);
+  const chainId = useChainId();
+  const address = getTNTAddress(chainId);
 
-    const { writeContract, data: hash, isPending, error } = useWriteContract();
+  const { writeContract, data: hash, isPending, error } = useWriteContract();
 
-    const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash });
+  const {
+    isLoading: isConfirming,
+    isSuccess,
+    error: receiptError,
+  } = useWaitForTransactionReceipt({ hash });
 
-    function setTokenURI({ tokenId, uri }: { tokenId: bigint; uri: string }) {
-        if (!address) throw new Error(`TNT not deployed on chain ${chainId}`);
-        writeContract({
-            address,
-            abi: TNT_ABI,
-            functionName: "setTokenURI",
-            args: [tokenId, uri],
-        });
-    }
+  function setTokenURI({ tokenId, uri }: { tokenId: bigint; uri: string }) {
+    if (!address) throw new Error(`TNT not deployed on chain ${chainId}`);
+    writeContract({
+      address,
+      abi: CLIENT_ABI,
+      functionName: "setTokenURI",
+      args: [tokenId, uri],
+    });
+  }
 
-    return { setTokenURI, hash, isPending: isPending || isConfirming, isSuccess, error } as const;
+  return {
+    setTokenURI,
+    hash,
+    isPending: isPending || isConfirming,
+    isSuccess,
+    error: error ?? receiptError,
+  } as const;
 }

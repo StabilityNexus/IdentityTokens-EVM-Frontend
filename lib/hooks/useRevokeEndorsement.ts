@@ -1,7 +1,11 @@
 "use client";
 
-import { useWriteContract, useWaitForTransactionReceipt, useChainId } from "wagmi";
-import TNT_ABI from "@/lib/abi/TNT.abi.json";
+import {
+  useWriteContract,
+  useWaitForTransactionReceipt,
+  useChainId,
+} from "wagmi";
+import CLIENT_ABI from "@/lib/abi/TNT.client.abi.json";
 import { getTNTAddress } from "@/lib/contracts";
 
 /**
@@ -15,30 +19,40 @@ import { getTNTAddress } from "@/lib/contracts";
  *   revokeEndorsement({ fromId: 1n, toId: 2n, index: 0n });
  */
 export function useRevokeEndorsement() {
-    const chainId = useChainId();
-    const address = getTNTAddress(chainId);
+  const chainId = useChainId();
+  const address = getTNTAddress(chainId);
 
-    const { writeContract, data: hash, isPending, error } = useWriteContract();
+  const { writeContract, data: hash, isPending, error } = useWriteContract();
 
-    const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash });
+  const {
+    isLoading: isConfirming,
+    isSuccess,
+    error: receiptError,
+  } = useWaitForTransactionReceipt({ hash });
 
-    function revokeEndorsement({
-        fromId,
-        toId,
-        index,
-    }: {
-        fromId: bigint;
-        toId: bigint;
-        index: bigint;
-    }) {
-        if (!address) throw new Error(`TNT not deployed on chain ${chainId}`);
-        writeContract({
-            address,
-            abi: TNT_ABI,
-            functionName: "revokeEndorsement",
-            args: [fromId, toId, index],
-        });
-    }
+  function revokeEndorsement({
+    fromId,
+    toId,
+    index,
+  }: {
+    fromId: bigint;
+    toId: bigint;
+    index: bigint;
+  }) {
+    if (!address) throw new Error(`TNT not deployed on chain ${chainId}`);
+    writeContract({
+      address,
+      abi: CLIENT_ABI,
+      functionName: "revokeEndorsement",
+      args: [fromId, toId, index],
+    });
+  }
 
-    return { revokeEndorsement, hash, isPending: isPending || isConfirming, isSuccess, error } as const;
+  return {
+    revokeEndorsement,
+    hash,
+    isPending: isPending || isConfirming,
+    isSuccess,
+    error: error ?? receiptError,
+  } as const;
 }

@@ -1,9 +1,10 @@
 "use client";
 
 import { useReadContract, useChainId } from "wagmi";
-import { type Hex } from "viem";
-import TNT_ABI from "@/lib/abi/TNT.abi.json";
+import { hexToBytes, type Hex } from "viem";
+import CLIENT_ABI from "@/lib/abi/TNT.client.abi.json";
 import { getTNTAddress } from "@/lib/contracts";
+import { attributeKeyHash } from "@/lib/hooks/useSetAttribute";
 
 /**
  * Hook: read a single attribute from a DIT token and decode it as UTF-8 text.
@@ -16,40 +17,43 @@ import { getTNTAddress } from "@/lib/contracts";
  *   // value === "Alice"
  */
 export function useGetAttribute({
-    tokenId,
-    key,
+  tokenId,
+  key,
 }: {
-    tokenId: bigint | undefined;
-    key: string;
+  tokenId: bigint | undefined;
+  key: string;
 }) {
-    const chainId = useChainId();
-    const address = getTNTAddress(chainId);
+  const chainId = useChainId();
+  const address = getTNTAddress(chainId);
 
-    const keyHash: Hex = (() => {
-        if (key.startsWith("0x") && key.length === 66) return key as Hex;
-        const bytes = new TextEncoder().encode(key);
-        const padded = new Uint8Array(32);
-        padded.set(bytes.slice(0, 32));
-        return ("0x" + [...padded].map((b) => b.toString(16).padStart(2, "0")).join("")) as Hex;
-    })();
+  const keyHash: Hex =
+    key.startsWith("0x") && key.length === 66
+      ? (key as Hex)
+      : attributeKeyHash(key);
 
-    const { data, isLoading, error, refetch } = useReadContract({
-        address,
-        abi: TNT_ABI,
-        functionName: "getAttribute",
-        args: [tokenId!, keyHash],
-        query: { enabled: !!address && tokenId !== undefined && !!key },
-    });
+  const { data, isLoading, error, refetch } = useReadContract({
+    address,
+    abi: CLIENT_ABI,
+    functionName: "getAttribute",
+    args: [tokenId!, keyHash],
+    query: { enabled: !!address && tokenId !== undefined && !!key },
+  });
 
-    // data is raw bytes from the contract; decode as UTF-8 string
-    const value =
-        data && (data as `0x${string}`).length > 2
-            ? new TextDecoder().decode(
-                Uint8Array.from(
-                    Buffer.from((data as string).slice(2), "hex"),
-                ),
-            )
-            : undefined;
+  // data is raw bytes from the contract; decode as UTF-8 string
+  const value =
+    data && (data as `0x${string}`).length > 2
+      ? new TextDecoder().decode(
+          new Uint8Array(
+            hexToBytes((data as `0x${string}`).slice(2) as `0x${string}`)
+          )
+        )
+      : undefined;
 
-    return { value, raw: data as `0x${string}` | undefined, isLoading, error, refetch } as const;
+  return {
+    value,
+    raw: data as `0x${string}` | undefined,
+    isLoading,
+    error,
+    refetch,
+  } as const;
 }

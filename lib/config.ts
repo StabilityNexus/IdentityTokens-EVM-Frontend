@@ -7,18 +7,14 @@ import {
   arbitrum,
   base,
 } from "wagmi/chains";
-import { injected, metaMask, coinbaseWallet, safe } from "wagmi/connectors";
+import { injected, safe } from "wagmi/connectors";
 
 export const config = createConfig({
   chains: [mainnet, sepolia, polygon, optimism, arbitrum, base],
   connectors: [
-    injected({ target: "metaMask" }),
-    injected({ target: "phantom" }),
-    injected({ target: "trust" }),
-    injected({ target: "coinbaseWallet" }),
-    metaMask(),
+    // Discover installed browser extension wallets dynamically.
+    injected(),
     safe(),
-    coinbaseWallet({ appName: "DIT" }),
   ],
   multiInjectedProviderDiscovery: true,
   transports: {

@@ -19,6 +19,16 @@ interface ConnectorParams {
   uid?: string;
 }
 
+const getConnectorParams = (value: unknown): ConnectorParams => {
+  if (typeof value !== "object" || value === null) return {};
+
+  const record = value as Record<string, unknown>;
+  return {
+    ready: typeof record.ready === "boolean" ? record.ready : undefined,
+    uid: typeof record.uid === "string" ? record.uid : undefined,
+  };
+};
+
 function ConnectBtn() {
   const { isConnected, address, chain, chainId } = useAccount();
   const { connectors, connect, isPending, variables } = useConnect();
@@ -43,16 +53,47 @@ function ConnectBtn() {
     ? `${address.slice(0, 6)}...${address.slice(-4)}`
     : "";
 
-  const enrichedConnectors = [...connectors]
+  const browserExtensionConnectors = connectors.filter(
+    (connector) => connector.type === "injected"
+  );
+
+  const dedupedConnectors = Array.from(
+    browserExtensionConnectors.reduce((map, connector) => {
+      const key = `${connector.id}:${connector.name}`;
+      if (!map.has(key)) map.set(key, connector);
+      return map;
+    }, new Map<string, (typeof connectors)[number]>())
+  ).map(([, connector]) => connector);
+
+  const hasNamedInjectedWallet = dedupedConnectors.some((connector) => {
+    const name = connector.name.toLowerCase();
+    const id = connector.id.toLowerCase();
+    return name !== "injected" && id !== "injected";
+  });
+
+  const visibleConnectors = dedupedConnectors.filter((connector) => {
+    if (!hasNamedInjectedWallet) return true;
+
+    const name = connector.name.toLowerCase();
+    const id = connector.id.toLowerCase();
+    return name !== "injected" && id !== "injected";
+  });
+
+  const enrichedConnectors = visibleConnectors
     .map((connector) => {
+      const connectorParams = getConnectorParams(connector);
+      if (connectorParams.ready === false) return null;
+
       const meta = WALLET_METADATA[connector.id] ?? {};
       return {
         connector,
         label: meta.label ?? connector.name,
         icon: meta.icon, // SVGs should be mapped but fallback safely
         priority: meta.priority ?? 0,
+        connectorParams,
       };
     })
+    .filter((item): item is NonNullable<typeof item> => item !== null)
     .sort((a, b) => b.priority - a.priority);
 
   if (!isConnected) {
@@ -105,60 +146,62 @@ function ConnectBtn() {
                 </div>
 
                 <div className="grid gap-3">
-                  {enrichedConnectors.map(({ connector, label, icon }) => {
-                    const connParams = connector as ConnectorParams;
-                    const varConnParams = variables?.connector as
-                      | ConnectorParams
-                      | undefined;
+                  {enrichedConnectors.map(
+                    ({ connector, label, icon, connectorParams }) => {
+                      const varConnParams = getConnectorParams(
+                        variables?.connector
+                      );
 
-                    const isDisabled = connParams.ready === false || isPending;
-                    const isThisPending =
-                      isPending && varConnParams?.uid === connParams.uid;
+                      const isDisabled =
+                        connectorParams.ready === false || isPending;
+                      const isThisPending =
+                        isPending && varConnParams.uid === connectorParams.uid;
 
-                    return (
-                      <button
-                        key={connParams.uid || connector.id}
-                        disabled={isDisabled}
-                        onClick={() => {
-                          connect({ connector });
-                          // Don't close immediately if pending, wait for explicit disconnect/result or let user close
-                          // setIsAccountMenuOpen(false);
-                        }}
-                        className="group flex w-full items-center justify-between rounded-xl border border-zinc-200 bg-white p-3 font-semibold text-zinc-900 transition-all hover:border-emerald-400 hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-white dark:hover:border-emerald-500 dark:hover:bg-zinc-800"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-zinc-100 p-1 dark:bg-zinc-800">
-                            {icon ? (
-                              <Image
-                                src={icon}
-                                alt={label}
-                                width={40}
-                                height={40}
-                                className="h-full w-full object-contain"
-                                onError={(e) => {
-                                  e.currentTarget.style.display = "none";
-                                }}
-                              />
-                            ) : (
-                              <div className="h-5 w-5 rounded-full bg-zinc-300 dark:bg-zinc-700" />
-                            )}
+                      return (
+                        <button
+                          key={connectorParams.uid || connector.id}
+                          disabled={isDisabled}
+                          onClick={() => {
+                            connect({ connector });
+                            // Don't close immediately if pending, wait for explicit disconnect/result or let user close
+                            // setIsAccountMenuOpen(false);
+                          }}
+                          className="group flex w-full items-center justify-between rounded-xl border border-zinc-200 bg-white p-3 font-semibold text-zinc-900 transition-all hover:border-emerald-400 hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-white dark:hover:border-emerald-500 dark:hover:bg-zinc-800"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-zinc-100 p-1 dark:bg-zinc-800">
+                              {icon ? (
+                                <Image
+                                  src={icon}
+                                  alt={label}
+                                  width={40}
+                                  height={40}
+                                  className="h-full w-full object-contain"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = "none";
+                                  }}
+                                />
+                              ) : (
+                                <div className="h-5 w-5 rounded-full bg-zinc-300 dark:bg-zinc-700" />
+                              )}
+                            </div>
+                            <span className="text-base">{label}</span>
                           </div>
-                          <span className="text-base">{label}</span>
-                        </div>
 
-                        {isThisPending && (
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-medium text-emerald-500">
-                              {CONNECTING_LABEL}
-                            </span>
-                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent"></div>
-                          </div>
-                        )}
-                      </button>
-                    );
-                  })}
+                          {isThisPending && (
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-medium text-emerald-500">
+                                {CONNECTING_LABEL}
+                              </span>
+                              <div className="h-4 w-4 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent"></div>
+                            </div>
+                          )}
+                        </button>
+                      );
+                    }
+                  )}
                 </div>
-                {connectors.length === 0 && (
+                {enrichedConnectors.length === 0 && (
                   <div className="py-6 text-center text-zinc-500 dark:text-zinc-400">
                     <p>{NO_WALLET_DETECTED_MSG}</p>
                     <p className="mt-2 text-sm">{INSTALL_WALLET_HINT}</p>

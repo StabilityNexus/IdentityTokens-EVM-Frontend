@@ -1,0 +1,15 @@
+refactor: Remove third-party web3 modal dependencies
+
+### 1. Context
+Replaced heavy web3 modal dependencies with a lightweight local implementation to fix UI dependencies and Framer Motion style overrides.
+
+### 2. Implementation Details
+- `package.json`: Removed `@rainbow-me/rainbowkit` and related heavy dependencies.
+- `lib/wallets.ts` & `public/wallets/`: Mapped connectors to customized local SVG/PNG assets.
+- `components/ui/ConnectBtn.tsx`: Rebuilt UI using simplified flexbox center styling, fixed `any` type warnings, and migrated `img` to `next/image`.
+- `providers/providers.tsx` & `app/layout.tsx`: Removed RainbowKit configs.
+- `components/dashboard/DashboardMetrics.tsx` & `components/layout/SideBar.tsx`: Removed unused import definitions.
+
+### 3. Verification
+- `npm run lint`: Passed with 0 errors.
+- Checked locally that Connect Wallet modal renders clearly without UI distortion.

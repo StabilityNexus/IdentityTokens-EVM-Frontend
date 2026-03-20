@@ -11,7 +11,7 @@ import {
 import { WALLET_METADATA } from "@/lib/wallets";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAccount, useConnect, useDisconnect, useSwitchChain } from "wagmi";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
 interface ConnectorParams {
@@ -35,13 +35,37 @@ function ConnectBtn() {
   const { disconnect } = useDisconnect();
   const { chains, switchChain } = useSwitchChain();
   const [mounted, setMounted] = useState(false);
+  const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const [isNetworkMenuOpen, setIsNetworkMenuOpen] = useState(false);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+  const walletTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const previouslyFocusedRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsAccountMenuOpen(false);
+    setIsWalletModalOpen(false);
+  }, [isConnected]);
+
+  useEffect(() => {
+    if (!isWalletModalOpen) {
+      previouslyFocusedRef.current?.focus();
+      return;
+    }
+
+    previouslyFocusedRef.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : walletTriggerRef.current;
+
+    closeButtonRef.current?.focus();
+  }, [isWalletModalOpen]);
 
   if (!mounted) return null;
 
@@ -100,7 +124,8 @@ function ConnectBtn() {
     return (
       <div className="relative">
         <motion.button
-          onClick={() => setIsAccountMenuOpen(true)}
+          ref={walletTriggerRef}
+          onClick={() => setIsWalletModalOpen(true)}
           whileHover={{ scale: 1.035 }}
           whileTap={{ scale: 0.98 }}
           className="rounded-xl bg-emerald-500 px-4 py-2 font-bold text-white shadow-md transition-shadow duration-200 hover:shadow-emerald-300/40 dark:bg-emerald-400 dark:text-black dark:hover:shadow-emerald-400/30"
@@ -109,27 +134,34 @@ function ConnectBtn() {
         </motion.button>
 
         <AnimatePresence>
-          {isAccountMenuOpen && (
+          {isWalletModalOpen && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
               {/* Backdrop */}
               <div
                 className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
-                onClick={() => setIsAccountMenuOpen(false)}
+                onClick={() => setIsWalletModalOpen(false)}
               />
               {/* Modal */}
               <motion.div
                 key="connect-modal"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="connect-wallet-title"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 className="relative z-[101] w-full max-w-sm overflow-hidden rounded-2xl border border-zinc-200 bg-white p-6 shadow-2xl dark:border-zinc-800 dark:bg-zinc-900"
               >
                 <div className="mb-5 flex items-center justify-between">
-                  <h2 className="text-xl font-bold text-zinc-900 dark:text-white">
+                  <h2
+                    id="connect-wallet-title"
+                    className="text-xl font-bold text-zinc-900 dark:text-white"
+                  >
                     {CONNECT_WALLET_TITLE}
                   </h2>
                   <button
-                    onClick={() => setIsAccountMenuOpen(false)}
+                    ref={closeButtonRef}
+                    onClick={() => setIsWalletModalOpen(false)}
                     className="rounded-full p-2 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800"
                   >
                     <span className="sr-only">Close</span>
@@ -164,7 +196,7 @@ function ConnectBtn() {
                           onClick={() => {
                             connect({ connector });
                             // Don't close immediately if pending, wait for explicit disconnect/result or let user close
-                            // setIsAccountMenuOpen(false);
+                            // setIsWalletModalOpen(false);
                           }}
                           className="group flex w-full items-center justify-between rounded-xl border border-zinc-200 bg-white p-3 font-semibold text-zinc-900 transition-all hover:border-emerald-400 hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-white dark:hover:border-emerald-500 dark:hover:bg-zinc-800"
                         >

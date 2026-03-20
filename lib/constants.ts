@@ -9,6 +9,13 @@ export const CONNECT_BTN_LABEL = {
   wrongNetwork: "Wrong Network",
 };
 
+export const CONNECT_WALLET_TITLE = "Connect Wallet";
+export const CONNECTING_LABEL = "Connecting";
+export const NO_WALLET_DETECTED_MSG = "No wallet extensions detected.";
+export const INSTALL_WALLET_HINT =
+  "Please install a wallet like MetaMask or Rabby.";
+export const DISCONNECT_LABEL = "Disconnect";
+
 export const FEATURES_DATA = [
   {
     image: "/cards/FeatureCard1.png",

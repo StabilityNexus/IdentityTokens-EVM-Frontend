@@ -1,4 +1,4 @@
-import { getDefaultConfig } from "@rainbow-me/rainbowkit";
+import { createConfig, http } from "wagmi";
 import {
   mainnet,
   sepolia,
@@ -8,10 +8,16 @@ import {
   base,
 } from "wagmi/chains";
 
-export const config = getDefaultConfig({
-  appName: "Decentralized Identity Token",
-  projectId:
-    process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "YOUR_PROJECT_ID", // Get one at https://cloud.reown.com/ (formerly WalletConnect)
+export const config = createConfig({
   chains: [mainnet, sepolia, polygon, optimism, arbitrum, base],
+  multiInjectedProviderDiscovery: true,
+  transports: {
+    [mainnet.id]: http(),
+    [sepolia.id]: http(),
+    [polygon.id]: http(),
+    [optimism.id]: http(),
+    [arbitrum.id]: http(),
+    [base.id]: http(),
+  },
   ssr: true,
 });

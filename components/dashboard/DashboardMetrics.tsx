@@ -1,7 +1,7 @@
 "use client";
 
 import IDMetrics, { IDMetricsProps } from "./IDMetrics";
-import TrustScore, { TrustScoreProps } from "./TrustScore";
+import TrustScore from "./TrustScore";
 import Metrics, { MetricsProps } from "./Metrics";
 
 export interface DashboardMetricsProps extends IDMetricsProps, MetricsProps {

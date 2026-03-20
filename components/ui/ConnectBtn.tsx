@@ -77,17 +77,14 @@ function ConnectBtn() {
     ? `${address.slice(0, 6)}...${address.slice(-4)}`
     : "";
 
-  const browserExtensionConnectors = connectors.filter(
-    (connector) => connector.type === "injected"
-  );
-
-  const dedupedConnectors = Array.from(
-    browserExtensionConnectors.reduce((map, connector) => {
-      const key = `${connector.id}:${connector.name}`;
-      if (!map.has(key)) map.set(key, connector);
-      return map;
-    }, new Map<string, (typeof connectors)[number]>())
-  ).map(([, connector]) => connector);
+  const connectorMap = new Map<string, (typeof connectors)[number]>();
+  for (const connector of connectors) {
+    const key = `${connector.id}:${connector.name}`;
+    if (!connectorMap.has(key)) {
+      connectorMap.set(key, connector);
+    }
+  }
+  const dedupedConnectors = Array.from(connectorMap.values());
 
   const hasNamedInjectedWallet = dedupedConnectors.some((connector) => {
     const name = connector.name.toLowerCase();
@@ -135,7 +132,7 @@ function ConnectBtn() {
 
         <AnimatePresence>
           {isWalletModalOpen && (
-            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
               {/* Backdrop */}
               <div
                 className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
@@ -150,7 +147,7 @@ function ConnectBtn() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="relative z-[101] w-full max-w-sm overflow-hidden rounded-2xl border border-zinc-200 bg-white p-6 shadow-2xl dark:border-zinc-800 dark:bg-zinc-900"
+                className="relative z-101 w-full max-w-sm overflow-hidden rounded-2xl border border-zinc-200 bg-white p-6 shadow-2xl dark:border-zinc-800 dark:bg-zinc-900"
               >
                 <div className="mb-5 flex items-center justify-between">
                   <h2

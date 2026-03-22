@@ -15,6 +15,10 @@ export const NO_WALLET_DETECTED_MSG = "No wallet extensions detected.";
 export const INSTALL_WALLET_HINT =
   "Please install a wallet like MetaMask or Rabby.";
 export const DISCONNECT_LABEL = "Disconnect";
+export const CLOSE_LABEL = "Close";
+export const NETWORK_FALLBACK_LABEL = "Network";
+export const CURRENT_NETWORK_MARKER = "(Current)";
+export const MOBILE_SWITCH_NETWORK_LABEL = "Switch network, current:";
 
 export const FEATURES_DATA = [
   {

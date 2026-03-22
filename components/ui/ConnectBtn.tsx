@@ -7,6 +7,10 @@ import {
   NO_WALLET_DETECTED_MSG,
   INSTALL_WALLET_HINT,
   DISCONNECT_LABEL,
+  CLOSE_LABEL,
+  NETWORK_FALLBACK_LABEL,
+  CURRENT_NETWORK_MARKER,
+  MOBILE_SWITCH_NETWORK_LABEL,
 } from "@/lib/constants";
 import { WALLET_METADATA } from "@/lib/wallets";
 import { motion, AnimatePresence } from "framer-motion";
@@ -92,11 +96,18 @@ function ConnectBtn() {
     return name !== "injected" && id !== "injected";
   });
 
-  const visibleConnectors = dedupedConnectors.filter((connector) => {
-    if (!hasNamedInjectedWallet) return true;
+  // Safe connector only works inside a Safe App iframe; hide it elsewhere.
+  const isInSafeIframe =
+    typeof window !== "undefined" && window.self !== window.top;
 
-    const name = connector.name.toLowerCase();
+  const visibleConnectors = dedupedConnectors.filter((connector) => {
     const id = connector.id.toLowerCase();
+    const name = connector.name.toLowerCase();
+
+    // Always hide the Safe connector unless we are inside a Safe App iframe.
+    if (id === "safe" && !isInSafeIframe) return false;
+
+    if (!hasNamedInjectedWallet) return true;
     return name !== "injected" && id !== "injected";
   });
 
@@ -161,7 +172,7 @@ function ConnectBtn() {
                     onClick={() => setIsWalletModalOpen(false)}
                     className="rounded-full p-2 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800"
                   >
-                    <span className="sr-only">Close</span>
+                    <span className="sr-only">{CLOSE_LABEL}</span>
                     <svg
                       className="h-5 w-5 text-zinc-500 dark:text-zinc-400"
                       viewBox="0 0 24 24"
@@ -231,9 +242,55 @@ function ConnectBtn() {
                   )}
                 </div>
                 {enrichedConnectors.length === 0 && (
-                  <div className="py-6 text-center text-zinc-500 dark:text-zinc-400">
-                    <p>{NO_WALLET_DETECTED_MSG}</p>
-                    <p className="mt-2 text-sm">{INSTALL_WALLET_HINT}</p>
+                  <div className="py-6 text-center">
+                    <p className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+                      {NO_WALLET_DETECTED_MSG}
+                    </p>
+                    <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+                      {INSTALL_WALLET_HINT}
+                    </p>
+                    <div className="mt-4 grid gap-2">
+                      {[
+                        {
+                          label: "MetaMask",
+                          url: "https://metamask.io/download/",
+                          icon: "/wallets/metamask.svg",
+                        },
+                        {
+                          label: "Rabby Wallet",
+                          url: "https://rabby.io/",
+                          icon: "/wallets/rabby.svg",
+                        },
+                        {
+                          label: "Coinbase Wallet",
+                          url: "https://www.coinbase.com/wallet/downloads",
+                          icon: "/wallets/cbw.svg",
+                        },
+                      ].map(({ label, url, icon }) => (
+                        <a
+                          key={label}
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-3 rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-left text-sm font-semibold text-zinc-900 transition-all hover:border-emerald-400 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:hover:border-emerald-500 dark:hover:bg-zinc-800"
+                        >
+                          <img
+                            src={icon}
+                            alt={label}
+                            width={28}
+                            height={28}
+                            className="h-7 w-7 rounded-lg object-contain"
+                            onError={(e) => {
+                              e.currentTarget.style.display = "none";
+                            }}
+                          />
+                          <span>{label}</span>
+                          <span className="ml-auto text-xs text-emerald-500">
+                            Install →
+                          </span>
+                        </a>
+                      ))}
+                    </div>
                   </div>
                 )}
               </motion.div>
@@ -246,14 +303,42 @@ function ConnectBtn() {
 
   if (isUnsupported) {
     return (
-      <motion.button
-        onClick={() => switchChain?.({ chainId: chains[0].id })}
-        whileHover={{ scale: 1.035 }}
-        whileTap={{ scale: 0.98 }}
-        className="rounded-xl bg-red-500 px-4 py-2 font-bold text-white shadow-md transition-shadow duration-200 hover:shadow-red-300/40 dark:bg-red-500 dark:text-white"
-      >
-        {CONNECT_BTN_LABEL.wrongNetwork}
-      </motion.button>
+      <div className="relative">
+        <motion.button
+          onClick={() => setIsNetworkMenuOpen(!isNetworkMenuOpen)}
+          whileHover={{ scale: 1.035 }}
+          whileTap={{ scale: 0.98 }}
+          className="rounded-xl bg-red-500 px-4 py-2 font-bold text-white shadow-md transition-shadow duration-200 hover:shadow-red-300/40 dark:bg-red-500 dark:text-white"
+        >
+          {CONNECT_BTN_LABEL.wrongNetwork}
+        </motion.button>
+
+        <AnimatePresence>
+          {isNetworkMenuOpen && (
+            <motion.div
+              key="unsupported-network-dropdown"
+              initial={{ opacity: 0, scale: 0.95, y: -10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: -10 }}
+              className="absolute top-full right-0 z-50 mt-2 w-48 overflow-hidden rounded-xl bg-zinc-100 shadow-lg dark:bg-zinc-800"
+            >
+              {chains.map((x) => (
+                <button
+                  key={x.id}
+                  disabled={!switchChain}
+                  onClick={() => {
+                    switchChain?.({ chainId: x.id });
+                    setIsNetworkMenuOpen(false);
+                  }}
+                  className="w-full px-4 py-3 text-left text-sm font-semibold text-zinc-900 transition-colors hover:bg-zinc-200 disabled:opacity-50 dark:text-white dark:hover:bg-zinc-700"
+                >
+                  {x.name}
+                </button>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     );
   }
 
@@ -266,7 +351,9 @@ function ConnectBtn() {
           whileTap={{ scale: 0.98 }}
           className="hidden items-center gap-1.5 rounded-xl bg-zinc-200 px-3 py-2 text-zinc-800 transition-colors duration-150 hover:bg-zinc-200 sm:flex dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:hover:bg-zinc-700"
         >
-          <span className="hidden md:inline">{chain?.name || "Network"}</span>
+          <span className="hidden md:inline">
+            {chain?.name || NETWORK_FALLBACK_LABEL}
+          </span>
           <span className="opacity-70">▾</span>
         </motion.button>
         <motion.button
@@ -274,7 +361,7 @@ function ConnectBtn() {
           whileHover={{ scale: 1.035 }}
           whileTap={{ scale: 0.98 }}
           className="flex items-center justify-center rounded-xl bg-zinc-200 p-2 text-zinc-800 transition-colors duration-150 hover:bg-zinc-300 sm:hidden dark:bg-zinc-800 dark:text-white dark:hover:bg-zinc-700"
-          aria-label={`Switch network, current: ${chain?.name}`}
+          aria-label={`${MOBILE_SWITCH_NETWORK_LABEL} ${chain?.name}`}
         >
           <span className="text-xs">⛓</span>
         </motion.button>
@@ -298,7 +385,7 @@ function ConnectBtn() {
                   }}
                   className="w-full px-4 py-3 text-left text-sm font-semibold text-zinc-900 transition-colors hover:bg-zinc-200 disabled:opacity-50 dark:text-white dark:hover:bg-zinc-700"
                 >
-                  {x.name} {x.id === chainId && "(Current)"}
+                  {x.name} {x.id === chainId && CURRENT_NETWORK_MARKER}
                 </button>
               ))}
             </motion.div>

@@ -58,6 +58,20 @@ function ConnectBtn() {
   }, [isConnected]);
 
   useEffect(() => {
+    if (!isNetworkMenuOpen && !isAccountMenuOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsNetworkMenuOpen(false);
+        setIsAccountMenuOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isNetworkMenuOpen, isAccountMenuOpen]);
+
+  useEffect(() => {
     if (!isWalletModalOpen) {
       previouslyFocusedRef.current?.focus();
       return;
@@ -274,7 +288,7 @@ function ConnectBtn() {
                           rel="noopener noreferrer"
                           className="flex items-center gap-3 rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-left text-sm font-semibold text-zinc-900 transition-all hover:border-emerald-400 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:hover:border-emerald-500 dark:hover:bg-zinc-800"
                         >
-                          <img
+                          <Image
                             src={icon}
                             alt={label}
                             width={28}

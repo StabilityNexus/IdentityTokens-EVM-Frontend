@@ -8,7 +8,8 @@ interface UseNetworkGuardResult {
   isWrongNetwork: boolean;
   isSwitchPending: boolean;
   targetChains: readonly Chain[];
-  switchNetwork: (chainId: number) => void;
+  switchNetwork: (chainId: number) => Promise<void>;
+  chainId: number | undefined;
 }
 
 function useNetworkGuard(): UseNetworkGuardResult {
@@ -19,21 +20,23 @@ function useNetworkGuard(): UseNetworkGuardResult {
   const isWrongNetwork =
     status === "connected" &&
     typeof chainId === "number" &&
-    targetChains.length > 0 &&
-    !isSwitchPending &&
-    !targetChains.some((chain) => chain.id === chainId);
+    targetChains.length > 0 && // guard: never flag wrong network before chains load
+    !targetChains.some((c) => c.id === chainId);
 
   const switchNetwork = useCallback(
-    (nextChainId: number) => {
-      void switchChainAsync({ chainId: nextChainId }).catch(
-        (error: unknown) => {
-          const message =
-            error instanceof Error
-              ? error.message
-              : "Unknown chain switch error";
-          console.warn("Chain switch rejected:", message);
+    async (nextChainId: number): Promise<void> => {
+      try {
+        await switchChainAsync({ chainId: nextChainId });
+      } catch (error: unknown) {
+        const err = error as { code?: number; message?: string };
+        if (err?.code === 4001) {
+          console.info("Chain switch rejected by user", { nextChainId });
+        } else if (err?.code === 4902) {
+          console.warn("Chain not added to wallet", { nextChainId });
+        } else {
+          console.error("Chain switch failed", err);
         }
-      );
+      }
     },
     [switchChainAsync]
   );
@@ -43,6 +46,7 @@ function useNetworkGuard(): UseNetworkGuardResult {
     isSwitchPending,
     targetChains,
     switchNetwork,
+    chainId,
   };
 }
 

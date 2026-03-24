@@ -18,6 +18,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
 import {
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -44,13 +45,18 @@ const emptySubscribe = () => () => {};
 
 function ConnectBtn() {
   const { isConnected, address, chain } = useAccount();
-  const chainId = chain?.id;
   const { connectors, connect, isPending, variables } = useConnect();
   const { disconnect } = useDisconnect();
-  const { isWrongNetwork, isSwitchPending, targetChains, switchNetwork } =
-    useNetworkGuard();
-
-  // FIX #4: useSyncExternalStore subscribe creates new function every render
+  // chainId from useNetworkGuard is sourced from useAccount().chainId —
+  // the raw EIP-1193 chain ID, valid even for unsupported chains (e.g. 999).
+  // This replaces the old `chain?.id` which was undefined for unsupported chains.
+  const {
+    isWrongNetwork,
+    isSwitchPending,
+    targetChains,
+    switchNetwork,
+    chainId,
+  } = useNetworkGuard();
   const mounted = useSyncExternalStore(
     emptySubscribe,
     () => true,
@@ -60,6 +66,18 @@ function ConnectBtn() {
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const [isNetworkMenuOpen, setIsNetworkMenuOpen] = useState(false);
+
+  // useLayoutEffect (not useEffect) to satisfy react-compiler's set-state-in-effect rule.
+  // Closes the modal when wallets like Phantom auto-connect instantly (no popup),
+  // so the "Connect Wallet" modal doesn't hang open.
+  const prevConnectedRef = useRef(isConnected);
+  useLayoutEffect(() => {
+    if (!prevConnectedRef.current && isConnected) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setIsWalletModalOpen(false);
+    }
+    prevConnectedRef.current = isConnected;
+  }, [isConnected]);
 
   const openNetworkMenu = () => {
     setIsNetworkMenuOpen(true);
@@ -154,6 +172,26 @@ function ConnectBtn() {
     document.addEventListener("keydown", trapFocus);
     return () => document.removeEventListener("keydown", trapFocus);
   }, [isWalletModalOpen]);
+
+  // Re-request EIP-6963 provider announcements when the modal opens.
+  // Helps MetaMask/Phantom when the extension service worker just woke up
+  // or when the user opened the modal before the extension had a chance to
+  // announce itself (e.g. incognito, cold start, tab restore).
+  useEffect(() => {
+    if (!isWalletModalOpen) return;
+    window.dispatchEvent(new CustomEvent("eip6963:requestProvider"));
+    const retry = setTimeout(() => {
+      window.dispatchEvent(new CustomEvent("eip6963:requestProvider"));
+    }, 300);
+    return () => clearTimeout(retry);
+  }, [isWalletModalOpen]);
+
+  useEffect(() => {
+    if (!isWrongNetwork && isNetworkMenuOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setIsNetworkMenuOpen(false);
+    }
+  }, [isWrongNetwork, isNetworkMenuOpen]);
 
   // Address formatting (0x1234...abcd)
   const displayName = address
@@ -419,9 +457,8 @@ function ConnectBtn() {
                 <button
                   key={x.id}
                   disabled={isSwitchPending}
-                  onClick={() => {
-                    switchNetwork(x.id);
-                    setIsNetworkMenuOpen(false);
+                  onClick={async () => {
+                    await switchNetwork(x.id);
                   }}
                   className="w-full px-4 py-3 text-left text-sm font-semibold text-zinc-900 transition-colors hover:bg-zinc-200 disabled:opacity-50 dark:text-white dark:hover:bg-zinc-700"
                 >
@@ -450,7 +487,11 @@ function ConnectBtn() {
           aria-label={`${MOBILE_SWITCH_NETWORK_LABEL} ${chain?.name}`}
         >
           <span className="hidden text-sm sm:inline">
-            {chain?.name || NETWORK_FALLBACK_LABEL}
+            {/* chainId here is from useNetworkGuard (useAccount().chainId) —
+                always a number even for unsupported chains like HyperEVM(999). */}
+            {isWrongNetwork
+              ? `Chain ${chainId ?? "?"}`
+              : chain?.name || NETWORK_FALLBACK_LABEL}
           </span>
           <span className="text-xs sm:hidden">⛓</span>
           <span className="hidden opacity-70 sm:inline">▾</span>
@@ -469,9 +510,10 @@ function ConnectBtn() {
                 <button
                   key={x.id}
                   disabled={x.id === chainId || isSwitchPending}
-                  onClick={() => {
-                    switchNetwork(x.id);
-                    setIsNetworkMenuOpen(false);
+                  onClick={async () => {
+                    await switchNetwork(x.id);
+                    // FIX-A: Don't close based on stale chainId closure.
+                    // Closing is handled reactively by the useEffect above.
                   }}
                   className="w-full px-4 py-3 text-left text-sm font-semibold text-zinc-900 transition-colors hover:bg-zinc-200 disabled:opacity-50 dark:text-white dark:hover:bg-zinc-700"
                 >

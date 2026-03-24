@@ -7,15 +7,11 @@ import {
   arbitrum,
   base,
 } from "wagmi/chains";
-import { injected, safe } from "wagmi/connectors";
+import { safe } from "wagmi/connectors";
 
 export const config = createConfig({
   chains: [mainnet, sepolia, polygon, optimism, arbitrum, base],
-  connectors: [
-    // Discover installed browser extension wallets dynamically.
-    injected(),
-    safe(),
-  ],
+  connectors: [safe()],
   multiInjectedProviderDiscovery: true,
   transports: {
     [mainnet.id]: http(),
@@ -25,5 +21,5 @@ export const config = createConfig({
     [arbitrum.id]: http(),
     [base.id]: http(),
   },
-  ssr: true,
+  ssr: false,
 });

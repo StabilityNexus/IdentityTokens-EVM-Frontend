@@ -20,7 +20,7 @@ function useNetworkGuard(): UseNetworkGuardResult {
   const isWrongNetwork =
     status === "connected" &&
     typeof chainId === "number" &&
-    targetChains.length > 0 && // guard: never flag wrong network before chains load
+    targetChains.length > 0 &&
     !targetChains.some((c) => c.id === chainId);
 
   const switchNetwork = useCallback(

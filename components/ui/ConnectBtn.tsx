@@ -47,9 +47,7 @@ function ConnectBtn() {
   const { isConnected, address, chain } = useAccount();
   const { connectors, connect, isPending, variables } = useConnect();
   const { disconnect } = useDisconnect();
-  // chainId from useNetworkGuard is sourced from useAccount().chainId —
-  // the raw EIP-1193 chain ID, valid even for unsupported chains (e.g. 999).
-  // This replaces the old `chain?.id` which was undefined for unsupported chains.
+
   const {
     isWrongNetwork,
     isSwitchPending,
@@ -66,14 +64,13 @@ function ConnectBtn() {
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const [isNetworkMenuOpen, setIsNetworkMenuOpen] = useState(false);
+  const isSwitchingRef = useRef(false);
 
-  // useLayoutEffect (not useEffect) to satisfy react-compiler's set-state-in-effect rule.
-  // Closes the modal when wallets like Phantom auto-connect instantly (no popup),
-  // so the "Connect Wallet" modal doesn't hang open.
+  const hadSwitchAttemptRef = useRef(false);
+
   const prevConnectedRef = useRef(isConnected);
   useLayoutEffect(() => {
     if (!prevConnectedRef.current && isConnected) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsWalletModalOpen(false);
     }
     prevConnectedRef.current = isConnected;
@@ -99,7 +96,7 @@ function ConnectBtn() {
   useEffect(() => {
     if (!isNetworkMenuOpen && !isAccountMenuOpen) return;
 
-    const handleClickOutside = (e: MouseEvent) => {
+    const handleClickOutside = (e: PointerEvent) => {
       const target = e.target as Node;
 
       if (networkMenuRef.current && !networkMenuRef.current.contains(target)) {
@@ -111,8 +108,9 @@ function ConnectBtn() {
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("pointerdown", handleClickOutside);
+    return () =>
+      document.removeEventListener("pointerdown", handleClickOutside);
   }, [isNetworkMenuOpen, isAccountMenuOpen]);
 
   useEffect(() => {
@@ -173,10 +171,6 @@ function ConnectBtn() {
     return () => document.removeEventListener("keydown", trapFocus);
   }, [isWalletModalOpen]);
 
-  // Re-request EIP-6963 provider announcements when the modal opens.
-  // Helps MetaMask/Phantom when the extension service worker just woke up
-  // or when the user opened the modal before the extension had a chance to
-  // announce itself (e.g. incognito, cold start, tab restore).
   useEffect(() => {
     if (!isWalletModalOpen) return;
     window.dispatchEvent(new CustomEvent("eip6963:requestProvider"));
@@ -187,11 +181,23 @@ function ConnectBtn() {
   }, [isWalletModalOpen]);
 
   useEffect(() => {
-    if (!isWrongNetwork && isNetworkMenuOpen) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (
+      !isWrongNetwork &&
+      isNetworkMenuOpen &&
+      !isSwitchPending &&
+      !isSwitchingRef.current &&
+      hadSwitchAttemptRef.current
+    ) {
+      hadSwitchAttemptRef.current = false;
       setIsNetworkMenuOpen(false);
     }
-  }, [isWrongNetwork, isNetworkMenuOpen]);
+  }, [isWrongNetwork, isNetworkMenuOpen, isSwitchPending, chainId]);
+
+  useEffect(() => {
+    if (isNetworkMenuOpen) {
+      setIsNetworkMenuOpen(false);
+    }
+  }, [chainId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Address formatting (0x1234...abcd)
   const displayName = address
@@ -428,50 +434,6 @@ function ConnectBtn() {
     );
   }
 
-  if (isWrongNetwork) {
-    return (
-      <div className="relative" ref={networkMenuRef}>
-        <motion.button
-          onClick={() =>
-            isNetworkMenuOpen ? setIsNetworkMenuOpen(false) : openNetworkMenu()
-          }
-          aria-expanded={isNetworkMenuOpen}
-          aria-haspopup="true"
-          whileHover={{ scale: 1.035 }}
-          whileTap={{ scale: 0.98 }}
-          className="rounded-xl bg-red-500 px-4 py-2 font-bold text-white shadow-md transition-shadow duration-200 hover:shadow-red-300/40 dark:bg-red-500 dark:text-white"
-        >
-          {CONNECT_BTN_LABEL.wrongNetwork}
-        </motion.button>
-
-        <AnimatePresence>
-          {isNetworkMenuOpen && (
-            <motion.div
-              key="unsupported-network-dropdown"
-              initial={{ opacity: 0, scale: 0.95, y: -10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: -10 }}
-              className="absolute top-full right-0 z-50 mt-2 w-48 overflow-hidden rounded-xl bg-zinc-100 shadow-lg dark:bg-zinc-800"
-            >
-              {targetChains.map((x) => (
-                <button
-                  key={x.id}
-                  disabled={isSwitchPending}
-                  onClick={async () => {
-                    await switchNetwork(x.id);
-                  }}
-                  className="w-full px-4 py-3 text-left text-sm font-semibold text-zinc-900 transition-colors hover:bg-zinc-200 disabled:opacity-50 dark:text-white dark:hover:bg-zinc-700"
-                >
-                  {x.name}
-                </button>
-              ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    );
-  }
-
   return (
     <div className="z-50 flex items-center gap-2 font-bold">
       <div className="relative" ref={networkMenuRef}>
@@ -483,18 +445,29 @@ function ConnectBtn() {
           aria-haspopup="true"
           whileHover={{ scale: 1.035 }}
           whileTap={{ scale: 0.98 }}
-          className="hidden items-center gap-1.5 rounded-xl bg-zinc-200 px-3 py-2 text-zinc-800 transition-colors duration-150 hover:bg-zinc-300 sm:flex dark:bg-zinc-800 dark:text-white dark:hover:bg-zinc-700"
-          aria-label={`${MOBILE_SWITCH_NETWORK_LABEL} ${chain?.name}`}
+          className={
+            isWrongNetwork
+              ? "rounded-xl bg-red-500 px-4 py-2 font-bold text-white shadow-md transition-shadow duration-200 hover:shadow-red-300/40 dark:bg-red-500 dark:text-white"
+              : "hidden items-center gap-1.5 rounded-xl bg-zinc-200 px-3 py-2 text-zinc-800 transition-colors duration-150 hover:bg-zinc-300 sm:flex dark:bg-zinc-800 dark:text-white dark:hover:bg-zinc-700"
+          }
+          aria-label={
+            isWrongNetwork
+              ? CONNECT_BTN_LABEL.wrongNetwork
+              : `${MOBILE_SWITCH_NETWORK_LABEL} ${chain?.name}`
+          }
         >
-          <span className="hidden text-sm sm:inline">
-            {/* chainId here is from useNetworkGuard (useAccount().chainId) —
-                always a number even for unsupported chains like HyperEVM(999). */}
-            {isWrongNetwork
-              ? `Chain ${chainId ?? "?"}`
-              : chain?.name || NETWORK_FALLBACK_LABEL}
-          </span>
-          <span className="text-xs sm:hidden">⛓</span>
-          <span className="hidden opacity-70 sm:inline">▾</span>
+          {isWrongNetwork ? (
+            <span>{CONNECT_BTN_LABEL.wrongNetwork}</span>
+          ) : (
+            <>
+              <span className="hidden text-sm sm:inline">
+                {chain?.name ||
+                  (chainId ? `Chain ${chainId}` : NETWORK_FALLBACK_LABEL)}
+              </span>
+              <span className="text-xs sm:hidden">⛓</span>
+              <span className="hidden opacity-70 sm:inline">▾</span>
+            </>
+          )}
         </motion.button>
 
         <AnimatePresence>
@@ -503,21 +476,37 @@ function ConnectBtn() {
               key="network-dropdown"
               initial={{ opacity: 0, scale: 0.95, y: -10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: -10 }}
               className="absolute top-full right-0 z-50 mt-2 w-48 overflow-hidden rounded-xl bg-zinc-100 shadow-lg dark:bg-zinc-800"
             >
               {targetChains.map((x) => (
                 <button
                   key={x.id}
-                  disabled={x.id === chainId || isSwitchPending}
+                  disabled={
+                    isSwitchPending ||
+                    (!isWrongNetwork &&
+                      typeof chainId === "number" &&
+                      x.id === chainId)
+                  }
+                  onPointerDown={(e) => e.stopPropagation()}
                   onClick={async () => {
-                    await switchNetwork(x.id);
-                    // FIX-A: Don't close based on stale chainId closure.
-                    // Closing is handled reactively by the useEffect above.
+                    if (isSwitchingRef.current) return;
+                    isSwitchingRef.current = true;
+                    hadSwitchAttemptRef.current = true;
+                    try {
+                      await switchNetwork(x.id);
+                    } catch (err) {
+                      hadSwitchAttemptRef.current = false;
+                      console.warn("[DIT] switchNetwork failed:", err);
+                    } finally {
+                      isSwitchingRef.current = false;
+                    }
                   }}
                   className="w-full px-4 py-3 text-left text-sm font-semibold text-zinc-900 transition-colors hover:bg-zinc-200 disabled:opacity-50 dark:text-white dark:hover:bg-zinc-700"
                 >
-                  {x.name} {x.id === chainId && CURRENT_NETWORK_MARKER}
+                  {x.name}
+                  {!isWrongNetwork &&
+                    x.id === chainId &&
+                    ` ${CURRENT_NETWORK_MARKER}`}
                 </button>
               ))}
             </motion.div>
@@ -527,46 +516,52 @@ function ConnectBtn() {
 
       {/* Account Button */}
 
-      <div className="relative" ref={accountMenuRef}>
-        <motion.button
-          onClick={() =>
-            isAccountMenuOpen ? setIsAccountMenuOpen(false) : openAccountMenu()
-          }
-          aria-label={`Account options for ${address}`}
-          aria-expanded={isAccountMenuOpen}
-          aria-haspopup="true"
-          whileHover={{ scale: 1.035 }}
-          whileTap={{ scale: 0.98 }}
-          className="flex items-center overflow-hidden rounded-xl bg-zinc-300 transition-colors duration-150 dark:border-zinc-700 dark:bg-zinc-800"
-        >
-          <span className="px-3 py-2 text-zinc-800 dark:text-white">
-            {displayName}
-          </span>
-          <span className="pr-2 text-black opacity-70 dark:text-white">▾</span>
-        </motion.button>
+      {!isWrongNetwork && (
+        <div className="relative" ref={accountMenuRef}>
+          <motion.button
+            onClick={() =>
+              isAccountMenuOpen
+                ? setIsAccountMenuOpen(false)
+                : openAccountMenu()
+            }
+            aria-label={`Account options for ${address}`}
+            aria-expanded={isAccountMenuOpen}
+            aria-haspopup="true"
+            whileHover={{ scale: 1.035 }}
+            whileTap={{ scale: 0.98 }}
+            className="flex items-center overflow-hidden rounded-xl bg-zinc-300 transition-colors duration-150 dark:border-zinc-700 dark:bg-zinc-800"
+          >
+            <span className="px-3 py-2 text-zinc-800 dark:text-white">
+              {displayName}
+            </span>
+            <span className="pr-2 text-black opacity-70 dark:text-white">
+              ▾
+            </span>
+          </motion.button>
 
-        <AnimatePresence>
-          {isAccountMenuOpen && (
-            <motion.div
-              key="account-dropdown"
-              initial={{ opacity: 0, scale: 0.95, y: -10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: -10 }}
-              className="absolute top-full right-0 z-50 mt-2 w-full overflow-hidden rounded-xl bg-zinc-100 shadow-lg dark:bg-zinc-800"
-            >
-              <button
-                onClick={() => {
-                  disconnect();
-                  setIsAccountMenuOpen(false);
-                }}
-                className="w-full px-4 py-3 text-center text-sm font-semibold text-red-500 hover:bg-zinc-200 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none dark:hover:bg-zinc-700"
+          <AnimatePresence>
+            {isAccountMenuOpen && (
+              <motion.div
+                key="account-dropdown"
+                initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                className="absolute top-full right-0 z-50 mt-2 w-full overflow-hidden rounded-xl bg-zinc-100 shadow-lg dark:bg-zinc-800"
               >
-                {DISCONNECT_LABEL}
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+                <button
+                  onClick={() => {
+                    disconnect();
+                    setIsAccountMenuOpen(false);
+                  }}
+                  className="w-full px-4 py-3 text-center text-sm font-semibold text-red-500 hover:bg-zinc-200 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none dark:hover:bg-zinc-700"
+                >
+                  {DISCONNECT_LABEL}
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
     </div>
   );
 }

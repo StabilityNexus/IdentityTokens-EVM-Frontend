@@ -1,5 +1,4 @@
 import localFont from "next/font/local";
-import { Comfortaa } from "next/font/google";
 
 export const atypFont = localFont({
   src: [
@@ -37,9 +36,7 @@ export const utsahaFont = localFont({
   display: "swap",
 });
 
-export const comfortaaFont = Comfortaa({
-  subsets: ["latin"],
-  weight: ["400", "700"],
-  variable: "--font-comfortaa",
-  display: "swap",
-});
+// Keep layout usage unchanged while avoiding remote Google font fetches.
+export const comfortaaFont = {
+  variable: "",
+} as const;

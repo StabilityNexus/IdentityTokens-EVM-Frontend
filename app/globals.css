@@ -4,10 +4,10 @@
 
 @theme {
   /* ---- Custom Fonts (Mapped from the Next.js localFont variables) ---- */
-  --font-atyp: var(--font-atyp), ui-sans-serif, system-ui;
-  --font-garamond: var(--font-garamond), ui-serif, Georgia;
-  --font-utsaha: var(--font-utsaha), cursive;
-  --font-comfortaa: var(--font-comfortaa), ui-sans-serif, system-ui;
+  --font-atyp: var(--font-atyp, ui-sans-serif, system-ui);
+  --font-garamond: var(--font-garamond, ui-serif, Georgia);
+  --font-utsaha: var(--font-utsaha, cursive);
+  --font-comfortaa: var(--font-comfortaa, ui-sans-serif, system-ui);
 
   /* ---- Branding Colors ---- */
   --color-brand-blue: #0553fd;

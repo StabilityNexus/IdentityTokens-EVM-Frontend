@@ -21,7 +21,6 @@
     ]
   },
   "dependencies": {
-    "@metamask/sdk": "^0.34.0",
     "@tanstack/react-query": "^5.90.20",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

@@ -13,7 +13,7 @@ export const CONNECT_WALLET_TITLE = "Connect Wallet";
 export const CONNECTING_LABEL = "Connecting";
 export const NO_WALLET_DETECTED_MSG = "No wallet extensions detected.";
 export const INSTALL_WALLET_HINT =
-  "Please install a wallet like MetaMask or Rabby.";
+  "Please install a Web3 wallet browser extension (e.g. Rabby, MetaMask, Coinbase Wallet).";
 export const DISCONNECT_LABEL = "Disconnect";
 export const CLOSE_LABEL = "Close";
 export const NETWORK_FALLBACK_LABEL = "Network";

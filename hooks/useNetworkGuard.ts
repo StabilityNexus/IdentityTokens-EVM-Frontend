@@ -6,7 +6,10 @@ import { useAccount, useChainId, useChains, useSwitchChain } from "wagmi";
 
 type Eip1193Provider = {
   on?: (event: string, listener: (...args: unknown[]) => void) => void;
-  removeListener?: (event: string, listener: (...args: unknown[]) => void) => void;
+  removeListener?: (
+    event: string,
+    listener: (...args: unknown[]) => void
+  ) => void;
   request?: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
 };
 
@@ -90,7 +93,9 @@ function useNetworkGuard(): UseNetworkGuardResult {
 
   const switchNetwork = useCallback(
     async (nextChainId: number): Promise<void> => {
-      const targetChain = targetChains.find((chain) => chain.id === nextChainId);
+      const targetChain = targetChains.find(
+        (chain) => chain.id === nextChainId
+      );
       const addEthereumChainParameter = targetChain
         ? {
             chainName: targetChain.name,

@@ -34,6 +34,7 @@ interface UseNetworkGuardResult {
 
 function useNetworkGuard(): UseNetworkGuardResult {
   const { status, chainId: accountChainId, connector } = useAccount();
+  const connectorId = connector?.id;
   const storeChainId = useChainId();
   const targetChains = useChains();
   const { switchChainAsync, isPending: isSwitchPending } = useSwitchChain();
@@ -47,11 +48,11 @@ function useNetworkGuard(): UseNetworkGuardResult {
     if (status !== "connected") return accountChainId;
     if (typeof accountChainId === "number") return accountChainId;
     if (typeof storeChainId === "number") return storeChainId;
-    if (eventChain?.connectorId && eventChain.connectorId === connector?.id) {
+    if (eventChain?.connectorId && eventChain.connectorId === connectorId) {
       return eventChain.chainId;
     }
     return accountChainId;
-  }, [status, storeChainId, accountChainId, eventChain, connector?.id]);
+  }, [status, storeChainId, accountChainId, eventChain, connectorId]);
 
   const isWrongNetwork =
     status === "connected" &&
@@ -65,8 +66,8 @@ function useNetworkGuard(): UseNetworkGuardResult {
 
     const handleChainChanged = (next: unknown) => {
       const nextChainId = parseChainId(next);
-      if (typeof nextChainId === "number" && connector?.id) {
-        setEventChain({ chainId: nextChainId, connectorId: connector.id });
+      if (typeof nextChainId === "number" && connectorId) {
+        setEventChain({ chainId: nextChainId, connectorId });
       }
     };
 
@@ -114,8 +115,8 @@ function useNetworkGuard(): UseNetworkGuardResult {
           addEthereumChainParameter,
         });
         // If the wallet does not emit chainChanged promptly, keep UI aligned with the request.
-        if (connector?.id) {
-          setEventChain({ chainId: nextChainId, connectorId: connector.id });
+        if (connectorId) {
+          setEventChain({ chainId: nextChainId, connectorId });
         }
       } catch (error: unknown) {
         const err = error as { code?: number; message?: string };
@@ -128,7 +129,7 @@ function useNetworkGuard(): UseNetworkGuardResult {
         }
       }
     },
-    [switchChainAsync, connector, targetChains]
+    [switchChainAsync, connector, connectorId, targetChains]
   );
 
   return {

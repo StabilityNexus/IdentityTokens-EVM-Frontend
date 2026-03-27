@@ -47,8 +47,8 @@ export default function DiscoverPage() {
       <TokenList
         variant="discover"
         tokens={discoverTokens}
-        onEndorse={(id) => console.log("Endorsing token:", id)}
-        onRevoke={(id) => console.log("Revoking token:", id)}
+        onEndorse={() => {}}
+        onRevoke={() => {}}
       />
     </main>
   );

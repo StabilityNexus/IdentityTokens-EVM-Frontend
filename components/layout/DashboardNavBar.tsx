@@ -20,6 +20,13 @@ export function DashboardNavbar() {
     setIsCreateModalOpen(false);
   };
 
+  const knownRoutes = ["/", "/home", "/dashboard", "/discover", "/settings"];
+  const firstSegment = pathname?.split("/").filter(Boolean)[0] ?? "";
+  const isUserProfile =
+    pathname !== "/" &&
+    !knownRoutes.includes(pathname) &&
+    firstSegment.length > 0;
+
   const isDiscover = pathname === "/discover";
 
   const getPageTitle = () => {
@@ -33,9 +40,11 @@ export function DashboardNavbar() {
     <>
       <nav className="flex h-[72px] w-full shrink-0 items-center justify-between border-b border-white/5 bg-dashboard-bg pr-5 pl-16 lg:px-8">
         <div className="flex min-w-0 flex-1 items-center gap-4">
-          <h1 className="shrink-0 font-utsaha text-xl tracking-wide text-white">
-            {getPageTitle()}
-          </h1>
+          {!isUserProfile && (
+            <h1 className="shrink-0 font-utsaha text-xl tracking-wide text-white">
+              {getPageTitle()}
+            </h1>
+          )}
 
           {isDiscover && (
             <SearchBar placeholder="Search by Token ID or Decentralized ID…" />

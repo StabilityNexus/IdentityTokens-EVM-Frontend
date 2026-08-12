@@ -1,6 +1,6 @@
 # BRAND
 
-Brand & Design System reference for the IdentityTokens EVM Frontend. This file is the single source of truth for how UI should look and feel. All visual values below are defined in [`app/globals.css`](app/globals.css) — **do not hardcode raw values in components**.
+Brand & Design System reference for the IdentityTokens EVM Frontend. This file documents how UI should look and feel, but the values themselves are owned by dedicated source files — **do not hardcode raw values in components**. CSS tokens (colors, fonts, radius, breakpoints) live in [`app/globals.css`](app/globals.css), font loading lives in [`lib/fonts.ts`](lib/fonts.ts), and visual assets (logos, icons) live in [`public`](public).
 
 ---
 
@@ -21,63 +21,64 @@ All colors are registered in the `@theme` block of [`app/globals.css`](app/globa
 
 ### Branding Colors
 
-| Token | Value | Usage |
-| --- | --- | --- |
-| `--color-brand-blue` | `#0553fd` | Primary brand color, primary actions, links |
-| `--color-brand-blue-hover` | `#0442cb` | Brand blue hover / pressed state |
-| `--color-brand-green` | `#63fc9f` | Success accents, active/verified states |
-| `--color-step-active` | `#65fc9f` | Active step indicator on landing flow |
+| Token                      | Value     | Usage                                                                                    |
+| -------------------------- | --------- | ---------------------------------------------------------------------------------------- |
+| `--color-brand-blue`       | `#0553fd` | Primary brand color, primary actions, focus (non-text surfaces or large text)            |
+| `--color-brand-blue-hover` | `#0442cb` | Brand blue hover / pressed state                                                         |
+| `--color-brand-blue-link`  | `#6ea8fe` | Accessible link blue for dark themes — WCAG AA vs `--color-app-bg` (≥ 4.5:1 normal text) |
+| `--color-brand-green`      | `#63fc9f` | Success accents, active/verified states                                                  |
+| `--color-step-active`      | `#65fc9f` | Active step indicator on landing flow                                                    |
 
 ### Layout Backgrounds
 
-| Token | Value | Usage |
-| --- | --- | --- |
-| `--color-landing-bg` | `#f4f2ff` | Landing/marketing light background |
-| `--color-landing-bg-dark` | `#0c0b1a` | Landing dark background |
-| `--color-app-bg` | `#18191d` | Default app/dashboard background |
-| `--color-dark-bg` | `#101115` | Deepest dark surface (cards, modals) |
+| Token                     | Value     | Usage                                |
+| ------------------------- | --------- | ------------------------------------ |
+| `--color-landing-bg`      | `#f4f2ff` | Landing/marketing light background   |
+| `--color-landing-bg-dark` | `#0c0b1a` | Landing dark background              |
+| `--color-app-bg`          | `#18191d` | Default app/dashboard background     |
+| `--color-dark-bg`         | `#101115` | Deepest dark surface (cards, modals) |
 
 ### Landing Page Animated Card Colors
 
-| Token | Value | Usage |
-| --- | --- | --- |
-| `--color-slate-white` | `#f4f4f4` | Landing card light surface |
-| `--color-slate-dark` | `#0f1117` | Landing card dark surface |
-| `--color-corner-stroke` | `#cdd4e3` | Landing corner border (light) |
-| `--color-corner-stroke-dark` | `#252833` | Landing corner border (dark) |
-| `--color-step-card` | `#18191d` | Step card surface (dark) |
-| `--color-step-card-dark` | `#ffffff` | Step card surface (light) |
-| `--color-step-line` | `#404348` | Step connector line (dark) |
-| `--color-step-line-dark` | `#c9cdd9` | Step connector line (light) |
-| `--color-landhead-text` | `#3c315b` | Landing heading text (light) |
-| `--color-landhead-text-dark` | `#f0efff` | Landing heading text (dark) |
+| Token                        | Value     | Usage                         |
+| ---------------------------- | --------- | ----------------------------- |
+| `--color-slate-white`        | `#f4f4f4` | Landing card light surface    |
+| `--color-slate-dark`         | `#0f1117` | Landing card dark surface     |
+| `--color-corner-stroke`      | `#cdd4e3` | Landing corner border (light) |
+| `--color-corner-stroke-dark` | `#252833` | Landing corner border (dark)  |
+| `--color-step-card`          | `#18191d` | Step card surface (dark)      |
+| `--color-step-card-dark`     | `#ffffff` | Step card surface (light)     |
+| `--color-step-line`          | `#404348` | Step connector line (dark)    |
+| `--color-step-line-dark`     | `#c9cdd9` | Step connector line (light)   |
+| `--color-landhead-text`      | `#3c315b` | Landing heading text (light)  |
+| `--color-landhead-text-dark` | `#f0efff` | Landing heading text (dark)   |
 
 ### Dashboard & Sidebar
 
-| Token | Value | Usage |
-| --- | --- | --- |
+| Token                  | Value     | Usage                |
+| ---------------------- | --------- | -------------------- |
 | `--color-dashboard-bg` | `#18191d` | Dashboard background |
 
 ### Token Card
 
-| Token | Value | Usage |
-| --- | --- | --- |
-| `--color-card-bg` | `#050505` | Token card background |
-| `--color-card-border` | `#18191b` | Token card border |
+| Token                 | Value     | Usage                 |
+| --------------------- | --------- | --------------------- |
+| `--color-card-bg`     | `#050505` | Token card background |
+| `--color-card-border` | `#18191b` | Token card border     |
 
 ### Component Colors
 
-| Token | Value | Usage |
-| --- | --- | --- |
-| `--color-trust-bg-1` | `#0a0a0f` | Trust/verification surface 1 |
-| `--color-trust-bg-2` | `#1a1a2e` | Trust/verification surface 2 |
-| `--color-search-bg` | `#151821` | Search input background |
-| `--color-modal-inner-bg` | `#212734` | Modal inner surface |
-| `--color-panel-bg` | `#2a2b30` | Raised panel background |
-| `--color-modal-border` | `#2a3040` | Modal border |
-| `--color-border-dark` | `#333333` | Dark border, dividers |
-| `--color-card-inner-bg` | `#3a3a3a` | Inner card surface |
-| `--color-text-grey` | `#95959d` | Muted / secondary text |
+| Token                    | Value     | Usage                        |
+| ------------------------ | --------- | ---------------------------- |
+| `--color-trust-bg-1`     | `#0a0a0f` | Trust/verification surface 1 |
+| `--color-trust-bg-2`     | `#1a1a2e` | Trust/verification surface 2 |
+| `--color-search-bg`      | `#151821` | Search input background      |
+| `--color-modal-inner-bg` | `#212734` | Modal inner surface          |
+| `--color-panel-bg`       | `#2a2b30` | Raised panel background      |
+| `--color-modal-border`   | `#2a3040` | Modal border                 |
+| `--color-border-dark`    | `#333333` | Dark border, dividers        |
+| `--color-card-inner-bg`  | `#3a3a3a` | Inner card surface           |
+| `--color-text-grey`      | `#95959d` | Muted / secondary text       |
 
 ---
 
@@ -85,16 +86,16 @@ All colors are registered in the `@theme` block of [`app/globals.css`](app/globa
 
 Semantic states use dedicated tokens. Use them to communicate meaning at a glance.
 
-| Semantic | Token | Value | Notes |
-| --- | --- | --- | --- |
-| **Success** | `--color-brand-green` | `#63fc9f` | Confirmation, verified identity, success states |
-| **Error (border)** | `--color-border-error` | `#cc0000` | Error input / field borders |
-| **Error (text)** | `--color-text-error` | `#ef4444` | Error messages, destructive text |
-| **Error (text red)** | `--color-text-red` | `#ff0000` | Explicit destructive red text |
-| **Warning** | `--color-text-warning` | `#facc15` | Warnings, caution indicators |
-| **Info / Neutral** | `--color-text-grey` | `#95959d` | Informational / muted text |
-| **Primary Action** | `--color-brand-blue` | `#0553fd` | Primary CTA, links, focus |
-| **Destructive** | `--destructive` | ShadCN token (`oklch(...)`) | ShadCN destructive surfaces (light/dark) |
+| Semantic             | Token                  | Value                                                                    | Notes                                            |
+| -------------------- | ---------------------- | ------------------------------------------------------------------------ | ------------------------------------------------ |
+| **Success**          | `--color-brand-green`  | `#63fc9f`                                                                | Confirmation, verified identity, success states  |
+| **Error (border)**   | `--color-border-error` | `#cc0000`                                                                | Error input / field borders                      |
+| **Error (text)**     | `--color-text-error`   | `#ef4444`                                                                | Error messages, destructive text                 |
+| **Error (text red)** | `--color-text-red`     | `#ff0000`                                                                | Explicit destructive red text                    |
+| **Warning**          | `--color-text-warning` | `#facc15`                                                                | Warnings, caution indicators                     |
+| **Info / Neutral**   | `--color-text-grey`    | `#95959d`                                                                | Informational / muted text                       |
+| **Primary Action**   | `--color-brand-blue`   | `#0553fd`                                                                | Primary CTA, links, focus                        |
+| **Destructive**      | `--destructive`        | `oklch(0.577 0.245 27.325)` (light) / `oklch(0.704 0.191 22.216)` (dark) | ShadCN destructive surfaces, switches with theme |
 
 ---
 
@@ -102,12 +103,12 @@ Semantic states use dedicated tokens. Use them to communicate meaning at a glanc
 
 Four fonts are exposed as Tailwind `font-*` utilities. They are mapped from Next.js `localFont` / Google fonts variables in the `@theme` block (see [`lib/fonts.ts`](lib/fonts.ts)).
 
-| Font | CSS Variable | Tailwind Utility | Style / Weights | Source | Use Case |
-| --- | --- | --- | --- | --- | --- |
-| Atyp Display Trial Bold | `--font-atyp` | `font-atyp` | Bold (700), normal | Local `AtypDisplayTRIAL-Bold.woff2` | Headings, display text, brand statements |
-| Garamond | `--font-garamond` | `font-garamond` | Regular (400), italic | Local `Garamond.woff2` | Elegant italic accents, editorial highlights |
-| UtSaHaGumm | `--font-utsaha` | `font-utsaha` | Regular (400), normal | Local `UtSaHaGumm.woff2` | Decorative / handwritten accents |
-| Comfortaa | `--font-comfortaa` | `font-comfortaa` | 400, 700 | Google Fonts | Rounded, friendly UI accents |
+| Font                    | CSS Variable       | Tailwind Utility | Style / Weights       | Source                              | Use Case                                     |
+| ----------------------- | ------------------ | ---------------- | --------------------- | ----------------------------------- | -------------------------------------------- |
+| Atyp Display Trial Bold | `--font-atyp`      | `font-atyp`      | Bold (700), normal    | Local `AtypDisplayTRIAL-Bold.woff2` | Headings, display text, brand statements     |
+| Garamond                | `--font-garamond`  | `font-garamond`  | Regular (400), italic | Local `Garamond.woff2`              | Elegant italic accents, editorial highlights |
+| UtSaHaGumm              | `--font-utsaha`    | `font-utsaha`    | Regular (400), normal | Local `UtSaHaGumm.woff2`            | Decorative / handwritten accents             |
+| Comfortaa               | `--font-comfortaa` | `font-comfortaa` | 400, 700              | Google Fonts                        | Rounded, friendly UI accents                 |
 
 ### Font Stack
 
@@ -128,16 +129,16 @@ There is no custom text-size scale in `globals.css`; the project uses Tailwind's
 
 Radius is driven by the `--radius` base token with a ShadCN-derived scale in the `@theme inline` block.
 
-| Token | Value | Tailwind Utility |
-| --- | --- | --- |
-| `--radius` (base) | `0.625rem` | — |
-| `--radius-sm` | `calc(var(--radius) - 4px)` → `0.375rem` | `rounded-sm` |
-| `--radius-md` | `calc(var(--radius) - 2px)` → `0.5rem` | `rounded-md` |
-| `--radius-lg` | `var(--radius)` → `0.625rem` | `rounded-lg` |
-| `--radius-xl` | `calc(var(--radius) + 4px)` → `0.875rem` | `rounded-xl` |
-| `--radius-2xl` | `calc(var(--radius) + 8px)` → `1.125rem` | `rounded-2xl` |
-| `--radius-3xl` | `calc(var(--radius) + 12px)` → `1.375rem` | `rounded-3xl` |
-| `--radius-4xl` | `calc(var(--radius) + 16px)` → `1.625rem` | `rounded-4xl` |
+| Token             | Value                                     | Tailwind Utility |
+| ----------------- | ----------------------------------------- | ---------------- |
+| `--radius` (base) | `0.625rem`                                | —                |
+| `--radius-sm`     | `calc(var(--radius) - 4px)` → `0.375rem`  | `rounded-sm`     |
+| `--radius-md`     | `calc(var(--radius) - 2px)` → `0.5rem`    | `rounded-md`     |
+| `--radius-lg`     | `var(--radius)` → `0.625rem`              | `rounded-lg`     |
+| `--radius-xl`     | `calc(var(--radius) + 4px)` → `0.875rem`  | `rounded-xl`     |
+| `--radius-2xl`    | `calc(var(--radius) + 8px)` → `1.125rem`  | `rounded-2xl`    |
+| `--radius-3xl`    | `calc(var(--radius) + 12px)` → `1.375rem` | `rounded-3xl`    |
+| `--radius-4xl`    | `calc(var(--radius) + 16px)` → `1.625rem` | `rounded-4xl`    |
 
 ---
 
@@ -154,9 +155,10 @@ Use `dark:` variants (`dark:bg-app-bg`) and semantic tokens (`bg-background`, `t
 
 ## Links
 
-- **Brand link color:** `--color-brand-blue` (`#0553fd`)
-- **Brand link hover:** `--color-brand-blue-hover` (`#0442cb`)
-- Dark theme links should remain legible on dark surfaces (test contrast against `--color-app-bg`).
+- **Light theme link color:** `--color-brand-blue` (`#0553fd`)
+- **Light theme link hover:** `--color-brand-blue-hover` (`#0442cb`)
+- **Dark theme link color:** `--color-brand-blue-link` (`#6ea8fe`) — WCAG AA against `--color-app-bg` (≥ 4.5:1 for normal text). Use this token for dark-theme text links.
+- **Reserve `--color-brand-blue` / `--color-brand-blue-hover` for non-text surfaces** (buttons, borders, icons) or qualifying large text (≥ 3:1) — on dark surfaces they do not meet 4.5:1 for normal text.
 
 ---
 
@@ -164,13 +166,13 @@ Use `dark:` variants (`dark:bg-app-bg`) and semantic tokens (`bg-background`, `t
 
 Icons and logos live in the `public` directory:
 
-| Asset | Path | Usage |
-| --- | --- | --- |
-| Primary logo | `public/assets/logo.svg` | Favicon, header brand mark |
-| Dark logo | `public/assets/dark-logo.svg` | Logo for dark surfaces |
-| Isologo | `public/assets/Isologo.svg` | Brand isologo |
-| Isologo dark | `public/assets/Isologo-dark.svg` | Brand isologo (dark) |
-| Logos | `public/logos/logo.svg` | Logo variant |
+| Asset           | Path                                                                                                                                               | Usage                           |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| Primary logo    | `public/assets/logo.svg`                                                                                                                           | Favicon, header brand mark      |
+| Dark logo       | `public/assets/dark-logo.svg`                                                                                                                      | Logo for dark surfaces          |
+| Isologo         | `public/assets/Isologo.svg`                                                                                                                        | Brand isologo                   |
+| Isologo dark    | `public/assets/Isologo-dark.svg`                                                                                                                   | Brand isologo (dark)            |
+| Logos           | `public/logos/logo.svg`                                                                                                                            | Logo variant                    |
 | Dashboard icons | `public/assets/` (`home.svg`, `discover.svg`, `dashboard.svg`, `report.svg`, `share.svg`, `copy.svg`, `edit.svg`, `trash.svg`, `sidebarclose.svg`) | Sidebar, actions, utility icons |
 
 Keep SVG usage inline (or via existing components) so they inherit current text/border colors.

@@ -12,6 +12,7 @@
   /* ---- Branding Colors ---- */
   --color-brand-blue: #0553fd;
   --color-brand-blue-hover: #0442cb;
+  --color-brand-blue-link: #6ea8fe; /* Accessible link blue for dark themes (WCAG AA vs --color-app-bg) */
   --color-brand-green: #63fc9f;
 
   /* ---- Layout Backgrounds ---- */

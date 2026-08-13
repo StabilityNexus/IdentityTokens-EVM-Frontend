@@ -191,6 +191,7 @@ Thank you for considering contributing to this project! Contributions are highly
 ## ✨ Maintainers
 
 - [Kanishk Sogani](https://github.com/KanishkSogani)
+- [Khushal Agarwal](https://github.com/khushal1512)
 
 ---
 

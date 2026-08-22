@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import { TokenList } from "@/components/dashboard/TokenList";
 import { EndorseModal } from "@/components/forms/EndorseModal";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
@@ -204,8 +205,6 @@ function RecentTokensFeed({
     />
   );
 }
-
-import { useSearchParams } from "next/navigation";
 
 export default function DiscoverPage() {
   const searchParams = useSearchParams();

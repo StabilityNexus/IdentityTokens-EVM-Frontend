@@ -50,6 +50,47 @@ const CONTRACT_ERROR_MESSAGES: Record<string, string> = {
   ProfileSystemAlreadySet: "The Profile System has already been configured.",
 };
 
+/**
+ * The human-readable text of an error and its `cause` chain.
+ *
+ * Deliberately narrow. Serialising the whole error pulls in viem's `abi`, which
+ * declares every error name the contract has, so matching against it selects a
+ * message unrelated to what actually reverted.
+ */
+function collectErrorText(error: unknown): string {
+  const parts: string[] = [];
+  let node: unknown = error;
+
+  // Bounded, so a self-referencing cause chain cannot loop forever.
+  for (let depth = 0; node && depth < 10; depth += 1) {
+    const current = node as Record<string, unknown>;
+
+    for (const key of [
+      "shortMessage",
+      "details",
+      "message",
+      "errorName",
+      "name",
+    ]) {
+      const value = current[key];
+      if (typeof value === "string") parts.push(value);
+    }
+
+    if (Array.isArray(current.metaMessages)) {
+      for (const line of current.metaMessages) {
+        if (typeof line === "string") parts.push(line);
+      }
+    }
+
+    const data = current.data as Record<string, unknown> | undefined;
+    if (typeof data?.errorName === "string") parts.push(data.errorName);
+
+    node = current.cause;
+  }
+
+  return parts.join("\n");
+}
+
 export function getContractErrorMessage(error: unknown): string {
   if (!error) return "An unknown error occurred.";
 
@@ -75,24 +116,15 @@ export function getContractErrorMessage(error: unknown): string {
     if (customMsg) return customMsg;
   }
 
-  // Search full stringified error / message / cause for any matching error name
-  try {
-    const fullErrorStr =
-      typeof error === "string"
-        ? error
-        : JSON.stringify(error, (key, value) =>
-            typeof value === "bigint" ? value.toString() : value
-          );
+  // Fall back to the error's own text. Every key here is a plain identifier, so
+  // the word boundaries keep one error name from matching inside a longer one.
+  const errorText =
+    typeof error === "string" ? error : collectErrorText(errObj);
 
-    for (const [errorName, message] of Object.entries(
-      CONTRACT_ERROR_MESSAGES
-    )) {
-      if (fullErrorStr.includes(errorName)) {
-        return message;
-      }
+  for (const [errorName, message] of Object.entries(CONTRACT_ERROR_MESSAGES)) {
+    if (new RegExp(`\\b${errorName}\\b`).test(errorText)) {
+      return message;
     }
-  } catch {
-    // ignore JSON stringify errors
   }
 
   // Fallback to shortMessage if useful

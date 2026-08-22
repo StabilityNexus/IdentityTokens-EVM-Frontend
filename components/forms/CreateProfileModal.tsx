@@ -182,7 +182,9 @@ export function CreateProfileModal({
     createProfile.write({
       name: formData.name.trim(),
       username: formData.username.trim(),
-      age: BigInt(formData.age || "0"),
+      // Number() first: validateAge accepts exponent and decimal forms such as
+      // "2e1", which BigInt() rejects outright.
+      age: BigInt(Number(formData.age || "0")),
       nationality: formData.nationality,
       github: formData.github.trim(),
       email: formData.email.trim(),

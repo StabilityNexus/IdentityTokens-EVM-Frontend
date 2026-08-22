@@ -2,25 +2,20 @@
 
 import React from "react";
 import { FiSearch } from "react-icons/fi";
-
-interface SearchBarProps {
-  placeholder?: string;
-  value?: string;
-  onChange?: (value: string) => void;
-  className?: string;
-}
+import { SearchBarProps } from "@/lib/types";
 
 export function SearchBar({
   placeholder = "Search…",
   value,
   onChange,
+  onSubmit,
   className = "",
 }: SearchBarProps) {
   return (
     <div
       className={`flex flex-1 items-center gap-2 px-4 py-2 ${className}`}
       style={{
-        backgroundColor: "#151821",
+        backgroundColor: "var(--color-search-bg)",
         borderRadius: "24px",
         border: "1px solid rgba(255,255,255,0.06)",
       }}
@@ -31,6 +26,9 @@ export function SearchBar({
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange?.(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") onSubmit?.();
+        }}
         className="w-full bg-transparent font-utsaha text-sm text-white placeholder-gray-500 focus:outline-none"
       />
     </div>

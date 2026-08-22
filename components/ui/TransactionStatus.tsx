@@ -2,7 +2,7 @@
 
 import React from "react";
 import { getContractErrorMessage, getEtherscanTxUrl } from "@/lib/errors";
-import { TransactionStatusProps, TxStatus } from "@/lib/types";
+import { TransactionStatusProps } from "@/lib/types";
 
 /**
  * Inline transaction status indicator for modals and action buttons.

@@ -9,7 +9,7 @@ import {
   PROFILE_SYSTEM_ABI,
 } from "@/lib/contracts";
 
-// ─── IdentitySystem Writes ───────────────────────────────────────────────────
+// IdentitySystem Writes
 
 /** Create a root identity (auto-called before first action if needed) */
 export function useCreateRootIdentity() {
@@ -226,7 +226,7 @@ export function useTransferToken() {
   };
 }
 
-// ─── ProfileSystem Writes ────────────────────────────────────────────────────
+// ProfileSystem Writes
 
 /** Create a profile (calls ProfileSystem which internally mints via IdentitySystem) */
 export function useCreateProfile() {

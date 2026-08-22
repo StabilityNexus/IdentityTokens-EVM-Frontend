@@ -12,19 +12,6 @@ import {
   useProfile,
 } from "./useIdentityReads";
 
-/**
- * Identity gate hook — orchestrates identity state on wallet connect.
- *
- * Flow:
- * 1. Get connected address from wagmi
- * 2. Fetch ownerToRootId(address) → root ID
- * 3. If rootId > 0, fetch getRootIdentityView → populate zustand
- * 4. Check hasProfile(address) → populate profile status
- * 5. Batch-fetch token types for all wallet tokens
- * 6. Find the PROFILE token (type === 2) and fetch its metadata
- *
- * Returns everything components need to render identity-aware UI.
- */
 export function useIdentityGate() {
   const { address, isConnected } = useAccount();
   const store = useAppStore();

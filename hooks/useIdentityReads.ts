@@ -9,7 +9,7 @@ import {
   PROFILE_SYSTEM_ABI,
 } from "@/lib/contracts";
 
-// ─── IdentitySystem Reads ────────────────────────────────────────────────────
+// IdentitySystem Reads
 
 /** Get the root identity ID for a wallet address */
 export function useRootId(address: `0x${string}` | undefined) {
@@ -151,7 +151,7 @@ export function useTokenOwner(tokenId: bigint | undefined) {
   });
 }
 
-// ─── ProfileSystem Reads ─────────────────────────────────────────────────────
+// ProfileSystem Reads
 
 /** Check if a wallet has minted a profile (on ProfileSystem) */
 export function useHasMintedProfile(address: `0x${string}` | undefined) {
@@ -200,7 +200,7 @@ export function useResolveUsername(username: string | undefined) {
   });
 }
 
-// ─── Batch Reads (Multicall) ─────────────────────────────────────────────────
+// Batch Reads (Multicall)
 
 /** Batch-fetch token types for multiple token IDs in a single multicall */
 export function useMultipleTokenTypes(tokenIds: readonly bigint[] | undefined) {
@@ -262,13 +262,9 @@ export function useMultipleTokenOwners(tokenIds: readonly bigint[] | undefined) 
   });
 }
 
-import { useQuery } from '@tanstack/react-query';
-import { usePublicClient } from 'wagmi';
 
-/** 
- * Fetch recent tokens by batch reading token types for IDs 1 to 100.
- * Bypasses Alchemy's strict eth_getLogs block range limits on the free tier.
- */
+
+
 export function useRecentTokens() {
   // Generate IDs 1 to 100
   const maxTokensToCheck = 100;
@@ -283,19 +279,17 @@ export function useRecentTokens() {
     if (!tokenTypes) return [];
 
     const validTokens: { tokenId: bigint, tokenType: string }[] = [];
-    
+
     for (let i = 0; i < tokenTypes.length; i++) {
       const typeResult = tokenTypes[i];
       if (typeResult?.status === "success") {
         const typeNum = typeResult.result as number;
-        
+
         let typeStr = "UNKNOWN";
         if (typeNum === 0) typeStr = "ROOT";
         else if (typeNum === 1) typeStr = "SUB";
         else if (typeNum === 2) typeStr = "PROFILE";
 
-        // Only include if we could read a valid type (contract returns 0 for non-existent)
-        // Since we also want to hide ROOT tokens from Discover anyway, we just require typeNum > 0
         if (typeNum > 0 && typeStr !== "UNKNOWN") {
           validTokens.push({
             tokenId: BigInt(i + 1),
@@ -304,7 +298,7 @@ export function useRecentTokens() {
         }
       }
     }
-    
+
     // Return the latest 20 valid tokens, reversed (newest first)
     return validTokens.reverse().slice(0, 20);
   }, [tokenTypes]);

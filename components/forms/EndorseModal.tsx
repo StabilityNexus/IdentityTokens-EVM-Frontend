@@ -131,11 +131,10 @@ export function EndorseModal({
                   key={preset.label}
                   type="button"
                   disabled={isSubmitting}
-                  className={`rounded-lg px-3 py-2 font-utsaha text-sm transition-all ${
-                    !useCustom && selectedPreset === i
+                  className={`rounded-lg px-3 py-2 font-utsaha text-sm transition-all ${!useCustom && selectedPreset === i
                       ? "bg-brand-blue text-white"
                       : "bg-modal-inner-bg text-gray-400 hover:bg-modal-border hover:text-white"
-                  }`}
+                    }`}
                   style={{ border: "1px solid rgba(255,255,255,0.08)" }}
                   onClick={() => {
                     setSelectedPreset(i);
@@ -153,9 +152,8 @@ export function EndorseModal({
             <button
               type="button"
               disabled={isSubmitting}
-              className={`w-fit font-utsaha text-xs transition-colors ${
-                useCustom ? "text-brand-blue" : "text-gray-500 hover:text-gray-300"
-              }`}
+              className={`w-fit font-utsaha text-xs transition-colors ${useCustom ? "text-brand-blue" : "text-gray-500 hover:text-gray-300"
+                }`}
               onClick={() => setUseCustom(!useCustom)}
             >
               {useCustom ? "▼ Custom Duration" : "▸ Custom Duration"}

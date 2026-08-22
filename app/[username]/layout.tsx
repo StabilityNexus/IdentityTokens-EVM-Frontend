@@ -20,8 +20,12 @@ export default function PublicProfileLayout({
         <DashboardNavbar />
 
         {/* Page content */}
-        <main className="no-scrollbar flex-1 overflow-y-auto bg-app-bg">
-          {children}
+        <main className="no-scrollbar relative flex-1 overflow-y-auto bg-app-bg">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-[radial-gradient(80%_100%_at_50%_0%,rgba(167,139,250,0.10)_0%,transparent_70%)]"
+          />
+          <div className="relative">{children}</div>
         </main>
       </div>
     </div>

@@ -1,58 +1,114 @@
-import React from "react";
+"use client";
+
+import React, { useMemo } from "react";
 import Metrics from "@/components/dashboard/Metrics";
 import { TokenList } from "@/components/dashboard/TokenList";
-
-// Sample token data — replace with real data from your API/contract using wagmi hooks
-const sampleTokens = [
-  {
-    tokenId: "0x1a2b3c",
-    name: "Vaccine",
-    type: "Oracle",
-    expiresIn: "5 years",
-    endorsements: 42,
-    historyAction: "endorsed" as const,
-    actionWalletId: "0xkhu...512",
-  },
-  {
-    tokenId: "0x4d5e6f",
-    name: "KYC Verified",
-    type: "Identity",
-    expiresIn: "2 years",
-    endorsements: 18,
-    historyAction: "flagged" as const,
-    actionWalletId: "0xmod...999",
-  },
-  {
-    tokenId: "0x7g8h9i",
-    name: "Education",
-    type: "Credential",
-    expiresIn: "10 years",
-    endorsements: 65,
-    historyAction: "revoked" as const,
-    actionWalletId: "0xuni...001",
-  },
-  {
-    tokenId: "0xj0k1l2",
-    name: "Employment",
-    type: "Attestation",
-    expiresIn: "1 year",
-    endorsements: 12,
-  },
-];
+import { useIdentityGate } from "@/hooks/useIdentityGate";
+import {
+  useMultipleTokenDetails,
+  useMultipleTokenTypes,
+  useMultipleEndorsementCounts,
+} from "@/hooks/useIdentityReads";
+import { formatExpiry } from "@/lib/helpers";
 
 export default function Home() {
+  const {
+    isConnected,
+    walletTokenIds,
+    hasProfile,
+    profileData,
+    isLoading,
+  } = useIdentityGate();
+
+  // Batch-fetch token details, types, and endorsement counts
+  const { data: tokenDetails } = useMultipleTokenDetails(walletTokenIds.length > 0 ? walletTokenIds : undefined);
+  const { data: tokenTypes } = useMultipleTokenTypes(walletTokenIds.length > 0 ? walletTokenIds : undefined);
+  const { data: endorsementCounts } = useMultipleEndorsementCounts(walletTokenIds.length > 0 ? walletTokenIds : undefined);
+
+  // Build tokens for display (exclude ROOT and PROFILE tokens)
+  const tokenListData = useMemo(() => {
+    if (!walletTokenIds || walletTokenIds.length === 0) return [];
+
+    return walletTokenIds
+      .map((id, i) => {
+        const detail = tokenDetails?.[i];
+        const typeResult = tokenTypes?.[i];
+        const endorseResult = endorsementCounts?.[i];
+
+        // Skip ROOT tokens (type 0)
+        const tokenType = typeResult?.status === "success" ? (typeResult.result as number) : -1;
+        if (tokenType === 0) return null;
+
+        const token = detail?.status === "success" ? detail.result : undefined;
+        const endorseCount = endorseResult?.status === "success" ? Number(endorseResult.result) : 0;
+
+        const tokenTuple = token as readonly [bigint, bigint, string, string, `0x${string}`, string, bigint, bigint, bigint, bigint, boolean, bigint, bigint] | undefined;
+
+        return {
+          tokenId: `#${id.toString()}`,
+          name: tokenTuple ? tokenTuple[2] || "Unnamed" : "Loading…",
+          type: tokenTuple ? tokenTuple[3] || "Unknown" : "…",
+          expiresIn: tokenTuple ? formatExpiry(tokenTuple[6]) : "…",
+          endorsements: endorseCount,
+        };
+      })
+      .filter((t): t is NonNullable<typeof t> => t !== null);
+  }, [walletTokenIds, tokenDetails, tokenTypes, endorsementCounts]);
+
+  // Calculate real metrics
+  const totalEndorsements = useMemo(() => {
+    if (!endorsementCounts) return 0;
+    return endorsementCounts.reduce((sum, r) => {
+      if (r?.status === "success") return sum + Number(r.result);
+      return sum;
+    }, 0);
+  }, [endorsementCounts]);
+
+  const socialsCount = profileData
+    ? [
+      profileData.github,
+      profileData.discord,
+      profileData.xDotCom,
+      profileData.email,
+    ].filter(Boolean).length
+    : 0;
+
+  if (!isConnected) {
+    return (
+      <main className="flex h-full items-center justify-center">
+        <div className="text-center">
+          <h2 className="font-utsaha text-2xl text-white">
+            Connect Your Wallet
+          </h2>
+          <p className="mt-2 font-utsaha text-gray-400">
+            Connect your wallet to see your tokens
+          </p>
+        </div>
+      </main>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <main className="flex h-full items-center justify-center">
+        <div className="text-center">
+          <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-brand-green border-t-transparent" />
+          <p className="font-utsaha text-gray-400">Loading tokens…</p>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="flex flex-col gap-6 px-4 pt-9 pb-12 sm:px-6 md:pr-14 md:pl-10">
       <Metrics
-        totalEndorsements={70}
-        activeTokens={14}
-        socials={3}
-        badgesEarned="300+ Trust Received"
+        totalEndorsements={totalEndorsements}
+        activeTokens={tokenListData.length}
+        socials={socialsCount}
+        badgesEarned={hasProfile ? "Profile Created" : "No badges yet"}
       />
 
-      <TokenList variant="tokens" tokens={sampleTokens} />
-
-      <TokenList variant="history" tokens={sampleTokens.slice(0, 3)} />
+      <TokenList variant="tokens" tokens={tokenListData} />
     </main>
   );
 }

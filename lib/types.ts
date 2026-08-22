@@ -120,14 +120,6 @@ export interface UITokenData {
   owner?: string;
 }
 
-export interface UserTokenListProps {
-  tokens: UITokenData[];
-  className?: string;
-  onRevoke?: (tokenId: string) => void;
-  onEndorse?: (tokenId: string) => void;
-  onViewAll?: (tokenId: string) => void;
-}
-
 export interface SearchBarProps {
   placeholder?: string;
   value?: string;

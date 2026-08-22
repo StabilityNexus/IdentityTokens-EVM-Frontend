@@ -10,6 +10,7 @@ import {
 import { useIdentityGate } from "@/hooks/useIdentityGate";
 import { CreateTokenModalProps, TxStatus } from "@/lib/types";
 import { TransactionStatus } from "@/components/ui/TransactionStatus";
+import { truncateAddress } from "@/lib/helpers";
 
 export const tokenSchema = z.object({
   name: z.string().min(1, "Token Name is required"),
@@ -143,7 +144,9 @@ export function CreateTokenModal({
 
     if (!hasRootIdentity) {
       setStep("creating-root");
-      createRoot.write("");
+      // An empty display name leaves the root identity nameless everywhere it
+      // is shown later, so fall back to the wallet address.
+      createRoot.write(address ? truncateAddress(address) : "");
     } else {
       submitToken();
     }

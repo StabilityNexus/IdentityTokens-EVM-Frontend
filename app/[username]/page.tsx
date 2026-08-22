@@ -20,7 +20,7 @@ import { ProfileReputation } from "@/components/profile/ProfileReputation";
 import { ProfileLinks } from "@/components/profile/ProfileLinks";
 import { ProfileIdentity } from "@/components/profile/ProfileIdentity";
 import { decodeProfileExtras } from "@/lib/profileExtras";
-import { getRankFromEndorsers } from "@/lib/rank";
+import { getRankFromEndorsers, getTrustScore } from "@/lib/rank";
 import { TxStatus } from "@/lib/types";
 
 export default function UsernamePage() {
@@ -29,8 +29,14 @@ export default function UsernamePage() {
 
   const { isConnected, address, rootId } = useIdentityGate();
 
-  const isNumericId = /^\d+$/.test(username);
-  const numericTokenId = isNumericId ? BigInt(username) : undefined;
+  // An all-digit segment is a token id, but only a positive one: 0n is not
+  // nullish, so it would satisfy the ?? below and skip username resolution
+  // entirely for an otherwise-valid username like "000".
+  const parsedTokenId = /^\d+$/.test(username) ? BigInt(username) : undefined;
+  const numericTokenId =
+    parsedTokenId !== undefined && parsedTokenId > 0n
+      ? parsedTokenId
+      : undefined;
 
   const { data: resolvedTokenId, isFetching: isResolvingUsername } =
     useResolveUsername(username);
@@ -56,7 +62,7 @@ export default function UsernamePage() {
 
   const totalEndorsements = Number(endorsementCount ?? 0n);
   const rank = getRankFromEndorsers(totalEndorsements);
-  const trustScore = Math.min(100, totalEndorsements * 2 + 20);
+  const trustScore = getTrustScore(totalEndorsements);
 
   const extras = useMemo(
     () => decodeProfileExtras(profileData?.websitePortfolioLink),
@@ -72,12 +78,14 @@ export default function UsernamePage() {
     typeof window !== "undefined" ? window.location.href : `/${username}`;
 
   useEffect(() => {
-    if (revokeEndorsement.isSuccess) {
-      refetchEndorsements();
-      refetchHasEndorsed();
-    }
+    if (!revokeEndorsement.isSuccess) return;
+    refetchEndorsements();
+    refetchHasEndorsed();
+    // Clear the write result, or isSuccess stays true and the success banner
+    // sticks for the life of the page.
+    revokeEndorsement.reset();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [revokeEndorsement.isSuccess]);
+  }, [revokeEndorsement.isSuccess, refetchEndorsements, refetchHasEndorsed]);
 
   useEffect(() => {
     if (!notice) return;

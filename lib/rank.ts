@@ -18,6 +18,16 @@ export const RANK_LABELS: Record<RankName, string> = {
   champion: "Champion",
 };
 
+/**
+ * Trust score on a 0-100 scale: two points per endorsement, on top of a
+ * baseline. Callers own the baseline because they differ on when it is earned --
+ * a public profile always carries it, the dashboard grants it only once a
+ * profile exists.
+ */
+export function getTrustScore(endorsements: number, baseline = 20): number {
+  return Math.min(100, Math.floor(endorsements * 2 + baseline));
+}
+
 /** Resolve the badge rank earned for a given number of endorsements. */
 export function getRankFromEndorsers(count: number): RankName {
   for (const { max, rank } of RANK_THRESHOLDS) {

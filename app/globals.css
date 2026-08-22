@@ -103,12 +103,30 @@
       linear-gradient(118deg, #221f42 0%, #16171d 62%);
   }
 
-  /* Accent text used for profile headings and stat figures. */
+  /* Accent text used for profile headings and stat figures.
+     The solid colour comes first so the text is never invisible: clipping the
+     gradient to the glyphs needs `color: transparent`, which would erase the
+     text anywhere the background does not paint. */
   .text-gradient-profile {
-    background: linear-gradient(96deg, #c4b5fd 0%, #67e8f9 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    color: #c4b5fd;
+  }
+
+  @supports (background-clip: text) or (-webkit-background-clip: text) {
+    .text-gradient-profile {
+      background: linear-gradient(96deg, #c4b5fd 0%, #67e8f9 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+  }
+
+  /* High-contrast mode drops the background but would keep the transparent
+     colour, so restore a system colour there. */
+  @media (forced-colors: active) {
+    .text-gradient-profile {
+      background: none;
+      color: CanvasText;
+    }
   }
 
   /* Hide scrollbar for Chrome, Safari and Opera */

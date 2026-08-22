@@ -2,7 +2,7 @@
 
 import React from "react";
 import { TokenCard } from "../cards/TokenCard";
-import { TokenListProps, UITokenData } from "@/lib/types";
+import { TokenListProps } from "@/lib/types";
 import { getCardVariant, getSectionTitle } from "@/lib/helpers";
 
 export function TokenList({

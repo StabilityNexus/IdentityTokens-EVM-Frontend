@@ -10,6 +10,7 @@ import {
   useMultipleEndorsementCounts,
 } from "@/hooks/useIdentityReads";
 import { formatExpiry, truncateAddress } from "@/lib/helpers";
+import { getTrustScore } from "@/lib/rank";
 import { TOKEN_TYPE } from "@/lib/types";
 
 const DashboardPage = () => {
@@ -146,11 +147,8 @@ const DashboardPage = () => {
       ].filter(Boolean).length
     : 0;
 
-  // Calculate trust score from endorsement count (0-100 scale)
-  const trustScore = Math.min(
-    100,
-    Math.floor(totalEndorsements * 2 + (hasProfile ? 20 : 0))
-  );
+  // The profile baseline is only earned here once a profile exists.
+  const trustScore = getTrustScore(totalEndorsements, hasProfile ? 20 : 0);
 
   if (!isConnected) {
     return (

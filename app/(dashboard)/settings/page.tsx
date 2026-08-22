@@ -4,7 +4,8 @@ import React from "react";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
 
 export default function SettingsPage() {
-  const { isConnected, hasProfile, profileData, address } = useIdentityGate();
+  const { isConnected, hasProfile, profileData, address, isLoading } =
+    useIdentityGate();
 
   return (
     <main className="flex flex-col gap-6 px-4 pt-9 pb-12 sm:px-6 md:pr-14 md:pl-10">
@@ -35,7 +36,9 @@ export default function SettingsPage() {
                 Profile Status
               </span>
               <span className="font-utsaha text-sm text-white">
-                {hasProfile ? (
+                {isLoading ? (
+                  <span className="text-gray-400">Checking…</span>
+                ) : hasProfile ? (
                   <span className="text-brand-green">✓ Profile Created</span>
                 ) : (
                   <span className="text-yellow-400">

@@ -39,7 +39,7 @@ export default function Hero() {
             </div>
 
             <p className="mx-auto max-w-lg font-sans text-base leading-relaxed text-gray-600 md:mx-0 md:text-lg dark:text-gray-200">
-              The first portable, recover-able and self-sovereign identity.
+              The first portable, recoverable and self-sovereign identity.
               <br className="hidden md:block" />
               Carry your reputation across any wallet, anywhere
             </p>
@@ -53,8 +53,8 @@ export default function Hero() {
                 alt="Identity Card"
                 width={800}
                 height={600}
+                sizes="(min-width: 768px) 50vw, 100vw"
                 className="object-contain dark:drop-shadow-md/40 dark:drop-shadow-white"
-                priority
               />
             </div>
           </div>

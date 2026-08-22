@@ -37,7 +37,13 @@ export function DashboardNavbar() {
 
   const isDiscover = pathname === "/discover";
   const isDashboard = pathname === "/dashboard";
-  const isHome = pathname === "/home";
+
+  // hasProfile and profileData come from separate reads, so the username can
+  // lag behind. Only treat the profile as visitable once both have arrived,
+  // and keep the button inert until then rather than doing nothing on click.
+  const profileUsername = profileData?.username;
+  const canVisitProfile = !!hasProfile && !!profileUsername;
+  const isAwaitingProfile = !!hasProfile && !profileUsername;
 
   const getPageTitle = () => {
     if (!pathname || pathname === "/") return "Home";
@@ -50,9 +56,9 @@ export function DashboardNavbar() {
     if (!isConnected) return;
 
     if (isDashboard) {
-      if (hasProfile && profileData?.username) {
+      if (canVisitProfile && profileUsername) {
         // Visit the user's profile in a new tab
-        window.open(`/${profileData.username}`, "_blank");
+        window.open(`/${profileUsername}`, "_blank");
       } else if (!hasProfile) {
         setIsCreateProfileModalOpen(true);
       }
@@ -70,8 +76,6 @@ export function DashboardNavbar() {
     if (isDiscover) return null; // icon only
     return "New Token";
   };
-
-  const isButtonDisabled = false;
 
   const handleSearchChange = (val: string) => {
     if (!val) {
@@ -137,7 +141,7 @@ export function DashboardNavbar() {
                 isDiscover
                   ? "h-10 w-10 p-0"
                   : "gap-2.5 px-4 py-2.5 text-base md:px-5 md:text-xl"
-              } ${!isConnected ? "cursor-not-allowed opacity-50" : ""}`}
+              } ${!isConnected || isAwaitingProfile ? "cursor-not-allowed opacity-50" : ""}`}
               aria-label={
                 isDiscover
                   ? "New Token"
@@ -148,7 +152,7 @@ export function DashboardNavbar() {
                     : undefined
               }
               onClick={handleButtonClick}
-              disabled={!isConnected}
+              disabled={!isConnected || isAwaitingProfile}
             >
               {!(isDashboard && hasProfile) && (
                 <FiPlus size={20} className="shrink-0" strokeWidth={3} />

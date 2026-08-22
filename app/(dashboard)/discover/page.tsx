@@ -13,7 +13,7 @@ import {
   useMultipleEndorsementCounts,
   useMultipleTokenOwners,
 } from "@/hooks/useIdentityReads";
-import { formatExpiry } from "@/lib/helpers";
+import { formatExpiry, truncateAddress } from "@/lib/helpers";
 
 function SearchedToken({
   tokenId,
@@ -61,9 +61,7 @@ function SearchedToken({
   const tokenType = tokenTuple[3] || "Unknown";
   const validUntil = tokenTuple[6];
   const endorseCount = Number(endorsementCount ?? 0n);
-  const ownerStr = owner
-    ? `${(owner as string).slice(0, 6)}…${(owner as string).slice(-4)}`
-    : "…";
+  const ownerStr = owner ? truncateAddress(owner as string) : "…";
 
   const tokenData = [
     {
@@ -152,7 +150,7 @@ function RecentTokensFeed({
           ]
         | undefined;
 
-      const ownerStr = owner ? `${owner.slice(0, 6)}…${owner.slice(-4)}` : "…";
+      const ownerStr = owner ? truncateAddress(owner) : "…";
 
       return {
         tokenId: `#${id.toString()}`,

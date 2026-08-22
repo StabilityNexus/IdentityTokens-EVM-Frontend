@@ -9,7 +9,7 @@ import {
   useMultipleTokenTypes,
   useMultipleEndorsementCounts,
 } from "@/hooks/useIdentityReads";
-import { formatExpiry } from "@/lib/helpers";
+import { formatExpiry, truncateAddress } from "@/lib/helpers";
 import { TOKEN_TYPE } from "@/lib/types";
 
 const DashboardPage = () => {
@@ -132,8 +132,7 @@ const DashboardPage = () => {
   }, [endorsementCounts]);
 
   const name =
-    profileData?.name ||
-    (address ? `${address.slice(0, 6)}…${address.slice(-4)}` : "Anonymous");
+    profileData?.name || (address ? truncateAddress(address) : "Anonymous");
   const age = profileData ? Number(profileData.age) : 0;
   const nationality = profileData?.nationality || "";
   const walletAddress = address || "0x0000000000000000000000000000000000000000";

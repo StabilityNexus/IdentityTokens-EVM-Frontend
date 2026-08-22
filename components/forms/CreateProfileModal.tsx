@@ -34,7 +34,10 @@ import {
 } from "@/lib/validation";
 import { AvatarPicker } from "./fields/AvatarPicker";
 import { CountrySelect } from "./fields/CountrySelect";
-import { CustomLinksField } from "./fields/CustomLinksField";
+import {
+  CustomLinksField,
+  hasCustomLinkError,
+} from "./fields/CustomLinksField";
 import { TextField } from "./fields/TextField";
 
 interface ProfileFormData {
@@ -125,9 +128,12 @@ export function CreateProfileModal({
     [formData, usernameResult]
   );
 
-  const hasBlockingError = Object.values(results).some(
-    (result) => result.status === "invalid"
-  );
+  // Custom links are validated by the field itself, so fold its verdict in
+  // here too -- otherwise a row showing a red error still submits and writes a
+  // dead link on-chain.
+  const hasBlockingError =
+    Object.values(results).some((result) => result.status === "invalid") ||
+    hasCustomLinkError(customLinks);
   const isMissingRequired =
     !formData.name.trim() || usernameResult.status !== "valid";
 
@@ -165,6 +171,7 @@ export function CreateProfileModal({
   // Keep the latest closer in a ref so the key listener below can stay stable.
   // The ref is written in an effect rather than during render — refs must not
   // be touched while rendering.
+  const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef(handleClose);
   useEffect(() => {
     closeRef.current = handleClose;
@@ -195,26 +202,68 @@ export function CreateProfileModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData, avatarId, customLinks]);
 
-  // Give the modal a fresh random avatar each time it opens. This has to stay
-  // in an effect: picking the id during render would differ between the server
-  // and client passes and trip a hydration mismatch.
+  // Give the modal a fresh random avatar each time it opens. This stays in an
+  // effect deliberately: deriving it during render would re-roll the avatar on
+  // every keystroke, and a lazy useState initialiser would only ever pick once
+  // per mount rather than once per open.
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (isOpen) setAvatarId((current) => current ?? getRandomAvatarId());
   }, [isOpen]);
 
-  // Escape to dismiss, and lock background scrolling while open.
+  // Escape to dismiss, background scroll lock, and focus management: pull focus
+  // into the dialog on open, keep Tab cycling inside it, and hand focus back to
+  // whatever opened it on close.
   useEffect(() => {
     if (!isOpen) return;
+
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+
+    const focusable = () =>
+      Array.from(
+        dialogRef.current?.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        ) ?? []
+        // Skip anything currently hidden, so the cycle matches what is on screen.
+      ).filter((element) => element.getClientRects().length > 0);
+
+    const initial = focusable();
+    const firstField = initial.find((element) =>
+      ["INPUT", "SELECT", "TEXTAREA"].includes(element.tagName)
+    );
+    (firstField ?? initial[0])?.focus();
+
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") closeRef.current();
+      if (event.key === "Escape") {
+        closeRef.current();
+        return;
+      }
+      if (event.key !== "Tab") return;
+
+      const cycle = focusable();
+      if (cycle.length === 0) return;
+
+      const first = cycle[0];
+      const last = cycle[cycle.length - 1];
+      const active = document.activeElement;
+      const escaped = !dialogRef.current?.contains(active);
+
+      if (event.shiftKey && (active === first || escaped)) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && (active === last || escaped)) {
+        event.preventDefault();
+        first.focus();
+      }
     };
+
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     document.addEventListener("keydown", handleKeyDown);
     return () => {
       document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", handleKeyDown);
+      previouslyFocused?.focus();
     };
   }, [isOpen]);
 
@@ -267,6 +316,7 @@ export function CreateProfileModal({
       role="presentation"
     >
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="create-profile-title"

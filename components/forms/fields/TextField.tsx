@@ -2,7 +2,7 @@
 
 import React, { useId } from "react";
 import { AlertCircle, Check, Info, Loader2 } from "lucide-react";
-import { FieldResult } from "@/lib/validation";
+import { FieldResult, FieldStatus } from "@/lib/validation";
 import { cn } from "@/lib/utils";
 
 export interface TextFieldProps {
@@ -29,7 +29,7 @@ export interface TextFieldProps {
   className?: string;
 }
 
-const BORDER_BY_STATUS: Record<string, string> = {
+const BORDER_BY_STATUS: Record<FieldStatus, string> = {
   idle: "border-white/8",
   checking: "border-white/8",
   valid: "border-brand-green/45",
@@ -37,7 +37,7 @@ const BORDER_BY_STATUS: Record<string, string> = {
   invalid: "border-red-500/55",
 };
 
-const TEXT_BY_STATUS: Record<string, string> = {
+const TEXT_BY_STATUS: Record<FieldStatus, string> = {
   valid: "text-brand-green",
   warning: "text-amber-400",
   invalid: "text-red-400",
@@ -82,7 +82,7 @@ export function TextField({
         className={cn(
           "flex items-center gap-2 rounded-xl border bg-modal-inner-bg px-3 transition-colors",
           "focus-within:border-profile-accent/70 focus-within:ring-1 focus-within:ring-profile-accent/40",
-          BORDER_BY_STATUS[status] ?? BORDER_BY_STATUS.idle,
+          BORDER_BY_STATUS[status],
           disabled && "opacity-60"
         )}
       >

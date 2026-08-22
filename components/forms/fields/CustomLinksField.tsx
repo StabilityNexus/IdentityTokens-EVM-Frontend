@@ -6,6 +6,25 @@ import { CustomLink, MAX_CUSTOM_LINKS } from "@/lib/profileExtras";
 import { validateWebsite } from "@/lib/validation";
 import { cn } from "@/lib/utils";
 
+/**
+ * The error shown for one row, or undefined when the row is fine.
+ *
+ * Exported so the owning form can gate submission on the same rule the field
+ * renders, rather than duplicating it or reporting validity back up through a
+ * callback and an effect.
+ */
+export function customLinkError(link: CustomLink): string | undefined {
+  const urlResult = link.url ? validateWebsite(link.url) : undefined;
+  if (urlResult?.status === "invalid") return urlResult.message;
+  if (!link.label.trim() && link.url.trim()) return "Give this link a name.";
+  return undefined;
+}
+
+/** True when any row is showing an error and submission should be blocked. */
+export function hasCustomLinkError(links: CustomLink[]): boolean {
+  return links.some((link) => customLinkError(link) !== undefined);
+}
+
 interface CustomLinksFieldProps {
   links: CustomLink[];
   onChange: (links: CustomLink[]) => void;
@@ -62,14 +81,7 @@ export function CustomLinksField({
       ) : (
         <div className="flex flex-col gap-2.5">
           {links.map((link, index) => {
-            const urlResult = link.url ? validateWebsite(link.url) : undefined;
-            const labelMissing = !link.label.trim() && !!link.url.trim();
-            const error =
-              urlResult?.status === "invalid"
-                ? urlResult.message
-                : labelMissing
-                  ? "Give this link a name."
-                  : undefined;
+            const error = customLinkError(link);
 
             return (
               <div key={index} className="flex flex-col gap-1">

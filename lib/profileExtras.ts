@@ -123,6 +123,12 @@ export function decodeProfileExtras(
 
   try {
     const payload = JSON.parse(decodeBase64Url(encoded)) as EncodedPayload;
+
+    // Fail closed on a version this build does not understand. A newer writer
+    // may have reused or redefined these keys, so keep the website and drop the
+    // extras rather than misreading them.
+    if (payload.v !== SCHEMA_VERSION) return { ...empty, website };
+
     return {
       website,
       avatarId: typeof payload.a === "string" ? payload.a : null,

@@ -4,17 +4,13 @@ import React, { useState } from "react";
 import { ArrowUpRight, Check, Copy } from "lucide-react";
 import { ProfileCard } from "./ProfileCard";
 import { getEtherscanAddressUrl } from "@/lib/errors";
+import { truncateAddress } from "@/lib/helpers";
 
 interface ProfileIdentityProps {
   walletAddress?: string;
   ens: string;
   profileTokenId?: bigint;
   className?: string;
-}
-
-function truncateAddress(address: string): string {
-  if (address.length <= 20) return address;
-  return `${address.slice(0, 8)}…${address.slice(-6)}`;
 }
 
 export function ProfileIdentity({
@@ -47,7 +43,7 @@ export function ProfileIdentity({
                 title={walletAddress}
                 className="truncate font-utsaha text-sm text-white"
               >
-                {truncateAddress(walletAddress)}
+                {truncateAddress(walletAddress, 8, 6)}
               </span>
               <button
                 type="button"

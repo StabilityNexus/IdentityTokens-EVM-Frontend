@@ -24,6 +24,7 @@ export function CountrySelect({
 }: CountrySelectProps) {
   const reactId = useId();
   const listboxId = `country-list-${reactId}`;
+  const optionId = (index: number) => `${listboxId}-option-${index}`;
 
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -169,6 +170,13 @@ export function CountrySelect({
               onKeyDown={handleKeyDown}
               placeholder="Search countries…"
               aria-label="Search countries"
+              role="combobox"
+              aria-expanded
+              aria-controls={listboxId}
+              aria-autocomplete="list"
+              aria-activedescendant={
+                results[activeIndex] ? optionId(activeIndex) : undefined
+              }
               className="w-full bg-transparent font-utsaha text-sm text-white placeholder-gray-600 focus:outline-none"
             />
           </div>
@@ -193,6 +201,7 @@ export function CountrySelect({
                   ref={(element) => {
                     optionRefs.current[index] = element;
                   }}
+                  id={optionId(index)}
                   role="option"
                   aria-selected={isSelected}
                   onMouseEnter={() => setActiveIndex(index)}

@@ -1,5 +1,15 @@
 import { TokenListVariant, TokenCardVariant } from "@/lib/types";
 
+/**
+ * Shorten a wallet address for display, keeping enough of each end to stay
+ * recognisable. `lead`/`tail` default to the 6/4 split used across the
+ * dashboard; the profile page passes a wider 8/6.
+ */
+export function truncateAddress(address: string, lead = 6, tail = 4): string {
+  if (address.length <= lead + tail) return address;
+  return `${address.slice(0, lead)}…${address.slice(-tail)}`;
+}
+
 export function formatExpiry(validUntil: bigint): string {
   if (validUntil === 0n) return "Never";
   const now = Math.floor(Date.now() / 1000);

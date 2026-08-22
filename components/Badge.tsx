@@ -1,18 +1,5 @@
 import Image from "next/image";
-
-type RankName =
-  | "bronze"
-  | "silver"
-  | "gold"
-  | "platinum"
-  | "diamond"
-  | "champion";
-
-interface BadgeProps {
-  rank: RankName;
-  size?: number;
-  className?: string;
-}
+import { BadgeProps, RankName } from "@/lib/types";
 
 const BADGE_MAP: Record<RankName, string> = {
   bronze: "/badges/BronzeBadge.svg",

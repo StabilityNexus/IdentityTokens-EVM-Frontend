@@ -48,7 +48,7 @@ export function ProfileLinks({
         label="GitHub"
         value={`@${github.replace(/^@/, "")}`}
         href={handleToUrl("https://github.com/", github)}
-      />,
+      />
     );
   }
 
@@ -60,7 +60,7 @@ export function ProfileLinks({
         label="X"
         value={`@${xDotCom.replace(/^@/, "")}`}
         href={handleToUrl("https://x.com/", xDotCom)}
-      />,
+      />
     );
   }
 
@@ -72,7 +72,7 @@ export function ProfileLinks({
         icon={<FaDiscord size={17} />}
         label="Discord"
         value={discord}
-      />,
+      />
     );
   }
 
@@ -84,7 +84,7 @@ export function ProfileLinks({
         label="Email"
         value={email}
         href={`mailto:${email}`}
-      />,
+      />
     );
   }
 
@@ -96,7 +96,7 @@ export function ProfileLinks({
         label="Website"
         value={website.replace(/^https?:\/\//i, "")}
         href={normalizeExternal(website)}
-      />,
+      />
     );
   }
 
@@ -109,7 +109,7 @@ export function ProfileLinks({
         label={link.label || "Link"}
         value={link.url.replace(/^https?:\/\//i, "")}
         href={normalizeExternal(link.url)}
-      />,
+      />
     );
   });
 

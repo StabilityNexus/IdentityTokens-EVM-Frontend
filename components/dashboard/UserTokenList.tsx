@@ -2,15 +2,7 @@
 
 import React from "react";
 import { TokenCard } from "../cards/TokenCard";
-import { TokenData } from "./TokenList";
-
-interface UserTokenListProps {
-  tokens: TokenData[];
-  className?: string;
-  onRevoke?: (tokenId: string) => void;
-  onEndorse?: (tokenId: string) => void;
-  onViewAll?: (tokenId: string) => void;
-}
+import { UserTokenListProps, UITokenData } from "@/lib/types";
 
 export function UserTokenList({
   tokens,

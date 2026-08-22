@@ -4,7 +4,13 @@ import React from "react";
 export type TokenCardVariant = "home" | "history" | "discover";
 export type TokenListVariant = "tokens" | "history" | "discover";
 export type TxStatus = "idle" | "pending" | "confirming" | "success" | "error";
-export type RankName = "bronze" | "silver" | "gold" | "platinum" | "diamond" | "champion";
+export type RankName =
+  | "bronze"
+  | "silver"
+  | "gold"
+  | "platinum"
+  | "diamond"
+  | "champion";
 
 // --- Component Props ---
 

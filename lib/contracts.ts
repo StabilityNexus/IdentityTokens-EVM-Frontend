@@ -48,9 +48,7 @@ export const IDENTITY_SYSTEM_ABI = [
   {
     type: "function",
     name: "createRootIdentity",
-    inputs: [
-      { name: "displayName", type: "string", internalType: "string" },
-    ],
+    inputs: [{ name: "displayName", type: "string", internalType: "string" }],
     outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
     stateMutability: "nonpayable",
   },
@@ -376,9 +374,7 @@ export const IDENTITY_SYSTEM_ABI = [
   {
     type: "function",
     name: "supportsInterface",
-    inputs: [
-      { name: "interfaceId", type: "bytes4", internalType: "bytes4" },
-    ],
+    inputs: [{ name: "interfaceId", type: "bytes4", internalType: "bytes4" }],
     outputs: [{ name: "", type: "bool", internalType: "bool" }],
     stateMutability: "view",
   },
@@ -785,16 +781,12 @@ export const IDENTITY_SYSTEM_ABI = [
   {
     type: "error",
     name: "ERC721InvalidApprover",
-    inputs: [
-      { name: "approver", type: "address", internalType: "address" },
-    ],
+    inputs: [{ name: "approver", type: "address", internalType: "address" }],
   },
   {
     type: "error",
     name: "ERC721InvalidOperator",
-    inputs: [
-      { name: "operator", type: "address", internalType: "address" },
-    ],
+    inputs: [{ name: "operator", type: "address", internalType: "address" }],
   },
   {
     type: "error",
@@ -804,9 +796,7 @@ export const IDENTITY_SYSTEM_ABI = [
   {
     type: "error",
     name: "ERC721InvalidReceiver",
-    inputs: [
-      { name: "receiver", type: "address", internalType: "address" },
-    ],
+    inputs: [{ name: "receiver", type: "address", internalType: "address" }],
   },
   {
     type: "error",

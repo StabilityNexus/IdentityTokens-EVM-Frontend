@@ -68,7 +68,7 @@ export function AvatarPicker({
                   isSelected
                     ? "ring-2 ring-profile-accent ring-offset-2 ring-offset-modal-inner-bg"
                     : "opacity-60 hover:opacity-100",
-                  disabled && "cursor-not-allowed",
+                  disabled && "cursor-not-allowed"
                 )}
               >
                 <Avatar avatarId={preset.id} shape="squircle" />

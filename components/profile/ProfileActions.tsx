@@ -95,7 +95,11 @@ export function ProfileActions({
         aria-label="Share this profile"
         className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 font-utsaha text-sm text-gray-200 transition-colors hover:border-profile-accent/40 hover:text-white"
       >
-        {shared ? <Check size={16} className="text-brand-green" /> : <Share2 size={16} />}
+        {shared ? (
+          <Check size={16} className="text-brand-green" />
+        ) : (
+          <Share2 size={16} />
+        )}
         <span className="hidden sm:inline">{shared ? "Copied" : "Share"}</span>
       </button>
 
@@ -105,8 +109,14 @@ export function ProfileActions({
         aria-label="Copy profile link"
         className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 font-utsaha text-sm text-gray-200 transition-colors hover:border-profile-accent/40 hover:text-white"
       >
-        {copied ? <Check size={16} className="text-brand-green" /> : <Copy size={16} />}
-        <span className="hidden sm:inline">{copied ? "Copied" : "Copy link"}</span>
+        {copied ? (
+          <Check size={16} className="text-brand-green" />
+        ) : (
+          <Copy size={16} />
+        )}
+        <span className="hidden sm:inline">
+          {copied ? "Copied" : "Copy link"}
+        </span>
       </button>
     </div>
   );

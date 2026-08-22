@@ -12,7 +12,9 @@ const TrustScore: React.FC<TrustScoreProps> = ({
     ? Math.max(0, Math.min(100, score!))
     : undefined;
   const arcColor =
-    clampedScore !== undefined ? getArcColor(clampedScore) : "var(--color-border-dark)";
+    clampedScore !== undefined
+      ? getArcColor(clampedScore)
+      : "var(--color-border-dark)";
 
   let defaultDesc = "N/A";
   if (clampedScore !== undefined) {

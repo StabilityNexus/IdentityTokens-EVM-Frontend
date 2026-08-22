@@ -73,10 +73,7 @@ export function TextField({
 
   return (
     <div className={cn("flex min-w-0 flex-col gap-1.5", className)}>
-      <label
-        htmlFor={inputId}
-        className="font-utsaha text-sm text-gray-300"
-      >
+      <label htmlFor={inputId} className="font-utsaha text-sm text-gray-300">
         {label}
         {required && <span className="ml-0.5 text-red-400">*</span>}
       </label>
@@ -86,7 +83,7 @@ export function TextField({
           "flex items-center gap-2 rounded-xl border bg-modal-inner-bg px-3 transition-colors",
           "focus-within:border-profile-accent/70 focus-within:ring-1 focus-within:ring-profile-accent/40",
           BORDER_BY_STATUS[status] ?? BORDER_BY_STATUS.idle,
-          disabled && "opacity-60",
+          disabled && "opacity-60"
         )}
       >
         {icon && (
@@ -122,7 +119,9 @@ export function TextField({
           {status === "checking" && (
             <Loader2 size={15} className="animate-spin text-gray-400" />
           )}
-          {status === "valid" && <Check size={15} className="text-brand-green" />}
+          {status === "valid" && (
+            <Check size={15} className="text-brand-green" />
+          )}
           {status === "warning" && (
             <Info size={15} className="text-amber-400" />
           )}
@@ -137,7 +136,7 @@ export function TextField({
           id={messageId}
           className={cn(
             "flex flex-wrap items-center gap-1.5 font-utsaha text-xs",
-            message ? TEXT_BY_STATUS[status] : "text-gray-500",
+            message ? TEXT_BY_STATUS[status] : "text-gray-500"
           )}
         >
           <span>{message ?? hint}</span>

@@ -41,7 +41,9 @@ export function TransactionStatus({
         {status === "pending" && (
           <>
             <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-brand-blue border-t-transparent" />
-            <span className="text-brand-blue">Waiting for wallet confirmation…</span>
+            <span className="text-brand-blue">
+              Waiting for wallet confirmation…
+            </span>
           </>
         )}
 

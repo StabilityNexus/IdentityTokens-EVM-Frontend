@@ -7,9 +7,15 @@ import { WagmiProvider } from "wagmi";
 import { RainbowKitProvider, darkTheme } from "@rainbow-me/rainbowkit";
 import { config } from "@/lib/config";
 
+declare global {
+  interface BigInt {
+    toJSON(): string;
+  }
+}
+
 // Polyfill for BigInt serialization (prevents "Do not know how to serialize a BigInt" in React Query / Wagmi mutations)
-if (typeof BigInt !== "undefined" && !(BigInt.prototype as any).toJSON) {
-  (BigInt.prototype as any).toJSON = function () {
+if (typeof BigInt !== "undefined" && !BigInt.prototype.toJSON) {
+  BigInt.prototype.toJSON = function () {
     return this.toString();
   };
 }

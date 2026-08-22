@@ -2,13 +2,14 @@
 
 import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
-import { useEndorseToken, useCreateRootIdentity } from "@/hooks/useIdentityWrites";
+import {
+  useEndorseToken,
+  useCreateRootIdentity,
+} from "@/hooks/useIdentityWrites";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
 import { useTokenOwner } from "@/hooks/useIdentityReads";
 import { EndorseModalProps, TxStatus } from "@/lib/types";
-import {
-  TransactionStatus,
-} from "@/components/ui/TransactionStatus";
+import { TransactionStatus } from "@/components/ui/TransactionStatus";
 
 /** Duration presets in seconds */
 const DURATION_PRESETS = [
@@ -35,12 +36,18 @@ export function EndorseModal({
   const endorseToken = useEndorseToken();
   const createRoot = useCreateRootIdentity();
 
-  const isSelfToken = !!address && !!ownerAddress && address.toLowerCase() === ownerAddress.toLowerCase();
+  const isSelfToken =
+    !!address &&
+    !!ownerAddress &&
+    address.toLowerCase() === ownerAddress.toLowerCase();
   const hasNoRootIdentity = !rootId || rootId === 0n;
 
-  // Reset on close
+  // Reset on close. Clearing this from an effect is the trade-off for the
+  // parent owning `isOpen`; the effect-free fix is to remount the modal on
+  // close (a `key`, or an inner component) rather than gate it on a prop.
   useEffect(() => {
     if (!isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedPreset(1);
       setCustomDays("");
       setUseCustom(false);
@@ -131,10 +138,11 @@ export function EndorseModal({
                   key={preset.label}
                   type="button"
                   disabled={isSubmitting}
-                  className={`rounded-lg px-3 py-2 font-utsaha text-sm transition-all ${!useCustom && selectedPreset === i
+                  className={`rounded-lg px-3 py-2 font-utsaha text-sm transition-all ${
+                    !useCustom && selectedPreset === i
                       ? "bg-brand-blue text-white"
                       : "bg-modal-inner-bg text-gray-400 hover:bg-modal-border hover:text-white"
-                    }`}
+                  }`}
                   style={{ border: "1px solid rgba(255,255,255,0.08)" }}
                   onClick={() => {
                     setSelectedPreset(i);
@@ -152,8 +160,11 @@ export function EndorseModal({
             <button
               type="button"
               disabled={isSubmitting}
-              className={`w-fit font-utsaha text-xs transition-colors ${useCustom ? "text-brand-blue" : "text-gray-500 hover:text-gray-300"
-                }`}
+              className={`w-fit font-utsaha text-xs transition-colors ${
+                useCustom
+                  ? "text-brand-blue"
+                  : "text-gray-500 hover:text-gray-300"
+              }`}
               onClick={() => setUseCustom(!useCustom)}
             >
               {useCustom ? "▼ Custom Duration" : "▸ Custom Duration"}
@@ -188,17 +199,24 @@ export function EndorseModal({
 
           {hasNoRootIdentity && !isSelfToken && (
             <div className="flex flex-col gap-2 rounded-lg border border-blue-500/30 bg-blue-500/10 p-3 text-center font-utsaha text-sm text-blue-300">
-              <p>ℹ️ You need a Root Identity before you can endorse tokens on-chain.</p>
+              <p>
+                ℹ️ You need a Root Identity before you can endorse tokens
+                on-chain.
+              </p>
               <button
                 type="button"
                 onClick={() => createRoot.write("")}
                 disabled={createRoot.isLoading}
                 className="mt-1 w-full rounded-md bg-brand-blue py-1.5 font-utsaha text-xs text-white hover:bg-blue-600 disabled:opacity-50"
               >
-                {createRoot.isLoading ? "Initializing Root Identity…" : "Initialize Root Identity"}
+                {createRoot.isLoading
+                  ? "Initializing Root Identity…"
+                  : "Initialize Root Identity"}
               </button>
               {createRoot.isSuccess && (
-                <p className="text-xs text-brand-green">Root Identity created! You can now endorse.</p>
+                <p className="text-xs text-brand-green">
+                  Root Identity created! You can now endorse.
+                </p>
               )}
             </div>
           )}
@@ -214,7 +232,9 @@ export function EndorseModal({
           {/* Submit */}
           <button
             type="submit"
-            disabled={isSubmitting || !address || isSelfToken || hasNoRootIdentity}
+            disabled={
+              isSubmitting || !address || isSelfToken || hasNoRootIdentity
+            }
             className="w-full rounded-lg bg-brand-green py-2.5 font-utsaha text-black transition-all hover:bg-brand-green/90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isSubmitting ? "Endorsing…" : "Endorse"}

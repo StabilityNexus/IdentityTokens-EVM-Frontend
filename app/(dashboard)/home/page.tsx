@@ -12,18 +12,19 @@ import {
 import { formatExpiry } from "@/lib/helpers";
 
 export default function Home() {
-  const {
-    isConnected,
-    walletTokenIds,
-    hasProfile,
-    profileData,
-    isLoading,
-  } = useIdentityGate();
+  const { isConnected, walletTokenIds, hasProfile, profileData, isLoading } =
+    useIdentityGate();
 
   // Batch-fetch token details, types, and endorsement counts
-  const { data: tokenDetails } = useMultipleTokenDetails(walletTokenIds.length > 0 ? walletTokenIds : undefined);
-  const { data: tokenTypes } = useMultipleTokenTypes(walletTokenIds.length > 0 ? walletTokenIds : undefined);
-  const { data: endorsementCounts } = useMultipleEndorsementCounts(walletTokenIds.length > 0 ? walletTokenIds : undefined);
+  const { data: tokenDetails } = useMultipleTokenDetails(
+    walletTokenIds.length > 0 ? walletTokenIds : undefined
+  );
+  const { data: tokenTypes } = useMultipleTokenTypes(
+    walletTokenIds.length > 0 ? walletTokenIds : undefined
+  );
+  const { data: endorsementCounts } = useMultipleEndorsementCounts(
+    walletTokenIds.length > 0 ? walletTokenIds : undefined
+  );
 
   // Build tokens for display (exclude ROOT and PROFILE tokens)
   const tokenListData = useMemo(() => {
@@ -36,13 +37,33 @@ export default function Home() {
         const endorseResult = endorsementCounts?.[i];
 
         // Skip ROOT tokens (type 0)
-        const tokenType = typeResult?.status === "success" ? (typeResult.result as number) : -1;
+        const tokenType =
+          typeResult?.status === "success" ? (typeResult.result as number) : -1;
         if (tokenType === 0) return null;
 
         const token = detail?.status === "success" ? detail.result : undefined;
-        const endorseCount = endorseResult?.status === "success" ? Number(endorseResult.result) : 0;
+        const endorseCount =
+          endorseResult?.status === "success"
+            ? Number(endorseResult.result)
+            : 0;
 
-        const tokenTuple = token as readonly [bigint, bigint, string, string, `0x${string}`, string, bigint, bigint, bigint, bigint, boolean, bigint, bigint] | undefined;
+        const tokenTuple = token as
+          | readonly [
+              bigint,
+              bigint,
+              string,
+              string,
+              `0x${string}`,
+              string,
+              bigint,
+              bigint,
+              bigint,
+              bigint,
+              boolean,
+              bigint,
+              bigint,
+            ]
+          | undefined;
 
         return {
           tokenId: `#${id.toString()}`,
@@ -66,11 +87,11 @@ export default function Home() {
 
   const socialsCount = profileData
     ? [
-      profileData.github,
-      profileData.discord,
-      profileData.xDotCom,
-      profileData.email,
-    ].filter(Boolean).length
+        profileData.github,
+        profileData.discord,
+        profileData.xDotCom,
+        profileData.email,
+      ].filter(Boolean).length
     : 0;
 
   if (!isConnected) {

@@ -13,7 +13,13 @@ import {
 
 /** Create a root identity (auto-called before first action if needed) */
 export function useCreateRootIdentity() {
-  const { writeContract, data: txHash, isPending, error, reset } = useWriteContract();
+  const {
+    writeContract,
+    data: txHash,
+    isPending,
+    error,
+    reset,
+  } = useWriteContract();
 
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash: txHash,
@@ -42,7 +48,13 @@ export function useCreateRootIdentity() {
 
 /** Create a new identity token */
 export function useCreateToken() {
-  const { writeContract, data: txHash, isPending, error, reset } = useWriteContract();
+  const {
+    writeContract,
+    data: txHash,
+    isPending,
+    error,
+    reset,
+  } = useWriteContract();
 
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash: txHash,
@@ -83,7 +95,13 @@ export function useCreateToken() {
 
 /** Endorse a token with a user-selected duration (in seconds) */
 export function useEndorseToken() {
-  const { writeContract, data: txHash, isPending, error, reset } = useWriteContract();
+  const {
+    writeContract,
+    data: txHash,
+    isPending,
+    error,
+    reset,
+  } = useWriteContract();
 
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash: txHash,
@@ -112,7 +130,13 @@ export function useEndorseToken() {
 
 /** Revoke your active endorsement on a token */
 export function useRevokeEndorsement() {
-  const { writeContract, data: txHash, isPending, error, reset } = useWriteContract();
+  const {
+    writeContract,
+    data: txHash,
+    isPending,
+    error,
+    reset,
+  } = useWriteContract();
 
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash: txHash,
@@ -141,7 +165,13 @@ export function useRevokeEndorsement() {
 
 /** Flag a token */
 export function useFlagToken() {
-  const { writeContract, data: txHash, isPending, error, reset } = useWriteContract();
+  const {
+    writeContract,
+    data: txHash,
+    isPending,
+    error,
+    reset,
+  } = useWriteContract();
 
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash: txHash,
@@ -170,7 +200,13 @@ export function useFlagToken() {
 
 /** Burn (permanently destroy) a token */
 export function useBurnToken() {
-  const { writeContract, data: txHash, isPending, error, reset } = useWriteContract();
+  const {
+    writeContract,
+    data: txHash,
+    isPending,
+    error,
+    reset,
+  } = useWriteContract();
 
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash: txHash,
@@ -199,7 +235,13 @@ export function useBurnToken() {
 
 /** Transfer a token to another wallet */
 export function useTransferToken() {
-  const { writeContract, data: txHash, isPending, error, reset } = useWriteContract();
+  const {
+    writeContract,
+    data: txHash,
+    isPending,
+    error,
+    reset,
+  } = useWriteContract();
 
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash: txHash,
@@ -230,7 +272,13 @@ export function useTransferToken() {
 
 /** Create a profile (calls ProfileSystem which internally mints via IdentitySystem) */
 export function useCreateProfile() {
-  const { writeContract, data: txHash, isPending, error, reset } = useWriteContract();
+  const {
+    writeContract,
+    data: txHash,
+    isPending,
+    error,
+    reset,
+  } = useWriteContract();
 
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash: txHash,

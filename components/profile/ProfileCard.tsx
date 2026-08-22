@@ -23,7 +23,7 @@ export function ProfileCard({
     <section
       className={cn(
         "overflow-hidden rounded-2xl border border-profile-border bg-profile-surface",
-        className,
+        className
       )}
     >
       {title && (

@@ -25,7 +25,7 @@ export function useIdentityGate() {
 
   // Step 2: Get root identity view (only if rootId > 0)
   const { data: rootView, isLoading: isRootViewLoading } = useRootIdentityView(
-    rootId && rootId > 0n ? rootId : undefined,
+    rootId && rootId > 0n ? rootId : undefined
   );
 
   // Step 3: Check profile status
@@ -96,7 +96,15 @@ export function useIdentityGate() {
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isConnected, address, rootId, rootView, hasProfile, profileTokenId, profileData]);
+  }, [
+    isConnected,
+    address,
+    rootId,
+    rootView,
+    hasProfile,
+    profileTokenId,
+    profileData,
+  ]);
 
   const isLoading =
     isRootIdLoading ||

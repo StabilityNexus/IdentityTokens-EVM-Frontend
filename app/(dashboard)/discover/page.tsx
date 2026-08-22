@@ -33,19 +33,37 @@ function SearchedToken({
       <div className="flex items-center justify-center rounded-2xl border border-card-border bg-card-bg py-12">
         <div className="text-center">
           <div className="mx-auto mb-3 h-6 w-6 animate-spin rounded-full border-2 border-brand-green border-t-transparent" />
-          <p className="font-utsaha text-sm text-gray-400">Loading token #{tokenId.toString()}…</p>
+          <p className="font-utsaha text-sm text-gray-400">
+            Loading token #{tokenId.toString()}…
+          </p>
         </div>
       </div>
     );
   }
 
   // Token struct: [tokenId, parentRootId, tokenName, tokenType, tokenValue, about, validUntil, ...]
-  const tokenTuple = token as readonly [bigint, bigint, string, string, `0x${string}`, string, bigint, bigint, bigint, bigint, boolean, bigint, bigint];
+  const tokenTuple = token as readonly [
+    bigint,
+    bigint,
+    string,
+    string,
+    `0x${string}`,
+    string,
+    bigint,
+    bigint,
+    bigint,
+    bigint,
+    boolean,
+    bigint,
+    bigint,
+  ];
   const tokenName = tokenTuple[2] || "Unnamed";
   const tokenType = tokenTuple[3] || "Unknown";
   const validUntil = tokenTuple[6];
   const endorseCount = Number(endorsementCount ?? 0n);
-  const ownerStr = owner ? `${(owner as string).slice(0, 6)}…${(owner as string).slice(-4)}` : "…";
+  const ownerStr = owner
+    ? `${(owner as string).slice(0, 6)}…${(owner as string).slice(-4)}`
+    : "…";
 
   const tokenData = [
     {
@@ -79,16 +97,26 @@ function RecentTokensFeed({
 
   const filteredEvents = useMemo(() => {
     if (!recentEvents) return [];
-    return recentEvents.filter(
-      (e: any) => e.tokenType !== "ROOT"
-    );
+    return recentEvents.filter((e) => e.tokenType !== "ROOT");
   }, [recentEvents]);
 
-  const tokenIds = useMemo(() => filteredEvents.map((e: { tokenId: bigint; tokenType: string }) => e.tokenId), [filteredEvents]);
+  const tokenIds = useMemo(
+    () =>
+      filteredEvents.map(
+        (e: { tokenId: bigint; tokenType: string }) => e.tokenId
+      ),
+    [filteredEvents]
+  );
 
-  const { data: tokenDetails } = useMultipleTokenDetails(tokenIds.length > 0 ? tokenIds : undefined);
-  const { data: endorsementCounts } = useMultipleEndorsementCounts(tokenIds.length > 0 ? tokenIds : undefined);
-  const { data: tokenOwners } = useMultipleTokenOwners(tokenIds.length > 0 ? tokenIds : undefined);
+  const { data: tokenDetails } = useMultipleTokenDetails(
+    tokenIds.length > 0 ? tokenIds : undefined
+  );
+  const { data: endorsementCounts } = useMultipleEndorsementCounts(
+    tokenIds.length > 0 ? tokenIds : undefined
+  );
+  const { data: tokenOwners } = useMultipleTokenOwners(
+    tokenIds.length > 0 ? tokenIds : undefined
+  );
 
   const tokenData = useMemo(() => {
     if (!tokenIds || tokenIds.length === 0) return [];
@@ -99,10 +127,30 @@ function RecentTokensFeed({
       const ownerResult = tokenOwners?.[i];
 
       const token = detail?.status === "success" ? detail.result : undefined;
-      const endorseCount = endorseResult?.status === "success" ? Number(endorseResult.result) : 0;
-      const owner = ownerResult?.status === "success" ? ownerResult.result as string : undefined;
+      const endorseCount =
+        endorseResult?.status === "success" ? Number(endorseResult.result) : 0;
+      const owner =
+        ownerResult?.status === "success"
+          ? (ownerResult.result as string)
+          : undefined;
 
-      const tokenTuple = token as readonly [bigint, bigint, string, string, `0x${string}`, string, bigint, bigint, bigint, bigint, boolean, bigint, bigint] | undefined;
+      const tokenTuple = token as
+        | readonly [
+            bigint,
+            bigint,
+            string,
+            string,
+            `0x${string}`,
+            string,
+            bigint,
+            bigint,
+            bigint,
+            bigint,
+            boolean,
+            bigint,
+            bigint,
+          ]
+        | undefined;
 
       const ownerStr = owner ? `${owner.slice(0, 6)}…${owner.slice(-4)}` : "…";
 
@@ -122,7 +170,9 @@ function RecentTokensFeed({
       <div className="flex items-center justify-center rounded-2xl border border-card-border bg-card-bg py-12">
         <div className="text-center">
           <div className="mx-auto mb-3 h-6 w-6 animate-spin rounded-full border-2 border-brand-green border-t-transparent" />
-          <p className="font-utsaha text-sm text-gray-400">Loading recent tokens…</p>
+          <p className="font-utsaha text-sm text-gray-400">
+            Loading recent tokens…
+          </p>
         </div>
       </div>
     );
@@ -163,22 +213,19 @@ export default function DiscoverPage() {
   const searchParams = useSearchParams();
   const query = searchParams?.get("q") ?? "";
 
-  const [searchedTokenId, setSearchedTokenId] = useState<bigint | null>(null);
+  // The searched id is fully derived from the query string, so it needs no
+  // state of its own.
+  const searchedTokenId = useMemo(() => {
+    const cleaned = query.trim().replace(/^#/, "");
+    return /^\d+$/.test(cleaned) ? BigInt(cleaned) : null;
+  }, [query]);
+
   const [endorseTarget, setEndorseTarget] = useState<{
     tokenId: bigint;
     tokenName: string;
   } | null>(null);
 
   const { isConnected } = useIdentityGate();
-
-  React.useEffect(() => {
-    const cleaned = query.trim().replace(/^#/, "");
-    if (/^\d+$/.test(cleaned)) {
-      setSearchedTokenId(BigInt(cleaned));
-    } else {
-      setSearchedTokenId(null);
-    }
-  }, [query]);
 
   const handleEndorse = (tokenId: bigint, tokenName: string) => {
     if (!isConnected) {
@@ -214,10 +261,7 @@ export default function DiscoverPage() {
           onRevoke={handleRevoke}
         />
       ) : (
-        <RecentTokensFeed
-          onEndorse={handleEndorse}
-          onRevoke={handleRevoke}
-        />
+        <RecentTokensFeed onEndorse={handleEndorse} onRevoke={handleRevoke} />
       )}
 
       {/* Endorse Modal */}

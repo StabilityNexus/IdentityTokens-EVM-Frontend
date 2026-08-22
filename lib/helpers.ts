@@ -11,7 +11,9 @@ export function formatExpiry(validUntil: bigint): string {
   return `${Math.floor(diff / 31536000)} years`;
 }
 
-export function getCardVariant(listVariant: TokenListVariant): TokenCardVariant {
+export function getCardVariant(
+  listVariant: TokenListVariant
+): TokenCardVariant {
   switch (listVariant) {
     case "tokens":
       return "home";

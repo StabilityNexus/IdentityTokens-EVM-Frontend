@@ -24,7 +24,7 @@ export default function SettingsPage() {
               <span className="font-utsaha text-sm text-gray-400">
                 Connected Wallet
               </span>
-              <span className="font-mono text-sm text-white break-all">
+              <span className="font-mono text-sm break-all text-white">
                 {address}
               </span>
             </div>

@@ -36,7 +36,10 @@ export function ProfileReputation({
             <defs>
               <linearGradient id={`trust-${uid}`} x1="0" y1="0" x2="1" y2="1">
                 <stop offset="0%" stopColor="var(--color-profile-accent)" />
-                <stop offset="100%" stopColor="var(--color-profile-accent-alt)" />
+                <stop
+                  offset="100%"
+                  stopColor="var(--color-profile-accent-alt)"
+                />
               </linearGradient>
             </defs>
             <circle
@@ -71,7 +74,7 @@ export function ProfileReputation({
 
         {/* Headline figure */}
         <div className="w-full rounded-xl border border-profile-border bg-profile-surface-raised px-4 py-3.5 text-center">
-          <p className="font-utsaha text-3xl text-gradient-profile">
+          <p className="text-gradient-profile font-utsaha text-3xl">
             {totalEndorsements}
           </p>
           <p className="mt-0.5 font-utsaha text-xs text-profile-muted">

@@ -23,7 +23,7 @@ export function CustomLinksField({
 
   const updateRow = (index: number, patch: Partial<CustomLink>) => {
     onChange(
-      links.map((link, i) => (i === index ? { ...link, ...patch } : link)),
+      links.map((link, i) => (i === index ? { ...link, ...patch } : link))
     );
   };
 
@@ -90,7 +90,7 @@ export function CustomLinksField({
                   <div
                     className={cn(
                       "flex min-w-0 flex-1 items-center gap-2 rounded-xl border bg-modal-inner-bg px-3 transition-colors focus-within:border-profile-accent/70",
-                      error ? "border-red-500/55" : "border-white/8",
+                      error ? "border-red-500/55" : "border-white/8"
                     )}
                   >
                     <LinkIcon size={14} className="shrink-0 text-gray-500" />

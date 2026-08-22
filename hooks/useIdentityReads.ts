@@ -113,7 +113,7 @@ export function useTransferHistory(tokenId: bigint | undefined) {
 /** Check if an endorser has actively endorsed a token */
 export function useHasEndorsed(
   endorserRootId: bigint | undefined,
-  tokenId: bigint | undefined,
+  tokenId: bigint | undefined
 ) {
   return useReadContract({
     address: IDENTITY_SYSTEM_ADDRESS,
@@ -189,7 +189,8 @@ export function useUsernameTaken(username: string | undefined) {
 /** Resolve a username to a profile token ID via on-chain mapping */
 export function useResolveUsername(username: string | undefined) {
   // Only attempt resolution for valid username strings (not numeric IDs)
-  const isValidUsername = !!username && username.length >= 3 && !/^\d+$/.test(username);
+  const isValidUsername =
+    !!username && username.length >= 3 && !/^\d+$/.test(username);
 
   return useReadContract({
     address: PROFILE_SYSTEM_ADDRESS,
@@ -218,7 +219,9 @@ export function useMultipleTokenTypes(tokenIds: readonly bigint[] | undefined) {
 }
 
 /** Batch-fetch token details for multiple token IDs in a single multicall */
-export function useMultipleTokenDetails(tokenIds: readonly bigint[] | undefined) {
+export function useMultipleTokenDetails(
+  tokenIds: readonly bigint[] | undefined
+) {
   const contracts = (tokenIds ?? []).map((id) => ({
     address: IDENTITY_SYSTEM_ADDRESS,
     abi: IDENTITY_SYSTEM_ABI,
@@ -233,7 +236,9 @@ export function useMultipleTokenDetails(tokenIds: readonly bigint[] | undefined)
 }
 
 /** Batch-fetch endorsement counts for multiple token IDs */
-export function useMultipleEndorsementCounts(tokenIds: readonly bigint[] | undefined) {
+export function useMultipleEndorsementCounts(
+  tokenIds: readonly bigint[] | undefined
+) {
   const contracts = (tokenIds ?? []).map((id) => ({
     address: IDENTITY_SYSTEM_ADDRESS,
     abi: IDENTITY_SYSTEM_ABI,
@@ -248,7 +253,9 @@ export function useMultipleEndorsementCounts(tokenIds: readonly bigint[] | undef
 }
 
 /** Batch-fetch token owners for multiple token IDs */
-export function useMultipleTokenOwners(tokenIds: readonly bigint[] | undefined) {
+export function useMultipleTokenOwners(
+  tokenIds: readonly bigint[] | undefined
+) {
   const contracts = (tokenIds ?? []).map((id) => ({
     address: IDENTITY_SYSTEM_ADDRESS,
     abi: IDENTITY_SYSTEM_ABI,
@@ -261,9 +268,6 @@ export function useMultipleTokenOwners(tokenIds: readonly bigint[] | undefined) 
     query: { enabled: !!tokenIds && tokenIds.length > 0 },
   });
 }
-
-
-
 
 export function useRecentTokens() {
   // Generate IDs 1 to 100
@@ -278,7 +282,7 @@ export function useRecentTokens() {
   const recentEvents = useMemo(() => {
     if (!tokenTypes) return [];
 
-    const validTokens: { tokenId: bigint, tokenType: string }[] = [];
+    const validTokens: { tokenId: bigint; tokenType: string }[] = [];
 
     for (let i = 0; i < tokenTypes.length; i++) {
       const typeResult = tokenTypes[i];
@@ -293,7 +297,7 @@ export function useRecentTokens() {
         if (typeNum > 0 && typeStr !== "UNKNOWN") {
           validTokens.push({
             tokenId: BigInt(i + 1),
-            tokenType: typeStr
+            tokenType: typeStr,
           });
         }
       }

@@ -20,8 +20,13 @@ export function DashboardNavbar() {
   const [isCreateProfileModalOpen, setIsCreateProfileModalOpen] =
     React.useState(false);
 
-  const { isConnected, hasProfile, profileData, refetchHasProfile, refetchWalletTokens } =
-    useIdentityGate();
+  const {
+    isConnected,
+    hasProfile,
+    profileData,
+    refetchHasProfile,
+    refetchWalletTokens,
+  } = useIdentityGate();
 
   const knownRoutes = ["/", "/home", "/dashboard", "/discover", "/settings"];
   const firstSegment = pathname?.split("/").filter(Boolean)[0] ?? "";
@@ -124,20 +129,30 @@ export function DashboardNavbar() {
               Public profiles are read-only surfaces, so no create action. */}
           {!isUserProfile && (
             <Button
-              className={`flex items-center justify-center rounded-full border-none font-utsaha shadow-none transition-transform duration-200 ease-out hover:scale-[1.02] active:scale-[0.98] ${isDashboard && hasProfile
+              className={`flex items-center justify-center rounded-full border-none font-utsaha shadow-none transition-transform duration-200 ease-out hover:scale-[1.02] active:scale-[0.98] ${
+                isDashboard && hasProfile
                   ? "bg-landing-bg text-dashboard-bg hover:bg-landing-bg/90"
                   : "bg-brand-green text-dashboard-bg hover:bg-brand-green/90"
-                } ${isDiscover
+              } ${
+                isDiscover
                   ? "h-10 w-10 p-0"
                   : "gap-2.5 px-4 py-2.5 text-base md:px-5 md:text-xl"
-                } ${!isConnected ? "cursor-not-allowed opacity-50" : ""}`}
+              } ${!isConnected ? "cursor-not-allowed opacity-50" : ""}`}
               aria-label={
-                isDiscover ? "New Token" : isDashboard ? (hasProfile ? "Visit Profile" : "Create Profile") : undefined
+                isDiscover
+                  ? "New Token"
+                  : isDashboard
+                    ? hasProfile
+                      ? "Visit Profile"
+                      : "Create Profile"
+                    : undefined
               }
               onClick={handleButtonClick}
               disabled={!isConnected}
             >
-              {!(isDashboard && hasProfile) && <FiPlus size={20} className="shrink-0" strokeWidth={3} />}
+              {!(isDashboard && hasProfile) && (
+                <FiPlus size={20} className="shrink-0" strokeWidth={3} />
+              )}
               {!isDiscover && <span>{getButtonLabel()}</span>}
             </Button>
           )}

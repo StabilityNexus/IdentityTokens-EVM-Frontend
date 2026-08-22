@@ -47,10 +47,7 @@ export default function UsernamePage() {
     useActiveEndorsementCount(profileTokenId);
 
   const { data: viewerHasEndorsed, refetch: refetchHasEndorsed } =
-    useHasEndorsed(
-      rootId && rootId > 0n ? rootId : undefined,
-      profileTokenId,
-    );
+    useHasEndorsed(rootId && rootId > 0n ? rootId : undefined, profileTokenId);
 
   const revokeEndorsement = useRevokeEndorsement();
 
@@ -63,7 +60,7 @@ export default function UsernamePage() {
 
   const extras = useMemo(
     () => decodeProfileExtras(profileData?.websitePortfolioLink),
-    [profileData?.websitePortfolioLink],
+    [profileData?.websitePortfolioLink]
   );
 
   const isOwnProfile =
@@ -79,6 +76,7 @@ export default function UsernamePage() {
       refetchEndorsements();
       refetchHasEndorsed();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [revokeEndorsement.isSuccess]);
 
   useEffect(() => {

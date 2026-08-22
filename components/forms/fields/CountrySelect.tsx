@@ -39,7 +39,7 @@ export function CountrySelect({
     const needle = query.trim().toLowerCase();
     if (!needle) return COUNTRIES;
     return COUNTRIES.filter((country) =>
-      country.name.toLowerCase().includes(needle),
+      country.name.toLowerCase().includes(needle)
     );
   }, [query]);
 
@@ -55,22 +55,31 @@ export function CountrySelect({
     return () => document.removeEventListener("mousedown", handlePointerDown);
   }, [isOpen]);
 
-  // Focus the search box and reset filtering each time the panel opens.
+  // Focus the search box once the panel is actually on screen.
   useEffect(() => {
     if (!isOpen) return;
-    setQuery("");
-    const index = selected
-      ? COUNTRIES.findIndex((country) => country.code === selected.code)
-      : 0;
-    setActiveIndex(Math.max(index, 0));
     searchRef.current?.focus();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   // Keep the highlighted option in view while arrowing through the list.
   useEffect(() => {
     optionRefs.current[activeIndex]?.scrollIntoView({ block: "nearest" });
   }, [activeIndex]);
+
+  // Reset filtering and highlight the current selection as the panel opens.
+  // Doing it here instead of in an effect keeps it to a single render pass.
+  const toggleOpen = () => {
+    if (isOpen) {
+      setIsOpen(false);
+      return;
+    }
+    setQuery("");
+    const index = selected
+      ? COUNTRIES.findIndex((country) => country.code === selected.code)
+      : 0;
+    setActiveIndex(Math.max(index, 0));
+    setIsOpen(true);
+  };
 
   const commit = (name: string) => {
     onChange(name);
@@ -100,7 +109,10 @@ export function CountrySelect({
   };
 
   return (
-    <div ref={containerRef} className={cn("relative flex flex-col gap-1.5", className)}>
+    <div
+      ref={containerRef}
+      className={cn("relative flex flex-col gap-1.5", className)}
+    >
       <span className="font-utsaha text-sm text-gray-300">
         {label}
         {required && <span className="ml-0.5 text-red-400">*</span>}
@@ -109,7 +121,7 @@ export function CountrySelect({
       <button
         type="button"
         disabled={disabled}
-        onClick={() => setIsOpen((open) => !open)}
+        onClick={toggleOpen}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         aria-controls={isOpen ? listboxId : undefined}
@@ -117,7 +129,7 @@ export function CountrySelect({
           "flex items-center gap-2 rounded-xl border border-white/8 bg-modal-inner-bg px-3 py-2.5 text-left transition-colors",
           "hover:border-white/15 focus:border-profile-accent/70 focus:ring-1 focus:ring-profile-accent/40 focus:outline-none",
           isOpen && "border-profile-accent/70",
-          disabled && "cursor-not-allowed opacity-60",
+          disabled && "cursor-not-allowed opacity-60"
         )}
       >
         {selected && (
@@ -128,7 +140,7 @@ export function CountrySelect({
         <span
           className={cn(
             "min-w-0 flex-1 truncate font-utsaha",
-            value ? "text-white" : "text-gray-600",
+            value ? "text-white" : "text-gray-600"
           )}
         >
           {value || "Select a country"}
@@ -137,7 +149,7 @@ export function CountrySelect({
           size={16}
           className={cn(
             "shrink-0 text-gray-500 transition-transform",
-            isOpen && "rotate-180",
+            isOpen && "rotate-180"
           )}
         />
       </button>
@@ -188,13 +200,15 @@ export function CountrySelect({
                   className={cn(
                     "flex cursor-pointer items-center gap-2.5 px-3 py-2 font-utsaha text-sm transition-colors",
                     index === activeIndex ? "bg-white/6" : "bg-transparent",
-                    isSelected ? "text-profile-accent-soft" : "text-gray-200",
+                    isSelected ? "text-profile-accent-soft" : "text-gray-200"
                   )}
                 >
                   <span aria-hidden="true" className="text-base leading-none">
                     {countryFlag(country.code)}
                   </span>
-                  <span className="min-w-0 flex-1 truncate">{country.name}</span>
+                  <span className="min-w-0 flex-1 truncate">
+                    {country.name}
+                  </span>
                   {isSelected && (
                     <Check size={14} className="shrink-0 text-profile-accent" />
                   )}

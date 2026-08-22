@@ -1,11 +1,7 @@
 "use client";
 
 import React, { useId } from "react";
-import {
-  AvatarGlyph,
-  deriveAvatarId,
-  getAvatarPreset,
-} from "@/lib/avatars";
+import { AvatarGlyph, deriveAvatarId, getAvatarPreset } from "@/lib/avatars";
 import { cn } from "@/lib/utils";
 
 interface AvatarProps {
@@ -128,7 +124,10 @@ const GLYPHS: Record<AvatarGlyph, React.ReactNode> = {
   ),
   nodes: (
     <>
-      <path d="M50 50 L30 32 M50 50 L70 32 M50 50 L30 68 M50 50 L70 68" opacity={0.7} />
+      <path
+        d="M50 50 L30 32 M50 50 L70 32 M50 50 L30 68 M50 50 L70 68"
+        opacity={0.7}
+      />
       <circle cx="50" cy="50" r="8" fill="#fff" stroke="none" />
       <circle cx="30" cy="32" r="6" fill="#fff" stroke="none" opacity={0.9} />
       <circle cx="70" cy="32" r="6" fill="#fff" stroke="none" opacity={0.9} />

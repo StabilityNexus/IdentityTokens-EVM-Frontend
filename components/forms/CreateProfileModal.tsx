@@ -1,18 +1,24 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { AtSign, Globe, Mail, X } from "lucide-react";
 import { FaDiscord, FaGithub, FaXTwitter } from "react-icons/fa6";
-import { useCreateProfile, useCreateRootIdentity } from "@/hooks/useIdentityWrites";
+import {
+  useCreateProfile,
+  useCreateRootIdentity,
+} from "@/hooks/useIdentityWrites";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
 import { useUsernameTaken } from "@/hooks/useIdentityReads";
 import { CreateProfileModalProps, TxStatus } from "@/lib/types";
 import { TransactionStatus } from "@/components/ui/TransactionStatus";
 import { DEFAULT_AVATAR_ID, getRandomAvatarId } from "@/lib/avatars";
-import {
-  CustomLink,
-  encodeProfileExtras,
-} from "@/lib/profileExtras";
+import { CustomLink, encodeProfileExtras } from "@/lib/profileExtras";
 import {
   FieldResult,
   normalizeWebsite,
@@ -66,16 +72,16 @@ export function CreateProfileModal({
   const [avatarId, setAvatarId] = useState<string | null>(null);
   const [customLinks, setCustomLinks] = useState<CustomLink[]>([]);
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
-  const [step, setStep] = useState<"idle" | "creating-root" | "creating-profile">(
-    "idle",
-  );
+  const [step, setStep] = useState<
+    "idle" | "creating-root" | "creating-profile"
+  >("idle");
 
   const { hasRootIdentity, address, refetchHasProfile, refetchRootId } =
     useIdentityGate();
 
   const { data: isUsernameTaken, isLoading: isCheckingUsername } =
     useUsernameTaken(
-      formData.username.length >= 3 ? formData.username : undefined,
+      formData.username.length >= 3 ? formData.username : undefined
     );
 
   const createRoot = useCreateRootIdentity();
@@ -83,7 +89,7 @@ export function CreateProfileModal({
 
   const setField = <K extends keyof ProfileFormData>(
     key: K,
-    value: ProfileFormData[K],
+    value: ProfileFormData[K]
   ) => setFormData((previous) => ({ ...previous, [key]: value }));
 
   // Live validation
@@ -116,11 +122,11 @@ export function CreateProfileModal({
       website: validateWebsite(formData.website),
       ens: validateEns(formData.ens),
     }),
-    [formData, usernameResult],
+    [formData, usernameResult]
   );
 
   const hasBlockingError = Object.values(results).some(
-    (result) => result.status === "invalid",
+    (result) => result.status === "invalid"
   );
   const isMissingRequired =
     !formData.name.trim() || usernameResult.status !== "valid";
@@ -157,8 +163,12 @@ export function CreateProfileModal({
   }, [onClose, createRoot, createProfile]);
 
   // Keep the latest closer in a ref so the key listener below can stay stable.
+  // The ref is written in an effect rather than during render — refs must not
+  // be touched while rendering.
   const closeRef = useRef(handleClose);
-  closeRef.current = handleClose;
+  useEffect(() => {
+    closeRef.current = handleClose;
+  }, [handleClose]);
 
   const submitProfile = useCallback(() => {
     setStep("creating-profile");
@@ -178,15 +188,18 @@ export function CreateProfileModal({
         {
           avatarId: avatarId ?? DEFAULT_AVATAR_ID,
           customLinks,
-        },
+        }
       ),
       ens: formData.ens.trim(),
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData, avatarId, customLinks]);
 
-  // Give the modal a fresh random avatar each time it opens.
+  // Give the modal a fresh random avatar each time it opens. This has to stay
+  // in an effect: picking the id during render would differ between the server
+  // and client passes and trip a hydration mismatch.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (isOpen) setAvatarId((current) => current ?? getRandomAvatarId());
   }, [isOpen]);
 
@@ -264,7 +277,7 @@ export function CreateProfileModal({
         <div className="relative shrink-0 overflow-hidden border-b border-white/8 px-6 py-5 md:px-8">
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 opacity-60 gradient-profile-cover"
+            className="gradient-profile-cover pointer-events-none absolute inset-0 opacity-60"
           />
           <div className="relative">
             <h2
@@ -326,7 +339,7 @@ export function CreateProfileModal({
                 onChange={(value) =>
                   setField(
                     "username",
-                    value.toLowerCase().replace(/[^a-z0-9._]/g, ""),
+                    value.toLowerCase().replace(/[^a-z0-9._]/g, "")
                   )
                 }
                 result={results.username}
@@ -519,11 +532,7 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section
-      className={
-        isLast ? "pb-1" : "mb-7 border-b border-white/6 pb-7"
-      }
-    >
+    <section className={isLast ? "pb-1" : "mb-7 border-b border-white/6 pb-7"}>
       <div className="mb-4 flex items-baseline gap-2.5">
         <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-profile-accent/40 bg-profile-accent/10 font-utsaha text-xs text-profile-accent-soft">
           {index}

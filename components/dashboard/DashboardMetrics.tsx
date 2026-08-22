@@ -1,15 +1,9 @@
 "use client";
 
-import IDMetrics, { IDMetricsProps } from "./IDMetrics";
-import TrustScore, { TrustScoreProps } from "./TrustScore";
-import Metrics, { MetricsProps } from "./Metrics";
-
-export interface DashboardMetricsProps extends IDMetricsProps, MetricsProps {
-  // TrustScore props (renamed to distinguish from other metrics if needed)
-  trustScore?: number;
-  trustFlags?: string;
-  trustDescription?: string;
-}
+import IDMetrics from "./IDMetrics";
+import TrustScore from "./TrustScore";
+import Metrics from "./Metrics";
+import { DashboardMetricsProps } from "@/lib/types";
 
 const DashboardMetrics: React.FC<DashboardMetricsProps> = ({
   name,

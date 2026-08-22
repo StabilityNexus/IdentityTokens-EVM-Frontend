@@ -1,11 +1,6 @@
 import React from "react";
 import Image from "next/image";
-
-interface FeatureCardProps {
-  bgImage: string;
-  title: string;
-  textColor?: string;
-}
+import { FeatureCardProps } from "@/lib/types";
 
 const FeatureCard: React.FC<FeatureCardProps> = ({
   bgImage,

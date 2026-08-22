@@ -6,19 +6,7 @@ import {
   FaDiscord,
 } from "react-icons/fa";
 import Badge from "../Badge";
-
-export interface IDCardProps {
-  name?: string;
-  age?: number;
-  nationality?: string;
-  walletAddress?: string;
-  endorsers?: number;
-  className?: string;
-  telegramUrl?: string;
-  linkedinUrl?: string;
-  githubUrl?: string;
-  discordUrl?: string;
-}
+import { IDCardProps } from "@/lib/types";
 
 const getRankFromEndorsers = (
   count: number

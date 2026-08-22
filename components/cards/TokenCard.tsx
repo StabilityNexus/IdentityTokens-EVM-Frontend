@@ -19,22 +19,7 @@ import {
 } from "../ui/dropdown-menu";
 import Badge from "../Badge";
 import { TokenForm } from "../forms/TokenForm";
-
-export type TokenCardVariant = "home" | "history" | "discover";
-
-interface TokenCardProps {
-  variant: TokenCardVariant;
-  tokenId: string;
-  name: string;
-  type: string;
-  expiresIn: string;
-  endorsements?: number;
-  historyAction?: "endorsed" | "revoked" | "flagged";
-  actionWalletId?: string;
-  onRevoke?: () => void;
-  onEndorse?: () => void;
-  onViewAll?: () => void;
-}
+import { TokenCardProps, TokenCardVariant } from "@/lib/types";
 
 const getRankFromEndorsements = (count: number) => {
   if (count >= 250) return "champion";
@@ -77,7 +62,7 @@ export function TokenCard({
         {/* --- Type Badge --- */}
         <div className="flex items-center xl:col-span-3 xl:justify-start">
           <div className="flex w-fit max-w-full items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3 py-1.5">
-            <ShieldCheck size={16} className="shrink-0 text-[#0553FD]" />
+            <ShieldCheck size={16} className="shrink-0 text-brand-blue" />
             <span className="truncate font-utsaha text-sm text-gray-300">
               {type}
             </span>
@@ -104,7 +89,7 @@ export function TokenCard({
               <div className="flex shrink-0 items-center gap-1 sm:gap-2">
                 <button
                   onClick={onViewAll}
-                  className="px-1 font-utsaha text-sm whitespace-nowrap text-[#0553FD] transition-colors hover:text-blue-400 sm:px-2"
+                  className="px-1 font-utsaha text-sm whitespace-nowrap text-brand-blue transition-colors hover:text-blue-400 sm:px-2"
                 >
                   View All
                 </button>
@@ -117,7 +102,7 @@ export function TokenCard({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="end"
-                    className="w-48 border-[#3a3a3a] bg-[#18191D] font-utsaha text-white"
+                    className="w-48 border-card-inner-bg bg-app-bg font-utsaha text-white"
                   >
                     <DropdownMenuItem className="cursor-pointer gap-2 hover:bg-white/10 focus:bg-white/5 focus:text-white">
                       <Share2 size={16} />
@@ -174,7 +159,7 @@ export function TokenCard({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="end"
-                  className="w-48 border-[#3a3a3a] bg-[#18191D] font-utsaha text-white"
+                  className="w-48 border-card-inner-bg bg-app-bg font-utsaha text-white"
                 >
                   <DropdownMenuItem className="cursor-pointer gap-2 text-red-400 hover:bg-white/10 focus:bg-white/5 focus:text-red-400">
                     <AlertTriangle size={16} />
@@ -213,7 +198,7 @@ export function TokenCard({
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <button
                   onClick={onViewAll}
-                  className="px-1 font-utsaha text-xs font-bold text-[#0553FD] transition-colors hover:text-blue-400 sm:px-2 sm:text-sm"
+                  className="px-1 font-utsaha text-xs font-bold text-brand-blue transition-colors hover:text-blue-400 sm:px-2 sm:text-sm"
                 >
                   View
                 </button>
@@ -227,7 +212,7 @@ export function TokenCard({
                   </button>
                   <button
                     onClick={onEndorse}
-                    className="rounded-lg bg-[#0553FD] px-2 py-1.5 font-utsaha text-xs text-white transition-all hover:scale-[1.02] hover:bg-blue-700 active:scale-[0.98] sm:px-3 sm:text-sm"
+                    className="rounded-lg bg-brand-blue px-2 py-1.5 font-utsaha text-xs text-white transition-all hover:scale-[1.02] hover:bg-blue-700 active:scale-[0.98] sm:px-3 sm:text-sm"
                   >
                     Endorse
                   </button>
@@ -240,7 +225,7 @@ export function TokenCard({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
                       align="end"
-                      className="w-48 border-[#3a3a3a] bg-[#18191D] font-utsaha text-white"
+                      className="w-48 border-card-inner-bg bg-app-bg font-utsaha text-white"
                     >
                       <DropdownMenuItem className="cursor-pointer gap-2 hover:bg-white/10 focus:bg-white/5 focus:text-white">
                         <Share2 size={16} />
@@ -274,7 +259,7 @@ export function TokenCard({
         isOpen={isTokenFormOpen}
         onClose={() => setIsTokenFormOpen(false)}
         tokenName={name}
-        tokenId={tokenId}
+        tokenId={BigInt(tokenId.replace(/^#/, ""))}
       />
     </>
   );

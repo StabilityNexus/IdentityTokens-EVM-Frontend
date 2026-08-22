@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useAccount } from "wagmi";
 import { useAppStore } from "@/store/useAppStore";
+import { TOKEN_TYPE } from "@/lib/types";
 import {
   useRootId,
   useRootIdentityView,
@@ -52,7 +53,10 @@ export function useIdentityGate() {
 
     for (let i = 0; i < walletTokenIds.length; i++) {
       const typeResult = tokenTypesData[i];
-      if (typeResult?.status === "success" && typeResult.result === 2) {
+      if (
+        typeResult?.status === "success" &&
+        typeResult.result === TOKEN_TYPE.PROFILE
+      ) {
         return walletTokenIds[i];
       }
     }
@@ -64,10 +68,22 @@ export function useIdentityGate() {
     useProfile(profileTokenId);
 
   // Sync to zustand store
+  const lastSyncedAddress = useRef<string | undefined>(undefined);
+
   useEffect(() => {
     if (!isConnected || !address) {
+      lastSyncedAddress.current = undefined;
       store.clearAll();
       return;
+    }
+
+    // Switching accounts must not leave the previous wallet's identity in the
+    // store. The setters below only fire once the new account's reads resolve,
+    // and there is no "clear root" path, so an account with no root identity
+    // would otherwise keep showing the previous account's rootId/displayName.
+    if (lastSyncedAddress.current !== address) {
+      lastSyncedAddress.current = address;
+      store.clearAll();
     }
 
     // Set root identity

@@ -227,19 +227,16 @@ export default function DiscoverPage() {
 
   const { isConnected } = useIdentityGate();
 
+  // A "connect your wallet" notice already renders inline below, so a
+  // disconnected wallet just makes these no-ops rather than firing a blocking
+  // alert().
   const handleEndorse = (tokenId: bigint, tokenName: string) => {
-    if (!isConnected) {
-      alert("Connect your wallet to endorse tokens.");
-      return;
-    }
+    if (!isConnected) return;
     setEndorseTarget({ tokenId, tokenName });
   };
 
   const handleRevoke = (tokenIdStr: string) => {
-    if (!isConnected) {
-      alert("Connect your wallet to revoke endorsements.");
-      return;
-    }
+    if (!isConnected) return;
     console.log("Revoking endorsement for:", tokenIdStr);
   };
 

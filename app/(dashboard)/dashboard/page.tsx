@@ -10,6 +10,7 @@ import {
   useMultipleEndorsementCounts,
 } from "@/hooks/useIdentityReads";
 import { formatExpiry } from "@/lib/helpers";
+import { TOKEN_TYPE } from "@/lib/types";
 
 const DashboardPage = () => {
   const {
@@ -32,7 +33,7 @@ const DashboardPage = () => {
     walletTokenIds.length > 0 ? walletTokenIds : undefined
   );
 
-  // Build token list from on-chain data, filtering out ROOT tokens (type 0)
+  // Build token list from on-chain data, excluding the ROOT token
   const tokenListData = useMemo(() => {
     if (!walletTokenIds || walletTokenIds.length === 0) return [];
 
@@ -42,10 +43,11 @@ const DashboardPage = () => {
         const typeResult = tokenTypes?.[i];
         const endorseResult = endorsementCounts?.[i];
 
-        // Skip ROOT tokens (type 0)
+        // Skip only ROOT, the wallet's identity anchor. The PROFILE token is
+        // meant to be listed alongside the user's other tokens.
         const tokenType =
           typeResult?.status === "success" ? (typeResult.result as number) : -1;
-        if (tokenType === 0) return null;
+        if (tokenType === TOKEN_TYPE.ROOT) return null;
 
         const token = detail?.status === "success" ? detail.result : undefined;
         const endorseCount =

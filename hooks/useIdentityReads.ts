@@ -8,6 +8,7 @@ import {
   PROFILE_SYSTEM_ADDRESS,
   PROFILE_SYSTEM_ABI,
 } from "@/lib/contracts";
+import { TOKEN_TYPE } from "@/lib/types";
 
 // IdentitySystem Reads
 
@@ -290,9 +291,9 @@ export function useRecentTokens() {
         const typeNum = typeResult.result as number;
 
         let typeStr = "UNKNOWN";
-        if (typeNum === 0) typeStr = "ROOT";
-        else if (typeNum === 1) typeStr = "SUB";
-        else if (typeNum === 2) typeStr = "PROFILE";
+        if (typeNum === TOKEN_TYPE.ROOT) typeStr = "ROOT";
+        else if (typeNum === TOKEN_TYPE.SUB) typeStr = "SUB";
+        else if (typeNum === TOKEN_TYPE.PROFILE) typeStr = "PROFILE";
 
         if (typeNum > 0 && typeStr !== "UNKNOWN") {
           validTokens.push({

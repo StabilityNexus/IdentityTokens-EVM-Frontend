@@ -12,6 +12,19 @@ export type RankName =
   | "diamond"
   | "champion";
 
+/**
+ * Mirrors the on-chain `DataTypes.TokenType` enum.
+ *
+ * ROOT is a wallet's identity anchor and PROFILE is its public profile record.
+ * Neither is a credential the user minted, so both are filtered out of the
+ * lists that surface a wallet's tokens.
+ */
+export const TOKEN_TYPE = {
+  ROOT: 0,
+  SUB: 1,
+  PROFILE: 2,
+} as const;
+
 // --- Component Props ---
 
 export interface TokenCardProps {

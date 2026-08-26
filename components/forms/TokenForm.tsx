@@ -1,87 +1,105 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { X, ChevronDown } from "lucide-react";
-
-interface TokenFormProps {
-  isOpen: boolean;
-  onClose: () => void;
-  tokenName?: string;
-  tokenId?: string;
-  onEdit?: (data: {
-    tokenId: string;
-    tokenName: string;
-    tokenType: string;
-    tokenValue: string;
-    aboutToken: string;
-    recoveryAddress: string;
-  }) => void;
-  onBurn?: (tokenId: string) => void;
-}
+import { useBurnToken, useTransferToken } from "@/hooks/useIdentityWrites";
+import { useIdentityGate } from "@/hooks/useIdentityGate";
+import { TokenFormProps, TxStatus } from "@/lib/types";
+import { TransactionStatus } from "@/components/ui/TransactionStatus";
 
 export function TokenForm({
   isOpen,
   onClose,
   tokenName = "Token Name",
-  tokenId = "tk-0x0000000000000000",
-  onEdit,
-  onBurn,
+  tokenId,
+  onSuccess,
 }: TokenFormProps) {
-  const [formData, setFormData] = useState({
-    tokenName: tokenName,
-    tokenType: "",
-    tokenValue: "",
-    aboutToken: "",
-    recoveryAddress: "",
-  });
+  const [transferAddress, setTransferAddress] = useState("");
+  const [showTransfer, setShowTransfer] = useState(false);
+  const [showBurnConfirm, setShowBurnConfirm] = useState(false);
+  const [action, setAction] = useState<"idle" | "burning" | "transferring">(
+    "idle"
+  );
 
-  const [errors, setErrors] = useState<
-    Partial<Record<keyof typeof formData, string>>
-  >({});
+  const { refetchWalletTokens } = useIdentityGate();
+  const burnToken = useBurnToken();
+  const transferToken = useTransferToken();
 
-  if (!isOpen) return null;
-
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name as keyof typeof formData]) {
-      setErrors((prev) => ({ ...prev, [name]: undefined }));
+  // Reset on close. Clearing this from an effect is the trade-off for the
+  // parent owning `isOpen`; the effect-free fix is to remount the modal on
+  // close (a `key`, or an inner component) rather than gate it on a prop.
+  useEffect(() => {
+    if (!isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setTransferAddress("");
+      setShowTransfer(false);
+      setShowBurnConfirm(false);
+      setAction("idle");
+      burnToken.reset();
+      transferToken.reset();
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const newErrors: Partial<Record<keyof typeof formData, string>> = {};
-    if (!formData.tokenName.trim())
-      newErrors.tokenName = "Token Name is required";
-    if (!formData.tokenType.trim())
-      newErrors.tokenType = "Token Type is required";
-    if (!formData.tokenValue.trim())
-      newErrors.tokenValue = "Token Value is required";
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
+  // Auto-close on success
+  useEffect(() => {
+    if (
+      (action === "burning" && burnToken.isSuccess) ||
+      (action === "transferring" && transferToken.isSuccess)
+    ) {
+      refetchWalletTokens();
+      const timer = setTimeout(() => {
+        onSuccess?.();
+        onClose();
+      }, 2000);
+      return () => clearTimeout(timer);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [action, burnToken.isSuccess, transferToken.isSuccess]);
 
-    if (onEdit) {
-      onEdit({ tokenId, ...formData });
-    }
-    setErrors({});
-    onClose();
-  };
+  if (!isOpen || tokenId === undefined) return null;
 
   const handleBurn = () => {
-    if (onBurn) {
-      onBurn(tokenId);
+    if (!showBurnConfirm) {
+      setShowBurnConfirm(true);
+      return;
     }
-    onClose();
+    setAction("burning");
+    burnToken.write(tokenId);
   };
+
+  const handleTransfer = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!transferAddress.startsWith("0x") || transferAddress.length !== 42) {
+      return;
+    }
+    setAction("transferring");
+    transferToken.write(tokenId, transferAddress as `0x${string}`);
+  };
+
+  const getTxStatus = (): TxStatus => {
+    if (action === "burning") {
+      if (burnToken.isPending) return "pending";
+      if (burnToken.isConfirming) return "confirming";
+      if (burnToken.isSuccess) return "success";
+      if (burnToken.error) return "error";
+    }
+    if (action === "transferring") {
+      if (transferToken.isPending) return "pending";
+      if (transferToken.isConfirming) return "confirming";
+      if (transferToken.isSuccess) return "success";
+      if (transferToken.error) return "error";
+    }
+    return "idle";
+  };
+
+  const txStatus = getTxStatus();
+  const isSubmitting = txStatus === "pending" || txStatus === "confirming";
+  const currentError =
+    action === "burning" ? burnToken.error : transferToken.error;
+  const currentTxHash =
+    action === "burning" ? burnToken.txHash : transferToken.txHash;
 
   return (
     <div
@@ -91,7 +109,7 @@ export function TokenForm({
       <div
         className="animate-in zoom-in-95 relative w-full max-w-xl overflow-hidden rounded-2xl shadow-2xl duration-200 md:max-w-2xl"
         style={{
-          backgroundColor: "#18191D",
+          backgroundColor: "var(--color-app-bg)",
           border: "1px solid rgba(255,255,255,0.06)",
         }}
         onClick={(e) => e.stopPropagation()}
@@ -105,7 +123,9 @@ export function TokenForm({
           >
             <span className="max-w-[260px] truncate md:max-w-sm">
               {tokenName} /{" "}
-              <span className="text-base text-gray-400">{tokenId}</span>
+              <span className="text-base text-gray-400">
+                #{tokenId.toString()}
+              </span>
             </span>
             <ChevronDown size={20} className="shrink-0 text-gray-400" />
           </button>
@@ -119,118 +139,69 @@ export function TokenForm({
           </button>
         </div>
 
-        {/* ── Form body ── */}
-        <form className="flex flex-col gap-4 px-6 py-5" onSubmit={handleSubmit}>
-          {/* Token Name */}
-          <div className="flex flex-col gap-1.5">
-            <label className="font-utsaha text-sm text-gray-300">
-              Token Name <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              name="tokenName"
-              value={formData.tokenName}
-              onChange={handleChange}
-              placeholder="Enter the token name"
-              className="w-full rounded-lg px-4 py-2 font-utsaha text-white placeholder-gray-500 transition-all focus:ring-1 focus:ring-[#0553FD] focus:outline-none"
-              style={{
-                backgroundColor: "#212734",
-                border: "1px solid rgba(255,255,255,0.08)",
-              }}
-            />
-            {errors.tokenName && (
-              <span className="text-xs text-red-500">{errors.tokenName}</span>
-            )}
-          </div>
-
-          {/* Token Type */}
-          <div className="flex flex-col gap-1.5">
-            <label className="font-utsaha text-sm text-gray-300">
-              Token Type <span className="text-red-500">*</span>
-            </label>
-            <select
-              name="tokenType"
-              value={formData.tokenType}
-              onChange={handleChange}
-              className="w-full appearance-none rounded-lg px-4 py-2 font-utsaha text-white transition-all focus:ring-1 focus:ring-[#0553FD] focus:outline-none"
-              style={{
-                backgroundColor: "#212734",
-                border: "1px solid rgba(255,255,255,0.08)",
-              }}
+        {/* ── Body ── */}
+        <div className="flex flex-col gap-4 px-6 py-5">
+          {/* Transfer section (collapsible) */}
+          <div>
+            <button
+              type="button"
+              onClick={() => setShowTransfer(!showTransfer)}
+              className="font-utsaha text-sm text-gray-400 transition-colors hover:text-white"
+              disabled={isSubmitting}
             >
-              <option value="" disabled>
-                Select token type
-              </option>
-              <option value="education">Education Credential</option>
-              <option value="professional">Professional Skill</option>
-              <option value="achievement">Achievement</option>
-              <option value="identity">Identity Document</option>
-              <option value="socials">Socials</option>
-            </select>
-            {errors.tokenType && (
-              <span className="text-xs text-red-500">{errors.tokenType}</span>
+              {showTransfer ? "▼ Transfer Token" : "▸ Transfer Token"}
+            </button>
+
+            {showTransfer && (
+              <form
+                onSubmit={handleTransfer}
+                className="mt-3 flex flex-col gap-3"
+              >
+                <div className="flex flex-col gap-1.5">
+                  <label className="font-utsaha text-sm text-gray-300">
+                    Recipient Address
+                  </label>
+                  <input
+                    type="text"
+                    value={transferAddress}
+                    onChange={(e) => setTransferAddress(e.target.value)}
+                    placeholder="0x..."
+                    disabled={isSubmitting}
+                    className="w-full rounded-lg px-4 py-2 font-utsaha text-white placeholder-gray-500 transition-all focus:ring-1 focus:ring-brand-blue focus:outline-none disabled:opacity-50"
+                    style={{
+                      backgroundColor: "var(--color-modal-inner-bg)",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                    }}
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={
+                    isSubmitting ||
+                    !transferAddress.startsWith("0x") ||
+                    transferAddress.length !== 42
+                  }
+                  className="w-full rounded-lg bg-brand-blue py-2 font-utsaha text-white transition-all hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {action === "transferring" && isSubmitting
+                    ? "Transferring…"
+                    : "Transfer"}
+                </button>
+              </form>
             )}
           </div>
 
-          {/* Token Value */}
-          <div className="flex flex-col gap-1.5">
-            <label className="font-utsaha text-sm text-gray-300">
-              Token Value <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              name="tokenValue"
-              value={formData.tokenValue}
-              onChange={handleChange}
-              placeholder="Enter the token value"
-              className="w-full rounded-lg px-4 py-2 font-utsaha text-white placeholder-gray-500 transition-all focus:ring-1 focus:ring-[#0553FD] focus:outline-none"
-              style={{
-                backgroundColor: "#212734",
-                border: "1px solid rgba(255,255,255,0.08)",
-              }}
-            />
-            {errors.tokenValue && (
-              <span className="text-xs text-red-500">{errors.tokenValue}</span>
-            )}
-          </div>
-
-          {/* About Token */}
-          <div className="flex flex-col gap-1.5">
-            <label className="font-utsaha text-sm text-gray-300">
-              About Token
-            </label>
-            <input
-              type="text"
-              name="aboutToken"
-              value={formData.aboutToken}
-              onChange={handleChange}
-              placeholder="Anything About Token"
-              className="w-full rounded-lg px-4 py-2 font-utsaha text-white placeholder-gray-500 transition-all focus:ring-1 focus:ring-[#0553FD] focus:outline-none"
-              style={{
-                backgroundColor: "#212734",
-                border: "1px solid rgba(255,255,255,0.08)",
-              }}
-            />
-          </div>
-
-          {/* Recovery Wallet Address */}
-          <div className="flex flex-col gap-1.5">
-            <label className="font-utsaha text-sm text-gray-300">
-              Recovery Wallet Address
-            </label>
-            <input
-              type="text"
-              name="recoveryAddress"
-              value={formData.recoveryAddress}
-              onChange={handleChange}
-              placeholder="Enter the wallet address"
-              className="w-full rounded-lg px-4 py-2 font-utsaha text-white placeholder-gray-500 transition-all focus:ring-1 focus:ring-[#0553FD] focus:outline-none"
-              style={{
-                backgroundColor: "#212734",
-                border: "1px solid rgba(255,255,255,0.08)",
-              }}
-            />
-          </div>
+          {/* Transaction Status */}
+          <TransactionStatus
+            status={txStatus}
+            txHash={currentTxHash}
+            error={currentError}
+            successMessage={
+              action === "burning"
+                ? "Token burned permanently!"
+                : "Token transferred successfully!"
+            }
+          />
 
           {/* ── Action buttons ── */}
           <div className="mt-2 flex items-center gap-3">
@@ -238,8 +209,13 @@ export function TokenForm({
             <button
               type="button"
               onClick={handleBurn}
-              className="flex flex-1 items-center justify-center gap-2.5 rounded-lg py-2.5 font-utsaha text-base text-black transition-all hover:opacity-90 active:scale-[0.98]"
-              style={{ backgroundColor: "#FF0000" }}
+              disabled={isSubmitting}
+              className="flex flex-1 items-center justify-center gap-2.5 rounded-lg py-2.5 font-utsaha text-base text-black transition-all hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+              style={{
+                backgroundColor: showBurnConfirm
+                  ? "var(--color-border-error)"
+                  : "var(--color-text-red)",
+              }}
             >
               <Image
                 src="/assets/trash.svg"
@@ -247,19 +223,20 @@ export function TokenForm({
                 width={20}
                 height={20}
               />
-              Burn
-            </button>
-
-            {/* Edit */}
-            <button
-              type="submit"
-              className="flex flex-1 items-center justify-center gap-2.5 rounded-lg bg-brand-green py-2.5 font-utsaha text-base text-black transition-all hover:opacity-90 active:scale-[0.98]"
-            >
-              <Image src="/assets/edit.svg" alt="edit" width={18} height={18} />
-              Edit
+              {showBurnConfirm
+                ? action === "burning" && isSubmitting
+                  ? "Burning…"
+                  : "Confirm Burn"
+                : "Burn"}
             </button>
           </div>
-        </form>
+
+          {showBurnConfirm && !isSubmitting && (
+            <p className="text-center font-utsaha text-xs text-red-400">
+              ⚠ This action is permanent and cannot be undone.
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );

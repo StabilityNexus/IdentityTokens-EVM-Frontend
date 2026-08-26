@@ -1,12 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import IDCard, { IDCardProps } from "../cards/IDCard";
+import IDCard from "../cards/IDCard";
+import { IDCardProps, IDMetricsProps } from "@/lib/types";
 import { IoCopyOutline, IoShareSocialOutline } from "react-icons/io5";
-
-export interface IDMetricsProps extends IDCardProps {
-  lastUpdated?: string;
-}
 
 const IDMetrics: React.FC<IDMetricsProps> = ({
   name = "Default Name",
@@ -87,8 +84,10 @@ const IDMetrics: React.FC<IDMetricsProps> = ({
             <h3 className="text-xl leading-tight text-white opacity-90 md:text-2xl">
               Decentralized Id
             </h3>
-            <p className="font-utsaha text-lg leading-relaxed break-all text-[#95959d] md:text-xl">
-              {walletAddress}
+            <p className="font-utsaha text-lg leading-relaxed break-all text-text-grey md:text-xl">
+              {walletAddress.length > 20
+                ? `${walletAddress.slice(0, 8)}...${walletAddress.slice(-6)}`
+                : walletAddress}
             </p>
           </div>
 
@@ -97,7 +96,7 @@ const IDMetrics: React.FC<IDMetricsProps> = ({
             <h3 className="text-xl leading-tight text-white opacity-90 md:text-2xl">
               Last Updated
             </h3>
-            <p className="font-utsaha text-lg leading-relaxed text-[#95959d] md:text-xl">
+            <p className="font-utsaha text-lg leading-relaxed text-text-grey md:text-xl">
               {lastUpdated}
             </p>
           </div>

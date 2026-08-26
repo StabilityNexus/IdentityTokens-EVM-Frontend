@@ -139,7 +139,7 @@ export function DashboardSidebar() {
 
                 {/* Tooltip for collapsed state */}
                 {isCollapsed && (
-                  <span className="pointer-events-none invisible absolute left-full z-50 ml-3 rounded-lg bg-[#2a2b30] px-3 py-1.5 font-utsaha text-sm whitespace-nowrap text-white opacity-0 shadow-xl transition-all duration-200 group-hover:visible group-hover:opacity-100">
+                  <span className="pointer-events-none invisible absolute left-full z-50 ml-3 rounded-lg bg-panel-bg px-3 py-1.5 font-utsaha text-sm whitespace-nowrap text-white opacity-0 shadow-xl transition-all duration-200 group-hover:visible group-hover:opacity-100">
                     {item.label}
                   </span>
                 )}

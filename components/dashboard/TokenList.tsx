@@ -1,53 +1,9 @@
 "use client";
 
 import React from "react";
-import { TokenCard, TokenCardVariant } from "../cards/TokenCard";
-
-export type TokenListVariant = "tokens" | "history" | "discover";
-
-export interface TokenData {
-  tokenId: string;
-  name: string;
-  type: string;
-  expiresIn: string;
-  endorsements?: number;
-  historyAction?: "endorsed" | "revoked" | "flagged";
-  actionWalletId?: string;
-  owner?: string;
-}
-
-interface TokenListProps {
-  variant: TokenListVariant;
-  tokens: TokenData[];
-  className?: string;
-  onRevoke?: (tokenId: string) => void;
-  onEndorse?: (tokenId: string) => void;
-  onViewAll?: (tokenId: string) => void;
-}
-
-/** Maps TokenList variant → TokenCard variant */
-function getCardVariant(listVariant: TokenListVariant): TokenCardVariant {
-  switch (listVariant) {
-    case "tokens":
-      return "home";
-    case "history":
-      return "history";
-    case "discover":
-      return "discover";
-  }
-}
-
-/** Maps TokenList variant → section title */
-function getSectionTitle(listVariant: TokenListVariant): string {
-  switch (listVariant) {
-    case "tokens":
-      return "Your Tokens";
-    case "history":
-      return "Recents";
-    case "discover":
-      return "Discover";
-  }
-}
+import { TokenCard } from "../cards/TokenCard";
+import { TokenListProps } from "@/lib/types";
+import { getCardVariant, getSectionTitle } from "@/lib/helpers";
 
 export function TokenList({
   variant,

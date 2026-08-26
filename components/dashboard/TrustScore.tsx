@@ -1,23 +1,6 @@
 "use client";
-
-export interface TrustScoreProps {
-  score?: number;
-  flags?: string;
-  description?: string;
-  className?: string;
-}
-
-/**
- * Returns the arc color based on score:
- * - >= 70: brand-green (#63fc9f)
- * - >= 40: yellow (#facc15)
- * - < 40:  red (#ef4444)
- */
-function getArcColor(score: number): string {
-  if (score >= 70) return "#63fc9f";
-  if (score >= 40) return "#facc15";
-  return "#ef4444";
-}
+import { TrustScoreProps } from "@/lib/types";
+import { getArcColor } from "@/lib/helpers";
 
 const TrustScore: React.FC<TrustScoreProps> = ({
   score,
@@ -29,7 +12,9 @@ const TrustScore: React.FC<TrustScoreProps> = ({
     ? Math.max(0, Math.min(100, score!))
     : undefined;
   const arcColor =
-    clampedScore !== undefined ? getArcColor(clampedScore) : "#333333";
+    clampedScore !== undefined
+      ? getArcColor(clampedScore)
+      : "var(--color-border-dark)";
 
   let defaultDesc = "N/A";
   if (clampedScore !== undefined) {
@@ -62,7 +47,7 @@ const TrustScore: React.FC<TrustScoreProps> = ({
             <h3 className="font-utsaha text-xl leading-tight text-white md:text-2xl">
               Trust Score
             </h3>
-            <p className="font-utsaha text-sm leading-relaxed text-[#95959d] md:text-base">
+            <p className="font-utsaha text-sm leading-relaxed text-text-grey md:text-base">
               {finalDescription}
             </p>
           </div>
@@ -72,7 +57,7 @@ const TrustScore: React.FC<TrustScoreProps> = ({
             <h4 className="font-utsaha text-lg leading-tight text-white md:text-xl">
               No of Flags
             </h4>
-            <p className="font-utsaha text-sm text-[#95959d] md:text-base">
+            <p className="font-utsaha text-sm text-text-grey md:text-base">
               {flags}
             </p>
           </div>
@@ -80,9 +65,9 @@ const TrustScore: React.FC<TrustScoreProps> = ({
 
         {/* Right: Gauge inside rounded border box, vertically centered */}
         <div className="flex flex-shrink-0 items-center justify-center">
-          <div className="flex h-[150px] w-[120px] flex-col items-center justify-center gap-2 rounded-2xl border border-[#2a2b30] bg-[#0a0a0f] md:h-[180px] md:w-[150px]">
+          <div className="flex h-[150px] w-[120px] flex-col items-center justify-center gap-2 rounded-2xl border border-panel-bg bg-trust-bg-1 md:h-[180px] md:w-[150px]">
             {/* Percentage number */}
-            <span className="font-utsaha text-2xl font-medium text-[#0553fd] md:text-3xl">
+            <span className="font-utsaha text-2xl font-medium text-brand-blue md:text-3xl">
               {clampedScore !== undefined ? `${clampedScore}%` : "N/A"}
             </span>
 
@@ -100,7 +85,7 @@ const TrustScore: React.FC<TrustScoreProps> = ({
                 <path
                   d="M 12 50 A 38 38 0 0 1 88 50"
                   fill="none"
-                  stroke="#1a1a2e"
+                  stroke="var(--color-trust-bg-2)"
                   strokeWidth="7"
                   strokeLinecap="round"
                 />

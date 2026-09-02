@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { useParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { UserX } from "lucide-react";
 import {
   useActiveEndorsementCount,
@@ -23,9 +23,9 @@ import { decodeProfileExtras } from "@/lib/profileExtras";
 import { getRankFromEndorsers, getTrustScore } from "@/lib/rank";
 import { TxStatus } from "@/lib/types";
 
-export default function UsernamePage() {
-  const params = useParams<{ username: string }>();
-  const username = params?.username ?? "";
+export default function ProfilePage() {
+  const searchParams = useSearchParams();
+  const username = searchParams?.get("u") ?? "";
 
   const { isConnected, address, rootId } = useIdentityGate();
 
@@ -75,7 +75,9 @@ export default function UsernamePage() {
     address.toLowerCase() === (ownerAddress as string).toLowerCase();
 
   const profileUrl =
-    typeof window !== "undefined" ? window.location.href : `/${username}`;
+    typeof window !== "undefined"
+      ? window.location.href
+      : `/profile?u=${username}`;
 
   useEffect(() => {
     if (!revokeEndorsement.isSuccess) return;
@@ -100,6 +102,24 @@ export default function UsernamePage() {
     }
     action();
   };
+
+  if (!username) {
+    return (
+      <div className="flex min-h-[calc(100vh-72px)] items-center justify-center px-4">
+        <div className="max-w-sm text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-profile-border bg-profile-surface">
+            <UserX size={24} className="text-profile-muted" />
+          </div>
+          <h1 className="font-utsaha text-2xl text-white">
+            No profile specified
+          </h1>
+          <p className="mt-2 font-utsaha text-sm text-profile-muted">
+            Please provide a username or token ID in the URL.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const isLoading =
     isResolvingUsername ||

@@ -4,11 +4,7 @@ const basePath = process.env.BASE_PATH || "";
 
 const nextConfig: NextConfig = {
   /* config options here */
-
-  /*
-  // output: "export", // Required for GitHub Pages
-  //commented out as we need this for dynamic routing
-  */
+  output: "export", // Required for GitHub Pages
   basePath: basePath,
   images: {
     unoptimized: true, // Required for static export

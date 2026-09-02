@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { NotFoundRedirect } from "@/components/NotFoundRedirect";
 
 export default function NotFound() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-landing-bg p-4 text-center">
+      <NotFoundRedirect />
       <h2 className="text-3xl font-bold tracking-tight text-gray-900">
         404 - Not Found
       </h2>

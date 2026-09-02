@@ -339,8 +339,9 @@ export function CreateProfileModal({
               Create your public profile
             </h2>
             <p className="mt-1 max-w-lg font-utsaha text-sm text-gray-400">
-              Anyone can view this page. Add only what you&rsquo;re happy to
-              make public — every field except name and username is optional.
+              Your profile data will be stored on a public blockchain. Only
+              include information that you are comfortable making permanently
+              public
             </p>
           </div>
 

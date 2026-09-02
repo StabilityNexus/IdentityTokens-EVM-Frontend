@@ -58,7 +58,7 @@ export function DashboardNavbar() {
     if (isDashboard) {
       if (canVisitProfile && profileUsername) {
         // Visit the user's profile in a new tab
-        window.open(`/${profileUsername}`, "_blank");
+        window.open(`/profile?u=${profileUsername}`, "_blank");
       } else if (!hasProfile) {
         setIsCreateProfileModalOpen(true);
       }

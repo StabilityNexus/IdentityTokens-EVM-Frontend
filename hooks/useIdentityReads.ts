@@ -287,6 +287,21 @@ export function useMultipleAttestationCounts(
   });
 }
 
+/** Batch-fetch profile metadata for multiple profile token IDs */
+export function useMultipleProfiles(tokenIds: readonly bigint[] | undefined) {
+  const contracts = (tokenIds ?? []).map((id) => ({
+    address: PROFILE_SYSTEM_ADDRESS,
+    abi: PROFILE_SYSTEM_ABI,
+    functionName: "getProfile" as const,
+    args: [id] as const,
+  }));
+
+  return useReadContracts({
+    contracts,
+    query: { enabled: !!tokenIds && tokenIds.length > 0 },
+  });
+}
+
 /** Batch-fetch token owners for multiple token IDs */
 export function useMultipleTokenOwners(
   tokenIds: readonly bigint[] | undefined

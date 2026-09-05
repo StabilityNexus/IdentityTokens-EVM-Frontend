@@ -21,6 +21,22 @@ export function formatExpiry(validUntil: bigint): string {
   return `${Math.floor(diff / 31536000)} years`;
 }
 
+/**
+ * How long ago a unix timestamp was, in the same coarse buckets as
+ * `formatExpiry` so the two read consistently side by side.
+ */
+export function formatTimeAgo(timestamp: bigint): string {
+  if (timestamp === 0n) return "—";
+  const now = Math.floor(Date.now() / 1000);
+  const diff = now - Number(timestamp);
+  if (diff < 60) return "just now";
+  if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)} hr ago`;
+  if (diff < 2592000) return `${Math.floor(diff / 86400)} days ago`;
+  if (diff < 31536000) return `${Math.floor(diff / 2592000)} months ago`;
+  return `${Math.floor(diff / 31536000)} years ago`;
+}
+
 export function getCardVariant(
   listVariant: TokenListVariant
 ): TokenCardVariant {

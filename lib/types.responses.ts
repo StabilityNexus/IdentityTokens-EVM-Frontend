@@ -42,3 +42,15 @@ export interface RootIdentityView {
   isActive: boolean;
   tokenCount: bigint;
 }
+
+export interface AttesterView {
+  rootId: bigint;
+  wallet: `0x${string}`;
+  displayName: string;
+  /** 0 when the attester has no profile token. */
+  profileTokenId: bigint;
+  timestamp: bigint;
+  /** 0 when the attestation has not been revoked. */
+  revokedAt: bigint;
+  expiresAt: bigint;
+}

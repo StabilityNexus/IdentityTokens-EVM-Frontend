@@ -100,6 +100,40 @@ export function useActiveAttestationCount(tokenId: bigint | undefined) {
   });
 }
 
+/**
+ * Who attested a token, each attester already resolved to a display name and
+ * profile token id.
+ *
+ * `activeOnly` filters out revoked and expired attestations; paging applies to
+ * the filtered set, so `total` is the filtered count.
+ */
+export function useAttestersDetailed(
+  tokenId: bigint | undefined,
+  activeOnly: boolean,
+  offset = 0n,
+  limit = 50n
+) {
+  return useReadContract({
+    address: IDENTITY_SYSTEM_ADDRESS,
+    abi: IDENTITY_SYSTEM_ABI,
+    functionName: "getAttestersDetailed",
+    args:
+      tokenId !== undefined ? [tokenId, activeOnly, offset, limit] : undefined,
+    query: { enabled: tokenId !== undefined },
+  });
+}
+
+/** Get the PROFILE token id held by a wallet, or 0n if it holds none */
+export function useProfileTokenId(address: `0x${string}` | undefined) {
+  return useReadContract({
+    address: IDENTITY_SYSTEM_ADDRESS,
+    abi: IDENTITY_SYSTEM_ABI,
+    functionName: "getProfileTokenId",
+    args: address ? [address] : undefined,
+    query: { enabled: !!address },
+  });
+}
+
 /** Get transfer history for a token */
 export function useTransferHistory(tokenId: bigint | undefined) {
   return useReadContract({

@@ -1,15 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useAccount } from "wagmi";
 import { useAppStore } from "@/store/useAppStore";
-import { TOKEN_TYPE } from "@/lib/types";
 import {
   useRootId,
   useRootIdentityView,
   useHasProfile,
   useWalletTokens,
-  useMultipleTokenTypes,
+  useProfileTokenId,
   useProfile,
 } from "./useIdentityReads";
 
@@ -48,30 +47,18 @@ export function useIdentityGate() {
     refetch: refetchWalletTokens,
   } = useWalletTokens(address);
 
-  // Step 5: Batch-fetch token types for all wallet tokens
+  // Step 5: Resolve the wallet's PROFILE token in a single read
   const {
-    data: tokenTypesData,
-    isLoading: isTypesLoading,
-    error: tokenTypesError,
-  } = useMultipleTokenTypes(walletTokenIds);
+    data: rawProfileTokenId,
+    isLoading: isProfileTokenIdLoading,
+    error: profileTokenIdError,
+  } = useProfileTokenId(address);
 
-  // Step 6: Find the PROFILE token (type === 2) among wallet tokens
-  const profileTokenId = useMemo(() => {
-    if (!walletTokenIds || !tokenTypesData) return undefined;
+  // The contract returns 0 when the wallet holds no profile.
+  const profileTokenId =
+    rawProfileTokenId && rawProfileTokenId > 0n ? rawProfileTokenId : undefined;
 
-    for (let i = 0; i < walletTokenIds.length; i++) {
-      const typeResult = tokenTypesData[i];
-      if (
-        typeResult?.status === "success" &&
-        typeResult.result === TOKEN_TYPE.PROFILE
-      ) {
-        return walletTokenIds[i];
-      }
-    }
-    return undefined;
-  }, [walletTokenIds, tokenTypesData]);
-
-  // Step 7: Get profile data if we have a profile token
+  // Step 6: Get profile data if we have a profile token
   const {
     data: profileData,
     isLoading: isProfileDataLoading,
@@ -141,7 +128,7 @@ export function useIdentityGate() {
     rootViewError ??
     hasProfileError ??
     walletTokensError ??
-    tokenTypesError ??
+    profileTokenIdError ??
     profileDataError ??
     null;
 
@@ -151,7 +138,7 @@ export function useIdentityGate() {
       isRootViewLoading ||
       isProfileLoading ||
       isTokensLoading ||
-      isTypesLoading ||
+      isProfileTokenIdLoading ||
       isProfileDataLoading);
 
   return {

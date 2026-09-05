@@ -7,23 +7,30 @@ import { useIdentityGate } from "@/hooks/useIdentityGate";
 import {
   useMultipleTokenDetails,
   useMultipleTokenTypes,
-  useMultipleEndorsementCounts,
+  useMultipleAttestationCounts,
 } from "@/hooks/useIdentityReads";
+import { getContractErrorMessage } from "@/lib/errors";
 import { formatExpiry } from "@/lib/helpers";
 import { TOKEN_TYPE } from "@/lib/types";
 
 export default function Home() {
-  const { isConnected, walletTokenIds, hasProfile, profileData, isLoading } =
-    useIdentityGate();
+  const {
+    isConnected,
+    walletTokenIds,
+    hasProfile,
+    profileData,
+    isLoading,
+    error,
+  } = useIdentityGate();
 
-  // Batch-fetch token details, types, and endorsement counts
+  // Batch-fetch token details, types, and attestation counts
   const { data: tokenDetails } = useMultipleTokenDetails(
     walletTokenIds.length > 0 ? walletTokenIds : undefined
   );
   const { data: tokenTypes } = useMultipleTokenTypes(
     walletTokenIds.length > 0 ? walletTokenIds : undefined
   );
-  const { data: endorsementCounts } = useMultipleEndorsementCounts(
+  const { data: attestationCounts } = useMultipleAttestationCounts(
     walletTokenIds.length > 0 ? walletTokenIds : undefined
   );
 
@@ -35,7 +42,7 @@ export default function Home() {
       .map((id, i) => {
         const detail = tokenDetails?.[i];
         const typeResult = tokenTypes?.[i];
-        const endorseResult = endorsementCounts?.[i];
+        const attestResult = attestationCounts?.[i];
 
         // Skip only ROOT, the wallet's identity anchor. The PROFILE token is
         // meant to be listed alongside the user's other tokens.
@@ -44,10 +51,8 @@ export default function Home() {
         if (tokenType === TOKEN_TYPE.ROOT) return null;
 
         const token = detail?.status === "success" ? detail.result : undefined;
-        const endorseCount =
-          endorseResult?.status === "success"
-            ? Number(endorseResult.result)
-            : 0;
+        const attestCount =
+          attestResult?.status === "success" ? Number(attestResult.result) : 0;
 
         const tokenTuple = token as
           | readonly [
@@ -72,20 +77,20 @@ export default function Home() {
           name: tokenTuple ? tokenTuple[2] || "Unnamed" : "Loading…",
           type: tokenTuple ? tokenTuple[3] || "Unknown" : "…",
           expiresIn: tokenTuple ? formatExpiry(tokenTuple[6]) : "…",
-          endorsements: endorseCount,
+          attestations: attestCount,
         };
       })
       .filter((t): t is NonNullable<typeof t> => t !== null);
-  }, [walletTokenIds, tokenDetails, tokenTypes, endorsementCounts]);
+  }, [walletTokenIds, tokenDetails, tokenTypes, attestationCounts]);
 
   // Calculate real metrics
-  const totalEndorsements = useMemo(() => {
-    if (!endorsementCounts) return 0;
-    return endorsementCounts.reduce((sum, r) => {
+  const totalAttestations = useMemo(() => {
+    if (!attestationCounts) return 0;
+    return attestationCounts.reduce((sum, r) => {
       if (r?.status === "success") return sum + Number(r.result);
       return sum;
     }, 0);
-  }, [endorsementCounts]);
+  }, [attestationCounts]);
 
   const socialsCount = profileData
     ? [
@@ -111,6 +116,25 @@ export default function Home() {
     );
   }
 
+  if (error) {
+    return (
+      <div className="flex h-full items-center justify-center bg-app-bg px-4">
+        <div className="max-w-md text-center">
+          <p className="font-utsaha text-lg text-white">
+            Couldn&rsquo;t load your identity
+          </p>
+          <p className="mt-2 font-utsaha text-sm text-gray-400">
+            {getContractErrorMessage(error)}
+          </p>
+          <p className="mt-3 font-utsaha text-xs text-gray-500">
+            If this persists, the deployed contracts may not match this build.
+            Check that your wallet is on the Sepolia network.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
       <main className="flex h-full items-center justify-center">
@@ -125,7 +149,7 @@ export default function Home() {
   return (
     <main className="flex flex-col gap-6 px-4 pt-9 pb-12 sm:px-6 md:pr-14 md:pl-10">
       <Metrics
-        totalEndorsements={totalEndorsements}
+        totalAttestations={totalAttestations}
         activeTokens={tokenListData.length}
         socials={socialsCount}
         badgesEarned={hasProfile ? "Profile Created" : "No badges yet"}

@@ -33,11 +33,11 @@ export interface TokenCardProps {
   name: string;
   type: string;
   expiresIn: string;
-  endorsements?: number;
-  historyAction?: "endorsed" | "revoked" | "flagged";
+  attestations?: number;
+  historyAction?: "attested" | "revoked" | "flagged";
   actionWalletId?: string;
   onRevoke?: () => void;
-  onEndorse?: () => void;
+  onAttest?: () => void;
   onViewAll?: () => void;
 }
 
@@ -49,10 +49,9 @@ export interface FeatureCardProps {
 
 export interface IDCardProps {
   name?: string;
-  age?: number;
   nationality?: string;
   walletAddress?: string;
-  endorsers?: number;
+  attesters?: number;
   className?: string;
   telegramUrl?: string;
   linkedinUrl?: string;
@@ -88,7 +87,7 @@ export interface TokenFormProps {
   onSuccess?: () => void;
 }
 
-export interface EndorseModalProps {
+export interface AttestModalProps {
   isOpen: boolean;
   onClose: () => void;
   tokenId: bigint;
@@ -114,8 +113,8 @@ export interface UITokenData {
   name: string;
   type: string;
   expiresIn: string;
-  endorsements?: number;
-  historyAction?: "endorsed" | "revoked" | "flagged";
+  attestations?: number;
+  historyAction?: "attested" | "revoked" | "flagged";
   actionWalletId?: string;
   owner?: string;
 }
@@ -134,7 +133,7 @@ export interface TokenListProps {
   tokens: UITokenData[];
   className?: string;
   onRevoke?: (tokenId: string) => void;
-  onEndorse?: (tokenId: string) => void;
+  onAttest?: (tokenId: string) => void;
   onViewAll?: (tokenId: string) => void;
 }
 
@@ -155,7 +154,7 @@ export interface DashboardMetricsProps extends IDMetricsProps, MetricsProps {
 }
 
 export interface MetricsProps {
-  totalEndorsements?: number;
+  totalAttestations?: number;
   activeTokens?: number;
   socials?: number;
   badgesEarned?: string;

@@ -1,7 +1,6 @@
 export interface ProfileMetadata {
   name: string;
   username: string;
-  age: bigint;
   nationality: string;
   github: string;
   email: string;
@@ -20,16 +19,16 @@ export interface TokenData {
   about: string;
   validUntil: bigint;
   createdAt: bigint;
-  totalEndorsementCount: bigint;
+  totalAttestationCount: bigint;
   revokedCount: bigint;
   isFlagged: boolean;
   flagCount: bigint;
   transferCount: bigint;
 }
 
-export interface Endorsement {
-  endorserTokenId: bigint;
-  endorserAddress: `0x${string}`;
+export interface Attestation {
+  attesterTokenId: bigint;
+  attesterAddress: `0x${string}`;
   timestamp: bigint;
   revokedAt: bigint;
   expiresAt: bigint;

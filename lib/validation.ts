@@ -163,17 +163,6 @@ export function validateUsername(value: string): FieldResult {
   return OK;
 }
 
-export function validateAge(value: string): FieldResult {
-  if (!value.trim()) return IDLE;
-  const age = Number(value);
-  if (!Number.isFinite(age) || !Number.isInteger(age)) {
-    return invalid("Enter a whole number.");
-  }
-  if (age < 13) return invalid("You must be at least 13.");
-  if (age > 120) return invalid("Enter a realistic age.");
-  return OK;
-}
-
 export function validateEmail(value: string): FieldResult {
   const trimmed = value.trim();
   if (!trimmed) return IDLE;

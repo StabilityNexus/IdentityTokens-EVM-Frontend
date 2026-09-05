@@ -21,7 +21,7 @@ import Badge from "../Badge";
 import { TokenForm } from "../forms/TokenForm";
 import { TokenCardProps, TokenCardVariant } from "@/lib/types";
 
-const getRankFromEndorsements = (count: number) => {
+const getRankFromAttestations = (count: number) => {
   if (count >= 250) return "champion";
   if (count >= 100) return "diamond";
   if (count >= 50) return "platinum";
@@ -36,14 +36,14 @@ export function TokenCard({
   name,
   type,
   expiresIn,
-  endorsements = 0,
-  historyAction = "endorsed",
+  attestations = 0,
+  historyAction = "attested",
   actionWalletId = "0x000...000",
   onRevoke,
-  onEndorse,
+  onAttest,
   onViewAll,
 }: TokenCardProps) {
-  const rank = getRankFromEndorsements(endorsements);
+  const rank = getRankFromAttestations(attestations);
   const [isTokenFormOpen, setIsTokenFormOpen] = React.useState(false);
 
   return (
@@ -82,9 +82,9 @@ export function TokenCard({
               <div className="flex shrink-0 items-center gap-2 font-utsaha text-sm whitespace-nowrap text-gray-400">
                 <div className="flex items-center gap-1.5">
                   <Badge rank={rank} size={20} />
-                  <span className="text-white">{endorsements}</span>
+                  <span className="text-white">{attestations}</span>
                 </div>
-                <span className="hidden xs:inline">Endorsements</span>
+                <span className="hidden xs:inline">Attestations</span>
               </div>
               <div className="flex shrink-0 items-center gap-1 sm:gap-2">
                 <button
@@ -146,8 +146,8 @@ export function TokenCard({
                     Flagged
                   </span>
                 )}
-                {historyAction === "endorsed" && (
-                  <span className="text-white">Endorsement received</span>
+                {historyAction === "attested" && (
+                  <span className="text-white">Attestation received</span>
                 )}
               </div>
 
@@ -189,9 +189,9 @@ export function TokenCard({
               <div className="flex shrink-0 items-center gap-2 font-utsaha text-sm whitespace-nowrap text-gray-400">
                 <div className="flex items-center gap-1">
                   <Badge rank={rank} size={18} />
-                  <span className="font-medium text-white">{endorsements}</span>
+                  <span className="font-medium text-white">{attestations}</span>
                 </div>
-                <span className="hidden xs:inline">Endorsements</span>
+                <span className="hidden xs:inline">Attestations</span>
               </div>
 
               {/* Right side: Buttons group */}
@@ -211,10 +211,10 @@ export function TokenCard({
                     Revoke
                   </button>
                   <button
-                    onClick={onEndorse}
+                    onClick={onAttest}
                     className="rounded-lg bg-brand-blue px-2 py-1.5 font-utsaha text-xs text-white transition-all hover:scale-[1.02] hover:bg-blue-700 active:scale-[0.98] sm:px-3 sm:text-sm"
                   >
-                    Endorse
+                    Attest
                   </button>
 
                   <DropdownMenu>

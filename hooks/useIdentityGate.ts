@@ -21,18 +21,22 @@ export function useIdentityGate() {
   const {
     data: rootId,
     isLoading: isRootIdLoading,
+    error: rootIdError,
     refetch: refetchRootId,
   } = useRootId(address);
 
   // Step 2: Get root identity view (only if rootId > 0)
-  const { data: rootView, isLoading: isRootViewLoading } = useRootIdentityView(
-    rootId && rootId > 0n ? rootId : undefined
-  );
+  const {
+    data: rootView,
+    isLoading: isRootViewLoading,
+    error: rootViewError,
+  } = useRootIdentityView(rootId && rootId > 0n ? rootId : undefined);
 
   // Step 3: Check profile status
   const {
     data: hasProfile,
     isLoading: isProfileLoading,
+    error: hasProfileError,
     refetch: refetchHasProfile,
   } = useHasProfile(address);
 
@@ -40,12 +44,16 @@ export function useIdentityGate() {
   const {
     data: walletTokenIds,
     isLoading: isTokensLoading,
+    error: walletTokensError,
     refetch: refetchWalletTokens,
   } = useWalletTokens(address);
 
   // Step 5: Batch-fetch token types for all wallet tokens
-  const { data: tokenTypesData, isLoading: isTypesLoading } =
-    useMultipleTokenTypes(walletTokenIds);
+  const {
+    data: tokenTypesData,
+    isLoading: isTypesLoading,
+    error: tokenTypesError,
+  } = useMultipleTokenTypes(walletTokenIds);
 
   // Step 6: Find the PROFILE token (type === 2) among wallet tokens
   const profileTokenId = useMemo(() => {
@@ -64,8 +72,11 @@ export function useIdentityGate() {
   }, [walletTokenIds, tokenTypesData]);
 
   // Step 7: Get profile data if we have a profile token
-  const { data: profileData, isLoading: isProfileDataLoading } =
-    useProfile(profileTokenId);
+  const {
+    data: profileData,
+    isLoading: isProfileDataLoading,
+    error: profileDataError,
+  } = useProfile(profileTokenId);
 
   // Sync to zustand store
   const lastSyncedAddress = useRef<string | undefined>(undefined);
@@ -101,7 +112,6 @@ export function useIdentityGate() {
       store.setProfile(profileTokenId, {
         name: profileData.name,
         username: profileData.username,
-        age: profileData.age,
         nationality: profileData.nationality,
         github: profileData.github,
         email: profileData.email,
@@ -122,13 +132,27 @@ export function useIdentityGate() {
     profileData,
   ]);
 
+  // A read that has failed will keep retrying and refetching on focus, so
+  // folding its pending state into `isLoading` leaves every consumer stuck on a
+  // spinner forever with nothing on screen explaining why. Surface the first
+  // error instead and let callers render it.
+  const error =
+    rootIdError ??
+    rootViewError ??
+    hasProfileError ??
+    walletTokensError ??
+    tokenTypesError ??
+    profileDataError ??
+    null;
+
   const isLoading =
-    isRootIdLoading ||
-    isRootViewLoading ||
-    isProfileLoading ||
-    isTokensLoading ||
-    isTypesLoading ||
-    isProfileDataLoading;
+    !error &&
+    (isRootIdLoading ||
+      isRootViewLoading ||
+      isProfileLoading ||
+      isTokensLoading ||
+      isTypesLoading ||
+      isProfileDataLoading);
 
   return {
     // Connection
@@ -150,6 +174,7 @@ export function useIdentityGate() {
 
     // Loading
     isLoading,
+    error,
 
     // Refetchers (for invalidation after writes)
     refetchRootId,

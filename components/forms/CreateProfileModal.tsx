@@ -22,7 +22,6 @@ import { CustomLink, encodeProfileExtras } from "@/lib/profileExtras";
 import {
   FieldResult,
   normalizeWebsite,
-  validateAge,
   validateDiscord,
   validateEmail,
   validateEns,
@@ -43,7 +42,6 @@ import { TextField } from "./fields/TextField";
 interface ProfileFormData {
   name: string;
   username: string;
-  age: string;
   nationality: string;
   github: string;
   email: string;
@@ -56,7 +54,6 @@ interface ProfileFormData {
 const INITIAL_FORM: ProfileFormData = {
   name: "",
   username: "",
-  age: "",
   nationality: "",
   github: "",
   email: "",
@@ -117,7 +114,6 @@ export function CreateProfileModal({
     () => ({
       name: validateName(formData.name),
       username: usernameResult,
-      age: validateAge(formData.age),
       github: validateGithub(formData.github),
       xDotCom: validateX(formData.xDotCom),
       discord: validateDiscord(formData.discord),
@@ -182,9 +178,6 @@ export function CreateProfileModal({
     createProfile.write({
       name: formData.name.trim(),
       username: formData.username.trim(),
-      // Number() first: validateAge accepts exponent and decimal forms such as
-      // "2e1", which BigInt() rejects outright.
-      age: BigInt(Number(formData.age || "0")),
       nationality: formData.nationality,
       github: formData.github.trim(),
       email: formData.email.trim(),
@@ -402,19 +395,6 @@ export function CreateProfileModal({
                 required
                 disabled={isSubmitting}
                 hint="3–32 characters. This becomes your profile URL."
-              />
-
-              <TextField
-                label="Age"
-                name="age"
-                type="number"
-                value={formData.age}
-                onChange={(value) => setField("age", value)}
-                result={results.age}
-                placeholder="Enter your Age"
-                min={13}
-                max={120}
-                disabled={isSubmitting}
               />
 
               <CountrySelect

@@ -3,12 +3,12 @@
 import React, { useState, useEffect, useId, useRef } from "react";
 import { X } from "lucide-react";
 import {
-  useEndorseToken,
+  useAttestToken,
   useCreateRootIdentity,
 } from "@/hooks/useIdentityWrites";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
 import { useTokenOwner } from "@/hooks/useIdentityReads";
-import { EndorseModalProps, TxStatus } from "@/lib/types";
+import { AttestModalProps, TxStatus } from "@/lib/types";
 import { TransactionStatus } from "@/components/ui/TransactionStatus";
 import { truncateAddress } from "@/lib/helpers";
 
@@ -23,13 +23,13 @@ const DURATION_PRESETS = [
 /** The contract has no exposed maximum, so only the lower bound is enforced. */
 const MIN_DURATION_DAYS = 1;
 
-export function EndorseModal({
+export function AttestModal({
   isOpen,
   onClose,
   tokenId,
   tokenName,
   onSuccess,
-}: EndorseModalProps) {
+}: AttestModalProps) {
   const [selectedPreset, setSelectedPreset] = useState<number>(1); // default: 90 days
   const [customDays, setCustomDays] = useState("");
   const [useCustom, setUseCustom] = useState(false);
@@ -37,7 +37,7 @@ export function EndorseModal({
   const { address, rootId } = useIdentityGate();
   const { data: ownerAddress } = useTokenOwner(tokenId);
 
-  const endorseToken = useEndorseToken();
+  const attestToken = useAttestToken();
   const createRoot = useCreateRootIdentity();
 
   const isSelfToken =
@@ -110,7 +110,7 @@ export function EndorseModal({
 
   // Auto-close on success
   useEffect(() => {
-    if (endorseToken.isSuccess) {
+    if (attestToken.isSuccess) {
       const timer = setTimeout(() => {
         onSuccess?.();
         onClose();
@@ -118,7 +118,7 @@ export function EndorseModal({
       return () => clearTimeout(timer);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [endorseToken.isSuccess]);
+  }, [attestToken.isSuccess]);
 
   if (!isOpen) return null;
 
@@ -131,7 +131,7 @@ export function EndorseModal({
       return "Enter a whole number of days.";
     }
     if (days < MIN_DURATION_DAYS) {
-      return `Endorse for at least ${MIN_DURATION_DAYS} day.`;
+      return `Attest for at least ${MIN_DURATION_DAYS} day.`;
     }
     return undefined;
   };
@@ -148,14 +148,14 @@ export function EndorseModal({
     e.preventDefault();
     // Previously a custom value of 0 or below fell through to a silent return.
     if (durationError) return;
-    endorseToken.write(tokenId, getDurationSeconds());
+    attestToken.write(tokenId, getDurationSeconds());
   };
 
   const getTxStatus = (): TxStatus => {
-    if (endorseToken.isPending) return "pending";
-    if (endorseToken.isConfirming) return "confirming";
-    if (endorseToken.isSuccess) return "success";
-    if (endorseToken.error) return "error";
+    if (attestToken.isPending) return "pending";
+    if (attestToken.isConfirming) return "confirming";
+    if (attestToken.isSuccess) return "success";
+    if (attestToken.error) return "error";
     return "idle";
   };
 
@@ -193,11 +193,11 @@ export function EndorseModal({
         {/* Header */}
         <div className="mb-6">
           <h2 id={titleId} className="font-utsaha text-2xl text-white">
-            Endorse Token
+            Attest Token
           </h2>
           {tokenName && (
             <p className="mt-1 font-utsaha text-sm text-gray-400">
-              Endorsing &ldquo;{tokenName}&rdquo; (#{tokenId.toString()})
+              Attesting &ldquo;{tokenName}&rdquo; (#{tokenId.toString()})
             </p>
           )}
         </div>
@@ -213,7 +213,7 @@ export function EndorseModal({
               id={durationLabelId}
               className="font-utsaha text-sm text-gray-300"
             >
-              Endorsement Duration
+              Attestation Duration
             </span>
             <div className="grid grid-cols-2 gap-2">
               {DURATION_PRESETS.map((preset, i) => (
@@ -296,14 +296,14 @@ export function EndorseModal({
           {/* Validation Warnings */}
           {isSelfToken && (
             <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-center font-utsaha text-sm text-amber-400">
-              ⚠️ You cannot endorse a token owned by your wallet.
+              ⚠️ You cannot attest a token owned by your wallet.
             </div>
           )}
 
           {hasNoRootIdentity && !isSelfToken && (
             <div className="flex flex-col gap-2 rounded-lg border border-blue-500/30 bg-blue-500/10 p-3 text-center font-utsaha text-sm text-blue-300">
               <p>
-                ℹ️ You need a Root Identity before you can endorse tokens
+                ℹ️ You need a Root Identity before you can attest tokens
                 on-chain.
               </p>
               <button
@@ -320,7 +320,7 @@ export function EndorseModal({
               </button>
               {createRoot.isSuccess && (
                 <p className="text-xs text-brand-green">
-                  Root Identity created! You can now endorse.
+                  Root Identity created! You can now attest.
                 </p>
               )}
             </div>
@@ -329,9 +329,9 @@ export function EndorseModal({
           {/* Transaction Status */}
           <TransactionStatus
             status={txStatus}
-            txHash={endorseToken.txHash}
-            error={endorseToken.error}
-            successMessage="Endorsement given successfully!"
+            txHash={attestToken.txHash}
+            error={attestToken.error}
+            successMessage="Attestation given successfully!"
           />
 
           {/* Submit */}
@@ -346,7 +346,7 @@ export function EndorseModal({
             }
             className="w-full rounded-lg bg-brand-green py-2.5 font-utsaha text-black transition-all hover:bg-brand-green/90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {isSubmitting ? "Endorsing…" : "Endorse"}
+            {isSubmitting ? "Attesting…" : "Attest"}
           </button>
         </form>
       </div>

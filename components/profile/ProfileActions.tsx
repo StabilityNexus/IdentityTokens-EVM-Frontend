@@ -7,12 +7,12 @@ import { cn } from "@/lib/utils";
 interface ProfileActionsProps {
   profileUrl: string;
   displayName: string;
-  /** Viewers can't endorse their own profile. */
+  /** Viewers can't attest their own profile. */
   isOwnProfile: boolean;
-  /** Whether the connected wallet already has an active endorsement. */
-  hasEndorsed: boolean;
+  /** Whether the connected wallet already has an active attestation. */
+  hasAttested: boolean;
   isRevoking?: boolean;
-  onEndorse: () => void;
+  onAttest: () => void;
   onRevoke: () => void;
   className?: string;
 }
@@ -21,9 +21,9 @@ export function ProfileActions({
   profileUrl,
   displayName,
   isOwnProfile,
-  hasEndorsed,
+  hasAttested,
   isRevoking = false,
-  onEndorse,
+  onAttest,
   onRevoke,
   className,
 }: ProfileActionsProps) {
@@ -68,14 +68,14 @@ export function ProfileActions({
         <>
           <button
             type="button"
-            onClick={onEndorse}
+            onClick={onAttest}
             className="flex items-center gap-2 rounded-xl bg-profile-accent px-4 py-2.5 font-utsaha text-sm text-[#1a1033] transition-all hover:bg-profile-accent-soft active:scale-[0.98] sm:text-base"
           >
             <ShieldCheck size={16} />
-            Endorse
+            Attest
           </button>
 
-          {hasEndorsed && (
+          {hasAttested && (
             <button
               type="button"
               onClick={onRevoke}

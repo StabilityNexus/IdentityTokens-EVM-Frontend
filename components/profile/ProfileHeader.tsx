@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { CalendarDays, MapPin } from "lucide-react";
+import { MapPin } from "lucide-react";
 import Badge from "@/components/Badge";
 import { Avatar } from "@/components/ui/Avatar";
 import { countryFlag, findCountryByName } from "@/lib/countries";
@@ -15,9 +15,8 @@ interface ProfileHeaderProps {
   /** Fallback seed for profiles created before avatars existed. */
   seed: string | null;
   nationality: string;
-  age: number;
   rank: RankName;
-  /** Endorse / revoke / share / copy cluster. */
+  /** Attest / revoke / share / copy cluster. */
   actions: React.ReactNode;
 }
 
@@ -27,7 +26,6 @@ export function ProfileHeader({
   avatarId,
   seed,
   nationality,
-  age,
   rank,
   actions,
 }: ProfileHeaderProps) {
@@ -76,13 +74,6 @@ export function ProfileHeader({
                 <MapPin size={14} />
               )}
               {nationality}
-            </span>
-          )}
-
-          {age > 0 && (
-            <span className="flex items-center gap-1.5 font-utsaha text-sm text-gray-400">
-              <CalendarDays size={14} />
-              {age} years old
             </span>
           )}
         </div>

@@ -4,15 +4,15 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { UserX } from "lucide-react";
 import {
-  useActiveEndorsementCount,
-  useHasEndorsed,
+  useActiveAttestationCount,
+  useHasAttested,
   useProfile,
   useResolveUsername,
   useTokenOwner,
 } from "@/hooks/useIdentityReads";
-import { useRevokeEndorsement } from "@/hooks/useIdentityWrites";
+import { useRevokeAttestation } from "@/hooks/useIdentityWrites";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
-import { EndorseModal } from "@/components/forms/EndorseModal";
+import { AttestModal } from "@/components/forms/AttestModal";
 import { TransactionStatus } from "@/components/ui/TransactionStatus";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { ProfileActions } from "@/components/profile/ProfileActions";
@@ -20,7 +20,7 @@ import { ProfileReputation } from "@/components/profile/ProfileReputation";
 import { ProfileLinks } from "@/components/profile/ProfileLinks";
 import { ProfileIdentity } from "@/components/profile/ProfileIdentity";
 import { decodeProfileExtras } from "@/lib/profileExtras";
-import { getRankFromEndorsers, getTrustScore } from "@/lib/rank";
+import { getRankFromAttesters, getTrustScore } from "@/lib/rank";
 import { TxStatus } from "@/lib/types";
 
 export default function ProfilePage() {
@@ -49,20 +49,20 @@ export default function ProfilePage() {
     useProfile(profileTokenId);
   const { data: ownerAddress } = useTokenOwner(profileTokenId);
 
-  const { data: endorsementCount, refetch: refetchEndorsements } =
-    useActiveEndorsementCount(profileTokenId);
+  const { data: attestationCount, refetch: refetchAttestations } =
+    useActiveAttestationCount(profileTokenId);
 
-  const { data: viewerHasEndorsed, refetch: refetchHasEndorsed } =
-    useHasEndorsed(rootId && rootId > 0n ? rootId : undefined, profileTokenId);
+  const { data: viewerHasAttested, refetch: refetchHasAttested } =
+    useHasAttested(rootId && rootId > 0n ? rootId : undefined, profileTokenId);
 
-  const revokeEndorsement = useRevokeEndorsement();
+  const revokeAttestation = useRevokeAttestation();
 
-  const [isEndorseModalOpen, setIsEndorseModalOpen] = useState(false);
+  const [isAttestModalOpen, setIsAttestModalOpen] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
-  const totalEndorsements = Number(endorsementCount ?? 0n);
-  const rank = getRankFromEndorsers(totalEndorsements);
-  const trustScore = getTrustScore(totalEndorsements);
+  const totalAttestations = Number(attestationCount ?? 0n);
+  const rank = getRankFromAttesters(totalAttestations);
+  const trustScore = getTrustScore(totalAttestations);
 
   const extras = useMemo(
     () => decodeProfileExtras(profileData?.websitePortfolioLink),
@@ -80,14 +80,14 @@ export default function ProfilePage() {
       : `/profile?u=${username}`;
 
   useEffect(() => {
-    if (!revokeEndorsement.isSuccess) return;
-    refetchEndorsements();
-    refetchHasEndorsed();
+    if (!revokeAttestation.isSuccess) return;
+    refetchAttestations();
+    refetchHasAttested();
     // Clear the write result, or isSuccess stays true and the success banner
     // sticks for the life of the page.
-    revokeEndorsement.reset();
+    revokeAttestation.reset();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [revokeEndorsement.isSuccess, refetchEndorsements, refetchHasEndorsed]);
+  }, [revokeAttestation.isSuccess, refetchAttestations, refetchHasAttested]);
 
   useEffect(() => {
     if (!notice) return;
@@ -97,7 +97,7 @@ export default function ProfilePage() {
 
   const requireWallet = (action: () => void) => {
     if (!isConnected) {
-      setNotice("Connect your wallet to endorse or revoke.");
+      setNotice("Connect your wallet to attest or revoke.");
       return;
     }
     action();
@@ -158,13 +158,13 @@ export default function ProfilePage() {
     );
   }
 
-  const revokeStatus: TxStatus = revokeEndorsement.isPending
+  const revokeStatus: TxStatus = revokeAttestation.isPending
     ? "pending"
-    : revokeEndorsement.isConfirming
+    : revokeAttestation.isConfirming
       ? "confirming"
-      : revokeEndorsement.isSuccess
+      : revokeAttestation.isSuccess
         ? "success"
-        : revokeEndorsement.error
+        : revokeAttestation.error
           ? "error"
           : "idle";
 
@@ -176,19 +176,18 @@ export default function ProfilePage() {
         avatarId={extras.avatarId}
         seed={(ownerAddress as string) ?? profileData.username}
         nationality={profileData.nationality}
-        age={Number(profileData.age)}
         rank={rank}
         actions={
           <ProfileActions
             profileUrl={profileUrl}
             displayName={profileData.name}
             isOwnProfile={isOwnProfile}
-            hasEndorsed={!!viewerHasEndorsed}
-            isRevoking={revokeEndorsement.isLoading}
-            onEndorse={() => requireWallet(() => setIsEndorseModalOpen(true))}
+            hasAttested={!!viewerHasAttested}
+            isRevoking={revokeAttestation.isLoading}
+            onAttest={() => requireWallet(() => setIsAttestModalOpen(true))}
             onRevoke={() =>
               requireWallet(() => {
-                if (profileTokenId) revokeEndorsement.write(profileTokenId);
+                if (profileTokenId) revokeAttestation.write(profileTokenId);
               })
             }
           />
@@ -204,9 +203,9 @@ export default function ProfilePage() {
       {revokeStatus !== "idle" && (
         <TransactionStatus
           status={revokeStatus}
-          txHash={revokeEndorsement.txHash}
-          error={revokeEndorsement.error}
-          successMessage="Endorsement revoked."
+          txHash={revokeAttestation.txHash}
+          error={revokeAttestation.error}
+          successMessage="Attestation revoked."
         />
       )}
 
@@ -215,7 +214,7 @@ export default function ProfilePage() {
         <div className="lg:order-2 lg:col-span-1">
           <ProfileReputation
             trustScore={trustScore}
-            totalEndorsements={totalEndorsements}
+            totalAttestations={totalAttestations}
             rank={rank}
           />
         </div>
@@ -238,15 +237,15 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {isEndorseModalOpen && profileTokenId && (
-        <EndorseModal
+      {isAttestModalOpen && profileTokenId && (
+        <AttestModal
           isOpen
-          onClose={() => setIsEndorseModalOpen(false)}
+          onClose={() => setIsAttestModalOpen(false)}
           tokenId={profileTokenId}
           tokenName={profileData.name}
           onSuccess={() => {
-            refetchEndorsements();
-            refetchHasEndorsed();
+            refetchAttestations();
+            refetchHasAttested();
           }}
         />
       )}

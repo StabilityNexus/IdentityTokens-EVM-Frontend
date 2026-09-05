@@ -7,15 +7,14 @@ import { DashboardMetricsProps } from "@/lib/types";
 
 const DashboardMetrics: React.FC<DashboardMetricsProps> = ({
   name,
-  age,
   nationality,
   walletAddress,
-  endorsers,
+  attesters,
   lastUpdated,
   trustScore,
   trustFlags,
   trustDescription,
-  totalEndorsements,
+  totalAttestations,
   activeTokens,
   socials,
   badgesEarned,
@@ -31,10 +30,9 @@ const DashboardMetrics: React.FC<DashboardMetricsProps> = ({
         <div className="w-full min-w-0 lg:flex-[1.6]">
           <IDMetrics
             name={name}
-            age={age}
             nationality={nationality}
             walletAddress={walletAddress}
-            endorsers={endorsers}
+            attesters={attesters}
             lastUpdated={lastUpdated}
           />
         </div>
@@ -51,7 +49,7 @@ const DashboardMetrics: React.FC<DashboardMetricsProps> = ({
 
       {/* Row 2: Metrics (full width) */}
       <Metrics
-        totalEndorsements={totalEndorsements}
+        totalAttestations={totalAttestations}
         activeTokens={activeTokens}
         socials={socials}
         badgesEarned={badgesEarned}

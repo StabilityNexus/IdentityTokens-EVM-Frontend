@@ -78,23 +78,23 @@ export function useTokensForRoot(rootId: bigint | undefined) {
   });
 }
 
-/** Get active endorsements for a token */
-export function useActiveEndorsements(tokenId: bigint | undefined) {
+/** Get active attestations for a token */
+export function useActiveAttestations(tokenId: bigint | undefined) {
   return useReadContract({
     address: IDENTITY_SYSTEM_ADDRESS,
     abi: IDENTITY_SYSTEM_ABI,
-    functionName: "getActiveEndorsements",
+    functionName: "getActiveAttestations",
     args: tokenId !== undefined ? [tokenId] : undefined,
     query: { enabled: tokenId !== undefined },
   });
 }
 
-/** Get active endorsement count for a token */
-export function useActiveEndorsementCount(tokenId: bigint | undefined) {
+/** Get active attestation count for a token */
+export function useActiveAttestationCount(tokenId: bigint | undefined) {
   return useReadContract({
     address: IDENTITY_SYSTEM_ADDRESS,
     abi: IDENTITY_SYSTEM_ABI,
-    functionName: "getActiveEndorsementCount",
+    functionName: "getActiveAttestationCount",
     args: tokenId !== undefined ? [tokenId] : undefined,
     query: { enabled: tokenId !== undefined },
   });
@@ -111,21 +111,21 @@ export function useTransferHistory(tokenId: bigint | undefined) {
   });
 }
 
-/** Check if an endorser has actively endorsed a token */
-export function useHasEndorsed(
-  endorserRootId: bigint | undefined,
+/** Check if an attester has actively attested a token */
+export function useHasAttested(
+  attesterRootId: bigint | undefined,
   tokenId: bigint | undefined
 ) {
   return useReadContract({
     address: IDENTITY_SYSTEM_ADDRESS,
     abi: IDENTITY_SYSTEM_ABI,
-    functionName: "hasEndorsed",
+    functionName: "hasAttested",
     args:
-      endorserRootId !== undefined && tokenId !== undefined
-        ? [endorserRootId, tokenId]
+      attesterRootId !== undefined && tokenId !== undefined
+        ? [attesterRootId, tokenId]
         : undefined,
     query: {
-      enabled: endorserRootId !== undefined && tokenId !== undefined,
+      enabled: attesterRootId !== undefined && tokenId !== undefined,
     },
   });
 }
@@ -236,14 +236,14 @@ export function useMultipleTokenDetails(
   });
 }
 
-/** Batch-fetch endorsement counts for multiple token IDs */
-export function useMultipleEndorsementCounts(
+/** Batch-fetch attestation counts for multiple token IDs */
+export function useMultipleAttestationCounts(
   tokenIds: readonly bigint[] | undefined
 ) {
   const contracts = (tokenIds ?? []).map((id) => ({
     address: IDENTITY_SYSTEM_ADDRESS,
     abi: IDENTITY_SYSTEM_ABI,
-    functionName: "getActiveEndorsementCount" as const,
+    functionName: "getActiveAttestationCount" as const,
     args: [id] as const,
   }));
 

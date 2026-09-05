@@ -10,7 +10,7 @@ export function TokenList({
   tokens,
   className = "",
   onRevoke,
-  onEndorse,
+  onAttest,
   onViewAll,
 }: TokenListProps) {
   const cardVariant = getCardVariant(variant);
@@ -40,11 +40,11 @@ export function TokenList({
               name={token.name}
               type={token.type}
               expiresIn={token.expiresIn}
-              endorsements={token.endorsements}
+              attestations={token.attestations}
               historyAction={token.historyAction}
               actionWalletId={token.actionWalletId}
               onRevoke={onRevoke ? () => onRevoke(token.tokenId) : undefined}
-              onEndorse={onEndorse ? () => onEndorse(token.tokenId) : undefined}
+              onAttest={onAttest ? () => onAttest(token.tokenId) : undefined}
               onViewAll={onViewAll ? () => onViewAll(token.tokenId) : undefined}
             />
           ))

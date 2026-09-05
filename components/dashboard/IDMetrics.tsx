@@ -7,10 +7,9 @@ import { IoCopyOutline, IoShareSocialOutline } from "react-icons/io5";
 
 const IDMetrics: React.FC<IDMetricsProps> = ({
   name = "Default Name",
-  age = 20,
   nationality = "Indian",
   walletAddress = "0x9032345320958093280943r82",
-  endorsers = 128,
+  attesters = 128,
   lastUpdated = "1 Day Ago",
   className = "",
 }) => {
@@ -68,10 +67,9 @@ const IDMetrics: React.FC<IDMetricsProps> = ({
       <div className="flex flex-shrink-0 justify-center lg:w-[340px] lg:justify-start">
         <IDCard
           name={name}
-          age={age}
           nationality={nationality}
           walletAddress={walletAddress}
-          endorsers={endorsers}
+          attesters={attesters}
         />
       </div>
 

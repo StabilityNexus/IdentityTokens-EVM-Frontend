@@ -132,12 +132,14 @@ export default function PrivacyPolicyPage() {
               personal information.
             </p>
             <p className="mt-3">
-              Identity data is stored on the blockchain as part of the
-              Decentralized Identity Token smart contract. This data is publicly
-              accessible on the blockchain by design, as it forms the basis of
-              your decentralized, self-sovereign identity. No additional
-              personal information is stored on any centralized remote server
-              operated by the App.
+              <strong>Public On-Chain Data:</strong> Identity tokens, Profile
+              tokens, chosen usernames, associated metadata (such as custom
+              links or bio fields), and peer-to-peer attestations are written
+              directly to public EVM-compatible blockchains. This data is
+              permanent, immutable, and publicly accessible by design. Users
+              should only publish information they are comfortable making
+              permanently public. No personal data is stored on centralized,
+              private databases operated by the App.
             </p>
           </section>
 
@@ -158,7 +160,7 @@ export default function PrivacyPolicyPage() {
               functionality. The following is a list of third parties and the
               information that may be shared with them:
             </p>
-            <ul className="mt-3 list-disc space-y-1 pl-6">
+            <ul className="mt-3 list-disc space-y-2 pl-6">
               <li>
                 <strong>
                   Blockchain Networks (e.g., Ethereum, EVM-compatible chains):
@@ -172,6 +174,21 @@ export default function PrivacyPolicyPage() {
                 </strong>{" "}
                 Wallet connection information required to authenticate and sign
                 transactions.
+              </li>
+              <li>
+                <strong>RPC Node Providers:</strong> To read from and broadcast
+                transactions to supported blockchains (e.g., Ethereum Sepolia),
+                the App connects to remote procedure call (RPC) nodes. These
+                third-party node providers may process network-level information
+                (such as your IP address) in accordance with their respective
+                privacy policies.
+              </li>
+              <li>
+                <strong>Static Hosting Infrastructure (GitHub Pages):</strong>{" "}
+                The App frontend is served as a client-side static application
+                hosted via GitHub Pages. GitHub may collect basic server logs
+                (such as IP addresses and request headers) for security and
+                operational purposes.
               </li>
             </ul>
             <p className="mt-3">
@@ -206,16 +223,18 @@ export default function PrivacyPolicyPage() {
               Data Deletion
             </h2>
             <p>
-              Where information is stored locally, you can generally remove it
-              by using the App&rsquo;s available data-clearing features,
-              clearing the data through your device settings, or uninstalling
-              the App.
+              Where information is cached locally on your device (such as
+              temporary session state or recent query caches in browser
+              storage), you can delete it immediately by clearing your
+              browser&rsquo;s cookies and site storage, or by disconnecting your
+              wallet.
             </p>
             <p className="mt-3">
-              Please note that information recorded on the blockchain (such as
-              your minted Decentralized Identity Token and associated
-              attestations) is immutable by nature and cannot be deleted from
-              the blockchain.
+              <strong>Blockchain Immutability:</strong> Because blockchain
+              ledgers are decentralized and append-only, records that have been
+              confirmed on-chain (including minted DIT tokens, Profile tokens,
+              and attestations) cannot be altered, overwritten, or deleted by
+              the App or any third party.
             </p>
           </section>
 

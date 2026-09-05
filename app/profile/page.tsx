@@ -13,6 +13,7 @@ import {
 import { useRevokeAttestation } from "@/hooks/useIdentityWrites";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
 import { AttestModal } from "@/components/forms/AttestModal";
+import { AttestersModal } from "@/components/profile/AttestersModal";
 import { TransactionStatus } from "@/components/ui/TransactionStatus";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { ProfileActions } from "@/components/profile/ProfileActions";
@@ -58,6 +59,7 @@ export default function ProfilePage() {
   const revokeAttestation = useRevokeAttestation();
 
   const [isAttestModalOpen, setIsAttestModalOpen] = useState(false);
+  const [isAttestersModalOpen, setIsAttestersModalOpen] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
   const totalAttestations = Number(attestationCount ?? 0n);
@@ -216,6 +218,7 @@ export default function ProfilePage() {
             trustScore={trustScore}
             totalAttestations={totalAttestations}
             rank={rank}
+            onViewAttesters={() => setIsAttestersModalOpen(true)}
           />
         </div>
 
@@ -236,6 +239,15 @@ export default function ProfilePage() {
           />
         </div>
       </div>
+
+      {isAttestersModalOpen && profileTokenId && (
+        <AttestersModal
+          isOpen
+          onClose={() => setIsAttestersModalOpen(false)}
+          tokenId={profileTokenId}
+          tokenName={profileData.name}
+        />
+      )}
 
       {isAttestModalOpen && profileTokenId && (
         <AttestModal

@@ -1,8 +1,8 @@
 export const IDENTITY_SYSTEM_ADDRESS =
-  "0xe886929760A5B8E47Cb42679512C920Fd1b14431" as const;
+  "0xB0E21B4901DD434A2e49C983529eB7094bf4D978" as const;
 
 export const PROFILE_SYSTEM_ADDRESS =
-  "0xDf36b4Cc1fB9d65CB371e0ee88EB9e4b4A30E423" as const;
+  "0xDc9058F434299c619Dc6f885F850ee133327DA4e" as const;
 
 export * from "./types.responses";
 
@@ -18,15 +18,47 @@ export const IDENTITY_SYSTEM_ABI = [
     type: "function",
     name: "admin",
     inputs: [],
-    outputs: [{ name: "", type: "address", internalType: "address" }],
+    outputs: [
+      {
+        name: "",
+        type: "address",
+        internalType: "address",
+      },
+    ],
     stateMutability: "view",
   },
   {
     type: "function",
     name: "approve",
     inputs: [
-      { name: "to", type: "address", internalType: "address" },
-      { name: "tokenId", type: "uint256", internalType: "uint256" },
+      {
+        name: "to",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "tokenId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "attestToken",
+    inputs: [
+      {
+        name: "tokenId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "duration",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
     outputs: [],
     stateMutability: "nonpayable",
@@ -34,84 +66,166 @@ export const IDENTITY_SYSTEM_ABI = [
   {
     type: "function",
     name: "balanceOf",
-    inputs: [{ name: "owner", type: "address", internalType: "address" }],
-    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    inputs: [
+      {
+        name: "owner",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
     stateMutability: "view",
   },
   {
     type: "function",
     name: "burnToken",
-    inputs: [{ name: "tokenId", type: "uint256", internalType: "uint256" }],
+    inputs: [
+      {
+        name: "tokenId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
     outputs: [],
     stateMutability: "nonpayable",
   },
   {
     type: "function",
     name: "createRootIdentity",
-    inputs: [{ name: "displayName", type: "string", internalType: "string" }],
-    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    inputs: [
+      {
+        name: "displayName",
+        type: "string",
+        internalType: "string",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
     stateMutability: "nonpayable",
   },
   {
     type: "function",
     name: "createToken",
     inputs: [
-      { name: "tokenName", type: "string", internalType: "string" },
-      { name: "tokenType", type: "string", internalType: "string" },
-      { name: "tokenValue", type: "bytes", internalType: "bytes" },
-      { name: "about", type: "string", internalType: "string" },
-      { name: "validUntil", type: "uint256", internalType: "uint256" },
+      {
+        name: "tokenName",
+        type: "string",
+        internalType: "string",
+      },
+      {
+        name: "tokenType",
+        type: "string",
+        internalType: "string",
+      },
+      {
+        name: "tokenValue",
+        type: "bytes",
+        internalType: "bytes",
+      },
+      {
+        name: "about",
+        type: "string",
+        internalType: "string",
+      },
+      {
+        name: "validUntil",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
-    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
-    stateMutability: "nonpayable",
-  },
-  {
-    type: "function",
-    name: "endorseToken",
-    inputs: [
-      { name: "tokenId", type: "uint256", internalType: "uint256" },
-      { name: "duration", type: "uint256", internalType: "uint256" },
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
-    outputs: [],
     stateMutability: "nonpayable",
   },
   {
     type: "function",
     name: "flagToken",
-    inputs: [{ name: "tokenId", type: "uint256", internalType: "uint256" }],
+    inputs: [
+      {
+        name: "tokenId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
     outputs: [],
     stateMutability: "nonpayable",
   },
   {
     type: "function",
-    name: "getActiveEndorsementCount",
-    inputs: [{ name: "tokenId", type: "uint256", internalType: "uint256" }],
-    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    name: "getActiveAttestationCount",
+    inputs: [
+      {
+        name: "tokenId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
     stateMutability: "view",
   },
   {
     type: "function",
-    name: "getActiveEndorsements",
-    inputs: [{ name: "tokenId", type: "uint256", internalType: "uint256" }],
+    name: "getActiveAttestations",
+    inputs: [
+      {
+        name: "tokenId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
     outputs: [
       {
         name: "",
         type: "tuple[]",
-        internalType: "struct DataTypes.Endorsement[]",
+        internalType: "struct DataTypes.Attestation[]",
         components: [
           {
-            name: "endorserTokenId",
+            name: "attesterTokenId",
             type: "uint256",
             internalType: "uint256",
           },
           {
-            name: "endorserAddress",
+            name: "attesterAddress",
             type: "address",
             internalType: "address",
           },
-          { name: "timestamp", type: "uint256", internalType: "uint256" },
-          { name: "revokedAt", type: "uint256", internalType: "uint256" },
-          { name: "expiresAt", type: "uint256", internalType: "uint256" },
+          {
+            name: "timestamp",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "revokedAt",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "expiresAt",
+            type: "uint256",
+            internalType: "uint256",
+          },
         ],
       },
     ],
@@ -120,33 +234,63 @@ export const IDENTITY_SYSTEM_ABI = [
   {
     type: "function",
     name: "getApproved",
-    inputs: [{ name: "tokenId", type: "uint256", internalType: "uint256" }],
-    outputs: [{ name: "", type: "address", internalType: "address" }],
+    inputs: [
+      {
+        name: "tokenId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "address",
+        internalType: "address",
+      },
+    ],
     stateMutability: "view",
   },
   {
     type: "function",
-    name: "getEndorsements",
-    inputs: [{ name: "tokenId", type: "uint256", internalType: "uint256" }],
+    name: "getAttestations",
+    inputs: [
+      {
+        name: "tokenId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
     outputs: [
       {
         name: "",
         type: "tuple[]",
-        internalType: "struct DataTypes.Endorsement[]",
+        internalType: "struct DataTypes.Attestation[]",
         components: [
           {
-            name: "endorserTokenId",
+            name: "attesterTokenId",
             type: "uint256",
             internalType: "uint256",
           },
           {
-            name: "endorserAddress",
+            name: "attesterAddress",
             type: "address",
             internalType: "address",
           },
-          { name: "timestamp", type: "uint256", internalType: "uint256" },
-          { name: "revokedAt", type: "uint256", internalType: "uint256" },
-          { name: "expiresAt", type: "uint256", internalType: "uint256" },
+          {
+            name: "timestamp",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "revokedAt",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "expiresAt",
+            type: "uint256",
+            internalType: "uint256",
+          },
         ],
       },
     ],
@@ -154,10 +298,10 @@ export const IDENTITY_SYSTEM_ABI = [
   },
   {
     type: "function",
-    name: "getEndorsementsByEndorser",
+    name: "getAttestationsByAttester",
     inputs: [
       {
-        name: "endorserRootId",
+        name: "attesterRootId",
         type: "uint256",
         internalType: "uint256",
       },
@@ -174,14 +318,24 @@ export const IDENTITY_SYSTEM_ABI = [
   {
     type: "function",
     name: "getRootIdentityView",
-    inputs: [{ name: "rootId", type: "uint256", internalType: "uint256" }],
+    inputs: [
+      {
+        name: "rootId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
     outputs: [
       {
         name: "",
         type: "tuple",
         internalType: "struct DataTypes.RootIdentityView",
         components: [
-          { name: "tokenId", type: "uint256", internalType: "uint256" },
+          {
+            name: "tokenId",
+            type: "uint256",
+            internalType: "uint256",
+          },
           {
             name: "walletAddress",
             type: "address",
@@ -192,8 +346,16 @@ export const IDENTITY_SYSTEM_ABI = [
             type: "string",
             internalType: "string",
           },
-          { name: "createdAt", type: "uint256", internalType: "uint256" },
-          { name: "isActive", type: "bool", internalType: "bool" },
+          {
+            name: "createdAt",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "isActive",
+            type: "bool",
+            internalType: "bool",
+          },
           {
             name: "tokenCount",
             type: "uint256",
@@ -207,111 +369,259 @@ export const IDENTITY_SYSTEM_ABI = [
   {
     type: "function",
     name: "getTokensForRoot",
-    inputs: [{ name: "rootId", type: "uint256", internalType: "uint256" }],
-    outputs: [{ name: "", type: "uint256[]", internalType: "uint256[]" }],
+    inputs: [
+      {
+        name: "rootId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "uint256[]",
+        internalType: "uint256[]",
+      },
+    ],
     stateMutability: "view",
   },
   {
     type: "function",
     name: "getTransferHistory",
-    inputs: [{ name: "tokenId", type: "uint256", internalType: "uint256" }],
-    outputs: [{ name: "", type: "address[]", internalType: "address[]" }],
+    inputs: [
+      {
+        name: "tokenId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "address[]",
+        internalType: "address[]",
+      },
+    ],
     stateMutability: "view",
   },
   {
     type: "function",
     name: "getWalletTokens",
-    inputs: [{ name: "wallet", type: "address", internalType: "address" }],
-    outputs: [{ name: "", type: "uint256[]", internalType: "uint256[]" }],
+    inputs: [
+      {
+        name: "wallet",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "uint256[]",
+        internalType: "uint256[]",
+      },
+    ],
     stateMutability: "view",
   },
   {
     type: "function",
-    name: "hasEndorsed",
+    name: "hasAttested",
     inputs: [
       {
-        name: "endorserRootId",
+        name: "attesterRootId",
         type: "uint256",
         internalType: "uint256",
       },
-      { name: "tokenId", type: "uint256", internalType: "uint256" },
+      {
+        name: "tokenId",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
-    outputs: [{ name: "", type: "bool", internalType: "bool" }],
+    outputs: [
+      {
+        name: "",
+        type: "bool",
+        internalType: "bool",
+      },
+    ],
     stateMutability: "view",
   },
   {
     type: "function",
     name: "hasProfile",
-    inputs: [{ name: "", type: "address", internalType: "address" }],
-    outputs: [{ name: "", type: "bool", internalType: "bool" }],
+    inputs: [
+      {
+        name: "",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "bool",
+        internalType: "bool",
+      },
+    ],
     stateMutability: "view",
   },
   {
     type: "function",
     name: "isApprovedForAll",
     inputs: [
-      { name: "owner", type: "address", internalType: "address" },
-      { name: "operator", type: "address", internalType: "address" },
+      {
+        name: "owner",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "operator",
+        type: "address",
+        internalType: "address",
+      },
     ],
-    outputs: [{ name: "", type: "bool", internalType: "bool" }],
+    outputs: [
+      {
+        name: "",
+        type: "bool",
+        internalType: "bool",
+      },
+    ],
     stateMutability: "view",
   },
   {
     type: "function",
     name: "mintProfileToken",
-    inputs: [{ name: "to", type: "address", internalType: "address" }],
-    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    inputs: [
+      {
+        name: "to",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
     stateMutability: "nonpayable",
   },
   {
     type: "function",
     name: "name",
     inputs: [],
-    outputs: [{ name: "", type: "string", internalType: "string" }],
+    outputs: [
+      {
+        name: "",
+        type: "string",
+        internalType: "string",
+      },
+    ],
     stateMutability: "view",
   },
   {
     type: "function",
     name: "ownerOf",
-    inputs: [{ name: "tokenId", type: "uint256", internalType: "uint256" }],
-    outputs: [{ name: "", type: "address", internalType: "address" }],
+    inputs: [
+      {
+        name: "tokenId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "address",
+        internalType: "address",
+      },
+    ],
     stateMutability: "view",
   },
   {
     type: "function",
     name: "ownerToRootId",
-    inputs: [{ name: "", type: "address", internalType: "address" }],
-    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    inputs: [
+      {
+        name: "",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
     stateMutability: "view",
   },
   {
     type: "function",
     name: "profileSystem",
     inputs: [],
-    outputs: [{ name: "", type: "address", internalType: "address" }],
+    outputs: [
+      {
+        name: "",
+        type: "address",
+        internalType: "address",
+      },
+    ],
     stateMutability: "view",
   },
   {
     type: "function",
-    name: "revokeEndorsement",
-    inputs: [{ name: "tokenId", type: "uint256", internalType: "uint256" }],
+    name: "revokeAttestation",
+    inputs: [
+      {
+        name: "tokenId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
     outputs: [],
     stateMutability: "nonpayable",
   },
   {
     type: "function",
     name: "rootIdentities",
-    inputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    inputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
     outputs: [
       {
         name: "walletAddress",
         type: "address",
         internalType: "address",
       },
-      { name: "displayName", type: "string", internalType: "string" },
-      { name: "tokenId", type: "uint256", internalType: "uint256" },
-      { name: "createdAt", type: "uint256", internalType: "uint256" },
-      { name: "isActive", type: "bool", internalType: "bool" },
+      {
+        name: "displayName",
+        type: "string",
+        internalType: "string",
+      },
+      {
+        name: "tokenId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "createdAt",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "isActive",
+        type: "bool",
+        internalType: "bool",
+      },
     ],
     stateMutability: "view",
   },
@@ -319,19 +629,45 @@ export const IDENTITY_SYSTEM_ABI = [
     type: "function",
     name: "rootToTokenIds",
     inputs: [
-      { name: "", type: "uint256", internalType: "uint256" },
-      { name: "", type: "uint256", internalType: "uint256" },
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
-    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
     stateMutability: "view",
   },
   {
     type: "function",
     name: "safeTransferFrom",
     inputs: [
-      { name: "from", type: "address", internalType: "address" },
-      { name: "to", type: "address", internalType: "address" },
-      { name: "tokenId", type: "uint256", internalType: "uint256" },
+      {
+        name: "from",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "to",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "tokenId",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
     outputs: [],
     stateMutability: "nonpayable",
@@ -340,10 +676,26 @@ export const IDENTITY_SYSTEM_ABI = [
     type: "function",
     name: "safeTransferFrom",
     inputs: [
-      { name: "from", type: "address", internalType: "address" },
-      { name: "to", type: "address", internalType: "address" },
-      { name: "tokenId", type: "uint256", internalType: "uint256" },
-      { name: "data", type: "bytes", internalType: "bytes" },
+      {
+        name: "from",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "to",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "tokenId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "data",
+        type: "bytes",
+        internalType: "bytes",
+      },
     ],
     outputs: [],
     stateMutability: "nonpayable",
@@ -352,8 +704,16 @@ export const IDENTITY_SYSTEM_ABI = [
     type: "function",
     name: "setApprovalForAll",
     inputs: [
-      { name: "operator", type: "address", internalType: "address" },
-      { name: "approved", type: "bool", internalType: "bool" },
+      {
+        name: "operator",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "approved",
+        type: "bool",
+        internalType: "bool",
+      },
     ],
     outputs: [],
     stateMutability: "nonpayable",
@@ -374,21 +734,45 @@ export const IDENTITY_SYSTEM_ABI = [
   {
     type: "function",
     name: "supportsInterface",
-    inputs: [{ name: "interfaceId", type: "bytes4", internalType: "bytes4" }],
-    outputs: [{ name: "", type: "bool", internalType: "bool" }],
+    inputs: [
+      {
+        name: "interfaceId",
+        type: "bytes4",
+        internalType: "bytes4",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "bool",
+        internalType: "bool",
+      },
+    ],
     stateMutability: "view",
   },
   {
     type: "function",
     name: "symbol",
     inputs: [],
-    outputs: [{ name: "", type: "string", internalType: "string" }],
+    outputs: [
+      {
+        name: "",
+        type: "string",
+        internalType: "string",
+      },
+    ],
     stateMutability: "view",
   },
   {
     type: "function",
     name: "tokenTypes",
-    inputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    inputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
     outputs: [
       {
         name: "",
@@ -401,32 +785,98 @@ export const IDENTITY_SYSTEM_ABI = [
   {
     type: "function",
     name: "tokenURI",
-    inputs: [{ name: "tokenId", type: "uint256", internalType: "uint256" }],
-    outputs: [{ name: "", type: "string", internalType: "string" }],
+    inputs: [
+      {
+        name: "tokenId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "string",
+        internalType: "string",
+      },
+    ],
     stateMutability: "view",
   },
   {
     type: "function",
     name: "tokens",
-    inputs: [{ name: "", type: "uint256", internalType: "uint256" }],
-    outputs: [
-      { name: "tokenId", type: "uint256", internalType: "uint256" },
-      { name: "parentRootId", type: "uint256", internalType: "uint256" },
-      { name: "tokenName", type: "string", internalType: "string" },
-      { name: "tokenType", type: "string", internalType: "string" },
-      { name: "tokenValue", type: "bytes", internalType: "bytes" },
-      { name: "about", type: "string", internalType: "string" },
-      { name: "validUntil", type: "uint256", internalType: "uint256" },
-      { name: "createdAt", type: "uint256", internalType: "uint256" },
+    inputs: [
       {
-        name: "totalEndorsementCount",
+        name: "",
         type: "uint256",
         internalType: "uint256",
       },
-      { name: "revokedCount", type: "uint256", internalType: "uint256" },
-      { name: "isFlagged", type: "bool", internalType: "bool" },
-      { name: "flagCount", type: "uint256", internalType: "uint256" },
-      { name: "transferCount", type: "uint256", internalType: "uint256" },
+    ],
+    outputs: [
+      {
+        name: "tokenId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "parentRootId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "tokenName",
+        type: "string",
+        internalType: "string",
+      },
+      {
+        name: "tokenType",
+        type: "string",
+        internalType: "string",
+      },
+      {
+        name: "tokenValue",
+        type: "bytes",
+        internalType: "bytes",
+      },
+      {
+        name: "about",
+        type: "string",
+        internalType: "string",
+      },
+      {
+        name: "validUntil",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "createdAt",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "totalAttestationCount",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "revokedCount",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "isFlagged",
+        type: "bool",
+        internalType: "bool",
+      },
+      {
+        name: "flagCount",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "transferCount",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
     stateMutability: "view",
   },
@@ -434,9 +884,21 @@ export const IDENTITY_SYSTEM_ABI = [
     type: "function",
     name: "transferFrom",
     inputs: [
-      { name: "from", type: "address", internalType: "address" },
-      { name: "to", type: "address", internalType: "address" },
-      { name: "tokenId", type: "uint256", internalType: "uint256" },
+      {
+        name: "from",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "to",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "tokenId",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
     outputs: [],
     stateMutability: "nonpayable",
@@ -445,18 +907,40 @@ export const IDENTITY_SYSTEM_ABI = [
     type: "function",
     name: "transferHistory",
     inputs: [
-      { name: "", type: "uint256", internalType: "uint256" },
-      { name: "", type: "uint256", internalType: "uint256" },
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
-    outputs: [{ name: "", type: "address", internalType: "address" }],
+    outputs: [
+      {
+        name: "",
+        type: "address",
+        internalType: "address",
+      },
+    ],
     stateMutability: "view",
   },
   {
     type: "function",
     name: "transferToken",
     inputs: [
-      { name: "tokenId", type: "uint256", internalType: "uint256" },
-      { name: "sendingTo", type: "address", internalType: "address" },
+      {
+        name: "tokenId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "sendingTo",
+        type: "address",
+        internalType: "address",
+      },
     ],
     outputs: [],
     stateMutability: "nonpayable",
@@ -465,10 +949,24 @@ export const IDENTITY_SYSTEM_ABI = [
     type: "function",
     name: "walletTokens",
     inputs: [
-      { name: "", type: "address", internalType: "address" },
-      { name: "", type: "uint256", internalType: "uint256" },
+      {
+        name: "",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
-    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
     stateMutability: "view",
   },
   {
@@ -523,10 +1021,10 @@ export const IDENTITY_SYSTEM_ABI = [
   },
   {
     type: "event",
-    name: "EndorsementGiven",
+    name: "AttestationGiven",
     inputs: [
       {
-        name: "endorserRootId",
+        name: "attesterRootId",
         type: "uint256",
         indexed: true,
         internalType: "uint256",
@@ -548,10 +1046,10 @@ export const IDENTITY_SYSTEM_ABI = [
   },
   {
     type: "event",
-    name: "EndorsementRevoked",
+    name: "AttestationRevoked",
     inputs: [
       {
-        name: "endorserRootId",
+        name: "attesterRootId",
         type: "uint256",
         indexed: true,
         internalType: "uint256",
@@ -563,7 +1061,7 @@ export const IDENTITY_SYSTEM_ABI = [
         internalType: "uint256",
       },
       {
-        name: "endorsementIndex",
+        name: "attestationIndex",
         type: "uint256",
         indexed: false,
         internalType: "uint256",
@@ -753,78 +1251,229 @@ export const IDENTITY_SYSTEM_ABI = [
     ],
     anonymous: false,
   },
-  // Errors
-  { type: "error", name: "AlreadyEndorsed", inputs: [] },
-  { type: "error", name: "AlreadyFlaggedByRoot", inputs: [] },
-  { type: "error", name: "AlreadyHasRoot", inputs: [] },
-  { type: "error", name: "AlreadyRevoked", inputs: [] },
-  { type: "error", name: "CannotEndorseOwnToken", inputs: [] },
-  { type: "error", name: "CannotFlagOwnToken", inputs: [] },
-  { type: "error", name: "CannotTransferRoot", inputs: [] },
+  {
+    type: "error",
+    name: "AlreadyAttested",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "AlreadyFlaggedByRoot",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "AlreadyHasRoot",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "AlreadyRevoked",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "AttestationExpired",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "CannotAttestOwnToken",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "CannotFlagOwnToken",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "CannotTransferRoot",
+    inputs: [],
+  },
   {
     type: "error",
     name: "ERC721IncorrectOwner",
     inputs: [
-      { name: "sender", type: "address", internalType: "address" },
-      { name: "tokenId", type: "uint256", internalType: "uint256" },
-      { name: "owner", type: "address", internalType: "address" },
+      {
+        name: "sender",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "tokenId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "owner",
+        type: "address",
+        internalType: "address",
+      },
     ],
   },
   {
     type: "error",
     name: "ERC721InsufficientApproval",
     inputs: [
-      { name: "operator", type: "address", internalType: "address" },
-      { name: "tokenId", type: "uint256", internalType: "uint256" },
+      {
+        name: "operator",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "tokenId",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
   },
   {
     type: "error",
     name: "ERC721InvalidApprover",
-    inputs: [{ name: "approver", type: "address", internalType: "address" }],
+    inputs: [
+      {
+        name: "approver",
+        type: "address",
+        internalType: "address",
+      },
+    ],
   },
   {
     type: "error",
     name: "ERC721InvalidOperator",
-    inputs: [{ name: "operator", type: "address", internalType: "address" }],
+    inputs: [
+      {
+        name: "operator",
+        type: "address",
+        internalType: "address",
+      },
+    ],
   },
   {
     type: "error",
     name: "ERC721InvalidOwner",
-    inputs: [{ name: "owner", type: "address", internalType: "address" }],
+    inputs: [
+      {
+        name: "owner",
+        type: "address",
+        internalType: "address",
+      },
+    ],
   },
   {
     type: "error",
     name: "ERC721InvalidReceiver",
-    inputs: [{ name: "receiver", type: "address", internalType: "address" }],
+    inputs: [
+      {
+        name: "receiver",
+        type: "address",
+        internalType: "address",
+      },
+    ],
   },
   {
     type: "error",
     name: "ERC721InvalidSender",
-    inputs: [{ name: "sender", type: "address", internalType: "address" }],
+    inputs: [
+      {
+        name: "sender",
+        type: "address",
+        internalType: "address",
+      },
+    ],
   },
   {
     type: "error",
     name: "ERC721NonexistentToken",
-    inputs: [{ name: "tokenId", type: "uint256", internalType: "uint256" }],
+    inputs: [
+      {
+        name: "tokenId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
   },
-  { type: "error", name: "EndorsementExpired", inputs: [] },
-  { type: "error", name: "InvalidExpiry", inputs: [] },
-  { type: "error", name: "NoActiveEndorsement", inputs: [] },
-  { type: "error", name: "NoRootIdentity", inputs: [] },
-  { type: "error", name: "NotAdmin", inputs: [] },
-  { type: "error", name: "NotHolder", inputs: [] },
-  { type: "error", name: "NotToken", inputs: [] },
-  { type: "error", name: "NotYourEndorsement", inputs: [] },
-  { type: "error", name: "OnlyProfileSystem", inputs: [] },
-  { type: "error", name: "ProfileSystemAlreadySet", inputs: [] },
-  { type: "error", name: "RecipientAlreadyHasProfile", inputs: [] },
-  { type: "error", name: "RootDeactivated", inputs: [] },
-  { type: "error", name: "RootNonTransferable", inputs: [] },
-  { type: "error", name: "SelfTransfer", inputs: [] },
-  { type: "error", name: "TokenExpired", inputs: [] },
-  { type: "error", name: "UseTransferToken", inputs: [] },
-  { type: "error", name: "ZeroAddress", inputs: [] },
+  {
+    type: "error",
+    name: "InvalidExpiry",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "NoActiveAttestation",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "NoRootIdentity",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "NotAdmin",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "NotHolder",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "NotToken",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "NotYourAttestation",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "OnlyProfileSystem",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "ProfileSystemAlreadySet",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "RecipientAlreadyHasProfile",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "RootDeactivated",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "RootNonTransferable",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "SelfTransfer",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "TokenExpired",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "UseTransferToken",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "ZeroAddress",
+    inputs: [],
+  },
 ] as const;
 
 // ProfileSystem ABI
@@ -843,6 +1492,19 @@ export const PROFILE_SYSTEM_ABI = [
   },
   {
     type: "function",
+    name: "cleanupBurnedProfile",
+    inputs: [
+      {
+        name: "tokenId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
     name: "createProfile",
     inputs: [
       {
@@ -850,58 +1512,124 @@ export const PROFILE_SYSTEM_ABI = [
         type: "tuple",
         internalType: "struct DataTypes.ProfileMetadata",
         components: [
-          { name: "name", type: "string", internalType: "string" },
-          { name: "username", type: "string", internalType: "string" },
-          { name: "age", type: "uint256", internalType: "uint256" },
+          {
+            name: "name",
+            type: "string",
+            internalType: "string",
+          },
+          {
+            name: "username",
+            type: "string",
+            internalType: "string",
+          },
           {
             name: "nationality",
             type: "string",
             internalType: "string",
           },
-          { name: "github", type: "string", internalType: "string" },
-          { name: "email", type: "string", internalType: "string" },
-          { name: "discord", type: "string", internalType: "string" },
-          { name: "xDotCom", type: "string", internalType: "string" },
+          {
+            name: "github",
+            type: "string",
+            internalType: "string",
+          },
+          {
+            name: "email",
+            type: "string",
+            internalType: "string",
+          },
+          {
+            name: "discord",
+            type: "string",
+            internalType: "string",
+          },
+          {
+            name: "xDotCom",
+            type: "string",
+            internalType: "string",
+          },
           {
             name: "websitePortfolioLink",
             type: "string",
             internalType: "string",
           },
-          { name: "ens", type: "string", internalType: "string" },
+          {
+            name: "ens",
+            type: "string",
+            internalType: "string",
+          },
         ],
       },
     ],
-    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
     stateMutability: "nonpayable",
   },
   {
     type: "function",
     name: "getProfile",
-    inputs: [{ name: "tokenId", type: "uint256", internalType: "uint256" }],
+    inputs: [
+      {
+        name: "tokenId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
     outputs: [
       {
         name: "",
         type: "tuple",
         internalType: "struct DataTypes.ProfileMetadata",
         components: [
-          { name: "name", type: "string", internalType: "string" },
-          { name: "username", type: "string", internalType: "string" },
-          { name: "age", type: "uint256", internalType: "uint256" },
+          {
+            name: "name",
+            type: "string",
+            internalType: "string",
+          },
+          {
+            name: "username",
+            type: "string",
+            internalType: "string",
+          },
           {
             name: "nationality",
             type: "string",
             internalType: "string",
           },
-          { name: "github", type: "string", internalType: "string" },
-          { name: "email", type: "string", internalType: "string" },
-          { name: "discord", type: "string", internalType: "string" },
-          { name: "xDotCom", type: "string", internalType: "string" },
+          {
+            name: "github",
+            type: "string",
+            internalType: "string",
+          },
+          {
+            name: "email",
+            type: "string",
+            internalType: "string",
+          },
+          {
+            name: "discord",
+            type: "string",
+            internalType: "string",
+          },
+          {
+            name: "xDotCom",
+            type: "string",
+            internalType: "string",
+          },
           {
             name: "websitePortfolioLink",
             type: "string",
             internalType: "string",
           },
-          { name: "ens", type: "string", internalType: "string" },
+          {
+            name: "ens",
+            type: "string",
+            internalType: "string",
+          },
         ],
       },
     ],
@@ -910,8 +1638,20 @@ export const PROFILE_SYSTEM_ABI = [
   {
     type: "function",
     name: "hasMintedProfile",
-    inputs: [{ name: "", type: "address", internalType: "address" }],
-    outputs: [{ name: "", type: "bool", internalType: "bool" }],
+    inputs: [
+      {
+        name: "",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "bool",
+        internalType: "bool",
+      },
+    ],
     stateMutability: "view",
   },
   {
@@ -930,37 +1670,98 @@ export const PROFILE_SYSTEM_ABI = [
   {
     type: "function",
     name: "profiles",
-    inputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    inputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
     outputs: [
-      { name: "name", type: "string", internalType: "string" },
-      { name: "username", type: "string", internalType: "string" },
-      { name: "age", type: "uint256", internalType: "uint256" },
-      { name: "nationality", type: "string", internalType: "string" },
-      { name: "github", type: "string", internalType: "string" },
-      { name: "email", type: "string", internalType: "string" },
-      { name: "discord", type: "string", internalType: "string" },
-      { name: "xDotCom", type: "string", internalType: "string" },
+      {
+        name: "name",
+        type: "string",
+        internalType: "string",
+      },
+      {
+        name: "username",
+        type: "string",
+        internalType: "string",
+      },
+      {
+        name: "nationality",
+        type: "string",
+        internalType: "string",
+      },
+      {
+        name: "github",
+        type: "string",
+        internalType: "string",
+      },
+      {
+        name: "email",
+        type: "string",
+        internalType: "string",
+      },
+      {
+        name: "discord",
+        type: "string",
+        internalType: "string",
+      },
+      {
+        name: "xDotCom",
+        type: "string",
+        internalType: "string",
+      },
       {
         name: "websitePortfolioLink",
         type: "string",
         internalType: "string",
       },
-      { name: "ens", type: "string", internalType: "string" },
+      {
+        name: "ens",
+        type: "string",
+        internalType: "string",
+      },
     ],
     stateMutability: "view",
   },
   {
     type: "function",
     name: "usernameTaken",
-    inputs: [{ name: "", type: "string", internalType: "string" }],
-    outputs: [{ name: "", type: "bool", internalType: "bool" }],
+    inputs: [
+      {
+        name: "",
+        type: "string",
+        internalType: "string",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "bool",
+        internalType: "bool",
+      },
+    ],
     stateMutability: "view",
   },
   {
     type: "function",
     name: "usernameToProfileTokenId",
-    inputs: [{ name: "", type: "string", internalType: "string" }],
-    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    inputs: [
+      {
+        name: "",
+        type: "string",
+        internalType: "string",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
     stateMutability: "view",
   },
   {
@@ -988,11 +1789,39 @@ export const PROFILE_SYSTEM_ABI = [
     ],
     anonymous: false,
   },
-  // Errors
-  { type: "error", name: "AlreadyMintedProfile", inputs: [] },
-  { type: "error", name: "InvalidProfileUsernameChar", inputs: [] },
-  { type: "error", name: "ProfileNameRequired", inputs: [] },
-  { type: "error", name: "ProfileUsernameTaken", inputs: [] },
-  { type: "error", name: "ProfileUsernameTooLong", inputs: [] },
-  { type: "error", name: "ProfileUsernameTooShort", inputs: [] },
+  {
+    type: "error",
+    name: "AlreadyMintedProfile",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "InvalidProfileUsernameChar",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "OnlyIdentitySystem",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "ProfileNameRequired",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "ProfileUsernameTaken",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "ProfileUsernameTooLong",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "ProfileUsernameTooShort",
+    inputs: [],
+  },
 ] as const;

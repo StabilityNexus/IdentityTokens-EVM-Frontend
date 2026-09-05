@@ -3,30 +3,30 @@
 import React, { useState, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { TokenList } from "@/components/dashboard/TokenList";
-import { EndorseModal } from "@/components/forms/EndorseModal";
+import { AttestModal } from "@/components/forms/AttestModal";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
 import {
   useTokenDetail,
-  useActiveEndorsementCount,
+  useActiveAttestationCount,
   useTokenOwner,
   useRecentTokens,
   useMultipleTokenDetails,
-  useMultipleEndorsementCounts,
+  useMultipleAttestationCounts,
   useMultipleTokenOwners,
 } from "@/hooks/useIdentityReads";
 import { formatExpiry, truncateAddress } from "@/lib/helpers";
 
 function SearchedToken({
   tokenId,
-  onEndorse,
+  onAttest,
   onRevoke,
 }: {
   tokenId: bigint;
-  onEndorse: (tokenId: bigint, tokenName: string) => void;
+  onAttest: (tokenId: bigint, tokenName: string) => void;
   onRevoke: (tokenId: string) => void;
 }) {
   const { data: token } = useTokenDetail(tokenId);
-  const { data: endorsementCount } = useActiveEndorsementCount(tokenId);
+  const { data: attestationCount } = useActiveAttestationCount(tokenId);
   const { data: owner } = useTokenOwner(tokenId);
 
   if (!token) {
@@ -61,7 +61,7 @@ function SearchedToken({
   const tokenName = tokenTuple[2] || "Unnamed";
   const tokenType = tokenTuple[3] || "Unknown";
   const validUntil = tokenTuple[6];
-  const endorseCount = Number(endorsementCount ?? 0n);
+  const attestCount = Number(attestationCount ?? 0n);
   const ownerStr = owner ? truncateAddress(owner as string) : "…";
 
   const tokenData = [
@@ -70,7 +70,7 @@ function SearchedToken({
       name: tokenName,
       type: tokenType,
       expiresIn: formatExpiry(validUntil),
-      endorsements: endorseCount,
+      attestations: attestCount,
       owner: ownerStr,
     },
   ];
@@ -79,17 +79,17 @@ function SearchedToken({
     <TokenList
       variant="discover"
       tokens={tokenData}
-      onEndorse={() => onEndorse(tokenId, tokenName)}
+      onAttest={() => onAttest(tokenId, tokenName)}
       onRevoke={(id) => onRevoke(id)}
     />
   );
 }
 
 function RecentTokensFeed({
-  onEndorse,
+  onAttest,
   onRevoke,
 }: {
-  onEndorse: (tokenId: bigint, tokenName: string) => void;
+  onAttest: (tokenId: bigint, tokenName: string) => void;
   onRevoke: (tokenId: string) => void;
 }) {
   const { data: recentEvents, isLoading: isEventsLoading } = useRecentTokens();
@@ -110,7 +110,7 @@ function RecentTokensFeed({
   const { data: tokenDetails } = useMultipleTokenDetails(
     tokenIds.length > 0 ? tokenIds : undefined
   );
-  const { data: endorsementCounts } = useMultipleEndorsementCounts(
+  const { data: attestationCounts } = useMultipleAttestationCounts(
     tokenIds.length > 0 ? tokenIds : undefined
   );
   const { data: tokenOwners } = useMultipleTokenOwners(
@@ -122,12 +122,12 @@ function RecentTokensFeed({
 
     return tokenIds.map((id: bigint, i: number) => {
       const detail = tokenDetails?.[i];
-      const endorseResult = endorsementCounts?.[i];
+      const attestResult = attestationCounts?.[i];
       const ownerResult = tokenOwners?.[i];
 
       const token = detail?.status === "success" ? detail.result : undefined;
-      const endorseCount =
-        endorseResult?.status === "success" ? Number(endorseResult.result) : 0;
+      const attestCount =
+        attestResult?.status === "success" ? Number(attestResult.result) : 0;
       const owner =
         ownerResult?.status === "success"
           ? (ownerResult.result as string)
@@ -158,11 +158,11 @@ function RecentTokensFeed({
         name: tokenTuple ? tokenTuple[2] || "Unnamed" : "Loading…",
         type: tokenTuple ? tokenTuple[3] || "Unknown" : "…",
         expiresIn: tokenTuple ? formatExpiry(tokenTuple[6]) : "…",
-        endorsements: endorseCount,
+        attestations: attestCount,
         owner: ownerStr,
       };
     });
-  }, [tokenIds, tokenDetails, endorsementCounts, tokenOwners]);
+  }, [tokenIds, tokenDetails, attestationCounts, tokenOwners]);
 
   if (isEventsLoading) {
     return (
@@ -196,10 +196,10 @@ function RecentTokensFeed({
     <TokenList
       variant="discover"
       tokens={tokenData}
-      onEndorse={(id) => {
+      onAttest={(id) => {
         const numericId = BigInt(id.replace(/^#/, ""));
         const token = tokenData.find((t) => t.tokenId === id);
-        onEndorse(numericId, token?.name || "");
+        onAttest(numericId, token?.name || "");
       }}
       onRevoke={(id) => onRevoke(id)}
     />
@@ -217,7 +217,7 @@ export default function DiscoverPage() {
     return /^\d+$/.test(cleaned) ? BigInt(cleaned) : null;
   }, [query]);
 
-  const [endorseTarget, setEndorseTarget] = useState<{
+  const [attestTarget, setAttestTarget] = useState<{
     tokenId: bigint;
     tokenName: string;
   } | null>(null);
@@ -227,14 +227,14 @@ export default function DiscoverPage() {
   // A "connect your wallet" notice already renders inline below, so a
   // disconnected wallet just makes these no-ops rather than firing a blocking
   // alert().
-  const handleEndorse = (tokenId: bigint, tokenName: string) => {
+  const handleAttest = (tokenId: bigint, tokenName: string) => {
     if (!isConnected) return;
-    setEndorseTarget({ tokenId, tokenName });
+    setAttestTarget({ tokenId, tokenName });
   };
 
   const handleRevoke = (tokenIdStr: string) => {
     if (!isConnected) return;
-    console.log("Revoking endorsement for:", tokenIdStr);
+    console.log("Revoking attestation for:", tokenIdStr);
   };
 
   return (
@@ -242,7 +242,7 @@ export default function DiscoverPage() {
       {!isConnected && (
         <div className="rounded-2xl border border-white/10 bg-card-bg p-6 text-center">
           <p className="font-utsaha text-gray-400">
-            Connect your wallet to endorse or revoke tokens
+            Connect your wallet to attest or revoke tokens
           </p>
         </div>
       )}
@@ -251,20 +251,20 @@ export default function DiscoverPage() {
       {searchedTokenId !== null ? (
         <SearchedToken
           tokenId={searchedTokenId}
-          onEndorse={handleEndorse}
+          onAttest={handleAttest}
           onRevoke={handleRevoke}
         />
       ) : (
-        <RecentTokensFeed onEndorse={handleEndorse} onRevoke={handleRevoke} />
+        <RecentTokensFeed onAttest={handleAttest} onRevoke={handleRevoke} />
       )}
 
-      {/* Endorse Modal */}
-      {endorseTarget && (
-        <EndorseModal
+      {/* Attest Modal */}
+      {attestTarget && (
+        <AttestModal
           isOpen={true}
-          onClose={() => setEndorseTarget(null)}
-          tokenId={endorseTarget.tokenId}
-          tokenName={endorseTarget.tokenName}
+          onClose={() => setAttestTarget(null)}
+          tokenId={attestTarget.tokenId}
+          tokenName={attestTarget.tokenName}
         />
       )}
     </main>

@@ -8,7 +8,7 @@ import {
 import Badge from "../Badge";
 import { IDCardProps } from "@/lib/types";
 
-const getRankFromEndorsers = (
+const getRankFromAttesters = (
   count: number
 ): "bronze" | "silver" | "gold" | "platinum" | "diamond" | "champion" => {
   if (count < 10) return "bronze";
@@ -21,10 +21,9 @@ const getRankFromEndorsers = (
 
 const IDCard: React.FC<IDCardProps> = ({
   name = "Khushal Agarwal",
-  age = 20,
   nationality = "Indian",
   walletAddress = "0x9cea81B9D2E900..",
-  endorsers = 128,
+  attesters = 128,
   className = "",
   telegramUrl,
   linkedinUrl,
@@ -58,16 +57,6 @@ const IDCard: React.FC<IDCardProps> = ({
         </p>
       </div>
 
-      {/* Age Section */}
-      <div className="absolute top-[125px] left-[20px] sm:top-[118px] sm:left-[30px] md:top-[130px] md:left-[40px] lg:top-[106px] lg:left-[18px]">
-        <p className="mb-0.5 font-comfortaa text-[8px] font-normal text-black sm:text-[9px] md:mb-1 md:text-[9.5px] lg:mb-0.5 lg:text-[8px]">
-          Age
-        </p>
-        <p className="font-utsaha text-[20px] leading-tight text-white sm:text-[24px] md:text-[26.5px] lg:text-[20px]">
-          {age}
-        </p>
-      </div>
-
       {/* Nationality Section */}
       <div className="absolute top-[125px] left-[90px] sm:top-[118px] sm:left-[110px] md:top-[130px] md:left-[130px] lg:top-[106px] lg:left-[84px]">
         <p className="mb-0.5 font-comfortaa text-[8px] font-normal text-black sm:text-[9px] md:mb-1 md:text-[9.5px] lg:mb-0.5 lg:text-[8px]">
@@ -81,15 +70,15 @@ const IDCard: React.FC<IDCardProps> = ({
       {/* Rank Badge */}
       <div className="absolute top-[50px] right-[35px] flex flex-col items-center sm:top-[58px] sm:right-[42px] md:top-[64px] md:right-[51px] lg:top-[44px] lg:right-[30px]">
         <Badge
-          rank={getRankFromEndorsers(endorsers)}
+          rank={getRankFromAttesters(attesters)}
           size={48}
           className="sm:h-[52px] sm:w-[52px] md:h-[57px] md:w-[57px] lg:h-[44px] lg:w-[44px]"
         />
         <p className="mt-0.5 font-utsaha text-[11px] text-white sm:text-[12px] md:mt-1 md:text-[13px] lg:mt-0.5 lg:text-[11px]">
-          Endorsers
+          Attesters
         </p>
         <p className="font-utsaha text-[15px] text-white sm:text-[16px] md:text-[17.7px] lg:text-[16px]">
-          {endorsers}
+          {attesters}
         </p>
       </div>
 

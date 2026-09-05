@@ -23,7 +23,7 @@ const MetricItem: React.FC<MetricItemProps> = ({
 );
 
 const Metrics: React.FC<MetricsProps> = ({
-  totalEndorsements = 70,
+  totalAttestations = 70,
   activeTokens = 14,
   socials = 3,
   badgesEarned = "300+ Trust Received",
@@ -34,7 +34,7 @@ const Metrics: React.FC<MetricsProps> = ({
       className={`w-full overflow-hidden rounded-2xl border border-card-border bg-card-bg px-6 py-6 md:px-10 md:py-8 ${className}`}
     >
       <div className="grid grid-cols-2 gap-x-6 gap-y-6 md:gap-x-10 lg:grid-cols-4">
-        <MetricItem label="Total Endorsements" value={totalEndorsements} />
+        <MetricItem label="Total Attestations" value={totalAttestations} />
         <MetricItem label="Active Tokens" value={activeTokens} />
         <MetricItem label="Socials" value={socials} />
         <MetricItem

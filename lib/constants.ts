@@ -12,7 +12,7 @@ export const CONNECT_BTN_LABEL = {
 export const FEATURES_DATA = [
   {
     image: "/cards/FeatureCard1.png",
-    title: "Build and Earn Reputation from Endorsements",
+    title: "Build and Earn Reputation from Attestations",
   },
   {
     image: "/cards/FeatureCard2.png",
@@ -20,7 +20,7 @@ export const FEATURES_DATA = [
   },
   {
     image: "/cards/FeatureCard3.png",
-    title: "Level up your credibility with every endorsement.",
+    title: "Level up your credibility with every attestation.",
   },
   {
     image: "/cards/FeatureCard4.png",
@@ -44,7 +44,7 @@ export const STEPS_DATA = [
   },
   {
     id: 2,
-    title: "Get Endorsed!",
+    title: "Get Attested!",
     image: "/assets/Step2.png",
   },
   {

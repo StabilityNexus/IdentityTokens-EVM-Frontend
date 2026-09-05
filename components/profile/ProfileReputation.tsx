@@ -8,7 +8,7 @@ import { RankName } from "@/lib/types";
 
 interface ProfileReputationProps {
   trustScore: number;
-  totalEndorsements: number;
+  totalAttestations: number;
   rank: RankName;
   className?: string;
 }
@@ -18,14 +18,14 @@ const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 export function ProfileReputation({
   trustScore,
-  totalEndorsements,
+  totalAttestations,
   rank,
   className,
 }: ProfileReputationProps) {
   const uid = useId().replace(/:/g, "");
   const score = Math.max(0, Math.min(100, Math.round(trustScore)));
   const dashOffset = CIRCUMFERENCE * (1 - score / 100);
-  const progress = getNextRankProgress(totalEndorsements);
+  const progress = getNextRankProgress(totalAttestations);
 
   return (
     <ProfileCard title="Reputation" className={className}>
@@ -75,10 +75,10 @@ export function ProfileReputation({
         {/* Headline figure */}
         <div className="w-full rounded-xl border border-profile-border bg-profile-surface-raised px-4 py-3.5 text-center">
           <p className="text-gradient-profile font-utsaha text-3xl">
-            {totalEndorsements}
+            {totalAttestations}
           </p>
           <p className="mt-0.5 font-utsaha text-xs text-profile-muted">
-            Total endorsement{totalEndorsements === 1 ? "" : "s"} received
+            Total attestation{totalAttestations === 1 ? "" : "s"} received
           </p>
         </div>
 

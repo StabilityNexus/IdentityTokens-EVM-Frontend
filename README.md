@@ -44,14 +44,14 @@
 <div align="center">
 <h1>Decentralized Identity Tokens</h1>
 </div>
-Decentralized Identity Tokens let anyone create and own a digital identity on the blockchain - no government, no institution, no middleman required. Think of it like a passport you issue to yourself, stored permanently on-chain, that anyone in the world can endorse to vouch for its authenticity.
+Decentralized Identity Tokens let anyone create and own a digital identity on the blockchain - no government, no institution, no middleman required. Think of it like a passport you issue to yourself, stored permanently on-chain, that anyone in the world can attest to, vouching for its authenticity.
 
 ## 🚀 Features
 
 - **Feature 1**: Create and own a digital identity on the blockchain
 - **Feature 2**: No government, no institution, no middleman required
 - **Feature 3**: Store identity permanently on-chain
-- **Feature 4**: Anyone in the world can endorse to vouch for its authenticity
+- **Feature 4**: Anyone in the world can attest to it, vouching for its authenticity
 
 ---
 

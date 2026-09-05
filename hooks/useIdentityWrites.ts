@@ -93,8 +93,8 @@ export function useCreateToken() {
   };
 }
 
-/** Endorse a token with a user-selected duration (in seconds) */
-export function useEndorseToken() {
+/** Attest a token with a user-selected duration (in seconds) */
+export function useAttestToken() {
   const {
     writeContract,
     data: txHash,
@@ -111,7 +111,7 @@ export function useEndorseToken() {
     writeContract({
       address: IDENTITY_SYSTEM_ADDRESS,
       abi: IDENTITY_SYSTEM_ABI,
-      functionName: "endorseToken",
+      functionName: "attestToken",
       args: [tokenId, durationSeconds],
     });
   };
@@ -128,8 +128,8 @@ export function useEndorseToken() {
   };
 }
 
-/** Revoke your active endorsement on a token */
-export function useRevokeEndorsement() {
+/** Revoke your active attestation on a token */
+export function useRevokeAttestation() {
   const {
     writeContract,
     data: txHash,
@@ -146,7 +146,7 @@ export function useRevokeEndorsement() {
     writeContract({
       address: IDENTITY_SYSTEM_ADDRESS,
       abi: IDENTITY_SYSTEM_ABI,
-      functionName: "revokeEndorsement",
+      functionName: "revokeAttestation",
       args: [tokenId],
     });
   };
@@ -287,7 +287,6 @@ export function useCreateProfile() {
   const write = (data: {
     name: string;
     username: string;
-    age: bigint;
     nationality: string;
     github: string;
     email: string;

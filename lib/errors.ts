@@ -30,15 +30,15 @@ const CONTRACT_ERROR_MESSAGES: Record<string, string> = {
   NotToken: "This is not a valid token for this operation.",
   TokenExpired: "This token has expired.",
 
-  // Endorsement
-  CannotEndorseOwnToken: "You cannot endorse your own token.",
-  AlreadyEndorsed: "You have already endorsed this token.",
-  NotYourEndorsement: "This is not your endorsement.",
-  AlreadyRevoked: "This endorsement has already been revoked.",
-  EndorsementExpired: "This endorsement has expired.",
+  // Attestation
+  CannotAttestOwnToken: "You cannot attest your own token.",
+  AlreadyAttested: "You have already attested this token.",
+  NotYourAttestation: "This is not your attestation.",
+  AlreadyRevoked: "This attestation has already been revoked.",
+  AttestationExpired: "This attestation has expired.",
   TokenExpiresTooSoon:
-    "The token expires too soon for this endorsement duration.",
-  NoActiveEndorsement: "No active endorsement found.",
+    "The token expires too soon for this attestation duration.",
+  NoActiveAttestation: "No active attestation found.",
 
   // Flag
   AlreadyFlaggedByRoot: "You have already flagged this token.",

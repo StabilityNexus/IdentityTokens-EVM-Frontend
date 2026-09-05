@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import DashboardMetrics from "@/components/dashboard/DashboardMetrics";
 import { TokenList } from "@/components/dashboard/TokenList";
+import { AttestersModal } from "@/components/profile/AttestersModal";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
 import {
   useMultipleTokenDetails,
@@ -24,6 +25,11 @@ const DashboardPage = () => {
     error,
     address,
   } = useIdentityGate();
+
+  const [attestersFor, setAttestersFor] = useState<{
+    tokenId: bigint;
+    name: string;
+  } | null>(null);
 
   // Batch-fetch token details, types, and attestation counts
   const { data: tokenDetails } = useMultipleTokenDetails(
@@ -224,8 +230,26 @@ const DashboardPage = () => {
           </div>
         )}
 
-        <TokenList variant="tokens" tokens={tokenListData} />
+        <TokenList
+          variant="tokens"
+          tokens={tokenListData}
+          onViewAll={(id) =>
+            setAttestersFor({
+              tokenId: BigInt(id.replace(/^#/, "")),
+              name: tokenListData.find((t) => t.tokenId === id)?.name || "",
+            })
+          }
+        />
       </div>
+
+      {attestersFor && (
+        <AttestersModal
+          isOpen
+          onClose={() => setAttestersFor(null)}
+          tokenId={attestersFor.tokenId}
+          tokenName={attestersFor.name}
+        />
+      )}
     </div>
   );
 };

@@ -1,8 +1,10 @@
 export const IDENTITY_SYSTEM_ADDRESS =
-  "0xB0E21B4901DD434A2e49C983529eB7094bf4D978" as const;
+  (process.env.NEXT_PUBLIC_IDENTITY_SYSTEM_ADDRESS as `0x${string}`) ||
+  ("0x82b049805626202D04c7450b386732B34180D634" as const);
 
 export const PROFILE_SYSTEM_ADDRESS =
-  "0xDc9058F434299c619Dc6f885F850ee133327DA4e" as const;
+  (process.env.NEXT_PUBLIC_PROFILE_SYSTEM_ADDRESS as `0x${string}`) ||
+  ("0x34bC039aD24cd2c13b093847612180FdbEAdC78a" as const);
 
 export * from "./types.responses";
 

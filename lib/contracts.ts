@@ -408,39 +408,41 @@ export const IDENTITY_SYSTEM_ABI = [
         internalType: "struct DataTypes.AttesterView[]",
         components: [
           {
-            name: "rootId",
-            type: "uint256",
-            internalType: "uint256",
-          },
-          {
-            name: "wallet",
-            type: "address",
-            internalType: "address",
+            name: "attestation",
+            type: "tuple",
+            internalType: "struct DataTypes.Attestation",
+            components: [
+              {
+                name: "attesterTokenId",
+                type: "uint256",
+                internalType: "uint256",
+              },
+              {
+                name: "attesterAddress",
+                type: "address",
+                internalType: "address",
+              },
+              {
+                name: "timestamp",
+                type: "uint256",
+                internalType: "uint256",
+              },
+              {
+                name: "revokedAt",
+                type: "uint256",
+                internalType: "uint256",
+              },
+              {
+                name: "expiresAt",
+                type: "uint256",
+                internalType: "uint256",
+              },
+            ],
           },
           {
             name: "displayName",
             type: "string",
             internalType: "string",
-          },
-          {
-            name: "profileTokenId",
-            type: "uint256",
-            internalType: "uint256",
-          },
-          {
-            name: "timestamp",
-            type: "uint256",
-            internalType: "uint256",
-          },
-          {
-            name: "revokedAt",
-            type: "uint256",
-            internalType: "uint256",
-          },
-          {
-            name: "expiresAt",
-            type: "uint256",
-            internalType: "uint256",
           },
         ],
       },

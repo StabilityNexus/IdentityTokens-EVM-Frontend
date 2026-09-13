@@ -42,6 +42,7 @@ export function TokenCard({
   onRevoke,
   onAttest,
   onViewAll,
+  readOnly = false,
 }: TokenCardProps) {
   const rank = getRankFromAttestations(attestations);
   const [isTokenFormOpen, setIsTokenFormOpen] = React.useState(false);
@@ -112,17 +113,21 @@ export function TokenCard({
                       <Copy size={16} />
                       <span>Copy ID</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className="cursor-pointer gap-2 hover:bg-white/10 focus:bg-white/5 focus:text-white"
-                      onClick={() => setIsTokenFormOpen(true)}
-                    >
-                      <Edit size={16} />
-                      <span>Edit Token</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="cursor-pointer gap-2 text-red-400 hover:bg-white/10 focus:bg-white/5 focus:text-red-400">
-                      <Flame size={16} />
-                      <span>Burn Token</span>
-                    </DropdownMenuItem>
+                    {!readOnly && (
+                      <>
+                        <DropdownMenuItem
+                          className="cursor-pointer gap-2 hover:bg-white/10 focus:bg-white/5 focus:text-white"
+                          onClick={() => setIsTokenFormOpen(true)}
+                        >
+                          <Edit size={16} />
+                          <span>Edit Token</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="cursor-pointer gap-2 text-red-400 hover:bg-white/10 focus:bg-white/5 focus:text-red-400">
+                          <Flame size={16} />
+                          <span>Burn Token</span>
+                        </DropdownMenuItem>
+                      </>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
@@ -235,17 +240,21 @@ export function TokenCard({
                         <Copy size={16} />
                         <span>Copy ID</span>
                       </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="cursor-pointer gap-2 hover:bg-white/10 focus:bg-white/5 focus:text-white"
-                        onClick={() => setIsTokenFormOpen(true)}
-                      >
-                        <Edit size={16} />
-                        <span>Edit Token</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="cursor-pointer gap-2 text-red-400 hover:bg-white/10 focus:bg-white/5 focus:text-red-400">
-                        <Flame size={16} />
-                        <span>Burn Token</span>
-                      </DropdownMenuItem>
+                      {!readOnly && (
+                        <>
+                          <DropdownMenuItem
+                            className="cursor-pointer gap-2 hover:bg-white/10 focus:bg-white/5 focus:text-white"
+                            onClick={() => setIsTokenFormOpen(true)}
+                          >
+                            <Edit size={16} />
+                            <span>Edit Token</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="cursor-pointer gap-2 text-red-400 hover:bg-white/10 focus:bg-white/5 focus:text-red-400">
+                            <Flame size={16} />
+                            <span>Burn Token</span>
+                          </DropdownMenuItem>
+                        </>
+                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
@@ -255,12 +264,14 @@ export function TokenCard({
         </div>
       </div>
 
-      <TokenForm
-        isOpen={isTokenFormOpen}
-        onClose={() => setIsTokenFormOpen(false)}
-        tokenName={name}
-        tokenId={BigInt(tokenId.replace(/^#/, ""))}
-      />
+      {!readOnly && (
+        <TokenForm
+          isOpen={isTokenFormOpen}
+          onClose={() => setIsTokenFormOpen(false)}
+          tokenName={name}
+          tokenId={BigInt(tokenId.replace(/^#/, ""))}
+        />
+      )}
     </>
   );
 }

@@ -78,17 +78,6 @@ export function useTokensForRoot(rootId: bigint | undefined) {
   });
 }
 
-/** Get active attestations for a token */
-export function useActiveAttestations(tokenId: bigint | undefined) {
-  return useReadContract({
-    address: IDENTITY_SYSTEM_ADDRESS,
-    abi: IDENTITY_SYSTEM_ABI,
-    functionName: "getActiveAttestations",
-    args: tokenId !== undefined ? [tokenId] : undefined,
-    query: { enabled: tokenId !== undefined },
-  });
-}
-
 /** Get active attestation count for a token */
 export function useActiveAttestationCount(tokenId: bigint | undefined) {
   return useReadContract({
@@ -278,21 +267,6 @@ export function useMultipleAttestationCounts(
     address: IDENTITY_SYSTEM_ADDRESS,
     abi: IDENTITY_SYSTEM_ABI,
     functionName: "getActiveAttestationCount" as const,
-    args: [id] as const,
-  }));
-
-  return useReadContracts({
-    contracts,
-    query: { enabled: !!tokenIds && tokenIds.length > 0 },
-  });
-}
-
-/** Batch-fetch profile metadata for multiple profile token IDs */
-export function useMultipleProfiles(tokenIds: readonly bigint[] | undefined) {
-  const contracts = (tokenIds ?? []).map((id) => ({
-    address: PROFILE_SYSTEM_ADDRESS,
-    abi: PROFILE_SYSTEM_ABI,
-    functionName: "getProfile" as const,
     args: [id] as const,
   }));
 

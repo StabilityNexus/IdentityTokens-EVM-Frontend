@@ -2,13 +2,9 @@
 
 import React, { useId, useMemo, useState } from "react";
 import Link from "next/link";
-import { ExternalLink, ShieldCheck } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
-import { Avatar } from "@/components/ui/Avatar";
-import {
-  useAttestersDetailed,
-  useMultipleProfiles,
-} from "@/hooks/useIdentityReads";
+import { useAttestersDetailed } from "@/hooks/useIdentityReads";
 import { getEtherscanAddressUrl } from "@/lib/errors";
 import { formatExpiry, formatTimeAgo, truncateAddress } from "@/lib/helpers";
 import { AttesterView } from "@/lib/types.responses";
@@ -24,9 +20,9 @@ interface AttestersModalProps {
 
 type Status = "active" | "revoked" | "expired";
 
-function statusOf(attester: AttesterView): Status {
-  if (attester.revokedAt > 0n) return "revoked";
-  if (attester.expiresAt <= BigInt(Math.floor(Date.now() / 1000)))
+function statusOf({ attestation }: AttesterView): Status {
+  if (attestation.revokedAt > 0n) return "revoked";
+  if (attestation.expiresAt <= BigInt(Math.floor(Date.now() / 1000)))
     return "expired";
   return "active";
 }
@@ -60,26 +56,6 @@ export function AttestersModal({
     [data]
   );
   const total = Number(data?.[1] ?? 0n);
-
-  // Resolve @usernames for the attesters that actually hold a profile. The
-  // detailed view gives us the token id; only the username needs a second read.
-  const profileTokenIds = useMemo(
-    () => attesters.map((a) => a.profileTokenId).filter((id) => id > 0n),
-    [attesters]
-  );
-  const { data: profiles } = useMultipleProfiles(profileTokenIds);
-
-  const usernameByTokenId = useMemo(() => {
-    const map = new Map<bigint, string>();
-    profileTokenIds.forEach((id, index) => {
-      const result = profiles?.[index];
-      if (result?.status === "success") {
-        const username = (result.result as { username?: string })?.username;
-        if (username) map.set(id, username);
-      }
-    });
-    return map;
-  }, [profileTokenIds, profiles]);
 
   return (
     <Modal
@@ -143,9 +119,8 @@ export function AttestersModal({
           ) : (
             attesters.map((attester, index) => (
               <AttesterRow
-                key={`${attester.rootId}-${index}`}
+                key={`${attester.attestation.attesterTokenId}-${index}`}
                 attester={attester}
-                username={usernameByTokenId.get(attester.profileTokenId)}
               />
             ))
           )}
@@ -155,16 +130,17 @@ export function AttestersModal({
   );
 }
 
-function AttesterRow({
-  attester,
-  username,
-}: {
-  attester: AttesterView;
-  username?: string;
-}) {
+function AttesterRow({ attester }: { attester: AttesterView }) {
+  const { attestation } = attester;
   const status = statusOf(attester);
-  const name =
-    attester.displayName?.trim() || truncateAddress(attester.wallet, 8, 6);
+  const wallet = attestation.attesterAddress;
+
+  // `displayName` is the name the wallet chose on its root identity -- the only
+  // name this list shows. A profile username is a separate, opt-in thing and is
+  // deliberately not surfaced here: every attester has a root identity, but a
+  // profile is optional, so a username would be blank for most of this list.
+  const displayName = attester.displayName?.trim();
+  const name = displayName || truncateAddress(wallet, 8, 6);
 
   return (
     <div
@@ -174,13 +150,19 @@ function AttesterRow({
       )}
       style={{ backgroundColor: "var(--color-modal-inner-bg)" }}
     >
-      <Avatar seed={attester.wallet} size={36} shape="squircle" />
-
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <span className="truncate font-utsaha text-sm text-white">
+          {/* The attester's wallet view, not their profile: this list is about
+              who vouched, and their public on-chain holdings are what backs
+              that up. `/<address>` is resolved client-side by
+              `NotFoundRedirect`, since a static export cannot pre-render a
+              route per wallet. */}
+          <Link
+            href={`/${wallet}`}
+            className="truncate font-utsaha text-sm text-white transition-colors hover:text-brand-blue hover:underline"
+          >
             {name}
-          </span>
+          </Link>
           <span
             className={cn(
               "shrink-0 rounded-full border px-2 py-0.5 font-utsaha text-[10px] uppercase",
@@ -192,32 +174,27 @@ function AttesterRow({
         </div>
 
         <p className="truncate font-utsaha text-xs text-gray-400">
-          {username ? `@${username} · ` : ""}
-          {formatTimeAgo(attester.timestamp)}
+          {displayName && (
+            <span className="font-mono">
+              {truncateAddress(wallet)}
+              {" · "}
+            </span>
+          )}
+          {formatTimeAgo(attestation.timestamp)}
           {status === "active" &&
-            ` · expires in ${formatExpiry(attester.expiresAt)}`}
+            ` · expires in ${formatExpiry(attestation.expiresAt)}`}
         </p>
       </div>
 
-      {username ? (
-        <Link
-          href={`/profile?u=${username}`}
-          className="shrink-0 rounded-lg p-2 text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
-          aria-label={`View ${name}'s profile`}
-        >
-          <ShieldCheck size={15} />
-        </Link>
-      ) : (
-        <a
-          href={getEtherscanAddressUrl(attester.wallet)}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="shrink-0 rounded-lg p-2 text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
-          aria-label={`View ${name} on Etherscan`}
-        >
-          <ExternalLink size={15} />
-        </a>
-      )}
+      <a
+        href={getEtherscanAddressUrl(wallet)}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="shrink-0 rounded-lg p-2 text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
+        aria-label={`View ${name} on Etherscan`}
+      >
+        <ExternalLink size={15} />
+      </a>
     </div>
   );
 }

@@ -1,12 +1,26 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { useAccount } from "wagmi";
 import { useTypewriter } from "@/hooks/useTypewriter";
 import { HERO_WORDS } from "@/lib/constants";
 
 export default function Hero() {
   const displayedText = useTypewriter(HERO_WORDS);
+  const router = useRouter();
+  const { isConnected } = useAccount();
+  const [isShaking, setIsShaking] = useState(false);
+
+  const handleBuildYourIdentity = () => {
+    if (!isConnected) {
+      setIsShaking(true);
+      return;
+    }
+    router.push("/dashboard");
+  };
 
   return (
     <section className="relative flex min-h-screen w-full flex-col items-center bg-landing-bg dark:bg-landing-bg-dark">
@@ -62,12 +76,20 @@ export default function Hero() {
 
         {/* Centered CTA Button below IDCard and Paragraph */}
         <div className="z-10 mt-4 flex w-full justify-center md:mt-6">
-          <Link
-            href="/dashboard"
-            className="inline-flex items-center justify-center rounded-xl bg-brand-green px-6 py-3 font-utsaha text-lg text-dashboard-bg shadow-md transition-transform duration-200 ease-out hover:scale-[1.02] hover:bg-brand-green/90 active:scale-[0.98] md:px-8 md:py-3.5 md:text-xl"
+          <motion.button
+            type="button"
+            onClick={handleBuildYourIdentity}
+            animate={
+              isShaking ? { x: [0, -10, 10, -8, 8, -4, 4, 0] } : { x: 0 }
+            }
+            transition={{ duration: 0.4 }}
+            onAnimationComplete={() => setIsShaking(false)}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="inline-flex items-center justify-center rounded-xl bg-brand-green px-6 py-3 font-utsaha text-lg text-dashboard-bg shadow-md hover:bg-brand-green/90 md:px-8 md:py-3.5 md:text-xl"
           >
             Build Your Identity
-          </Link>
+          </motion.button>
         </div>
       </div>
     </section>

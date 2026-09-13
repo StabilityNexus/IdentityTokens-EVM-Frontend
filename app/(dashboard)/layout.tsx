@@ -1,4 +1,8 @@
-import React, { Suspense } from "react";
+"use client";
+
+import React, { Suspense, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAccount } from "wagmi";
 import { DashboardSidebar } from "@/components/layout/SideBar";
 import { DashboardNavbar } from "@/components/layout/DashboardNavBar";
 
@@ -7,6 +11,25 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const router = useRouter();
+  const { isConnected, status } = useAccount();
+
+  // wagmi restores a persisted session asynchronously, so isConnected is
+  // briefly false on load even for an already-connected wallet. Wait until
+  // that resolves before deciding to send the user back to the landing page.
+  const isResolvingConnection =
+    status === "connecting" || status === "reconnecting";
+
+  useEffect(() => {
+    if (!isResolvingConnection && !isConnected) {
+      router.replace("/");
+    }
+  }, [isResolvingConnection, isConnected, router]);
+
+  if (isResolvingConnection || !isConnected) {
+    return <div className="h-screen bg-dashboard-bg" />;
+  }
+
   return (
     <div className="flex h-screen overflow-hidden bg-dashboard-bg">
       {/* Sidebar */}

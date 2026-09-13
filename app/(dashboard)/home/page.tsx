@@ -3,7 +3,7 @@
 import React, { useMemo, useState } from "react";
 import Metrics from "@/components/dashboard/Metrics";
 import { TokenList } from "@/components/dashboard/TokenList";
-import { AttestersModal } from "@/components/profile/AttestersModal";
+import { AttestersModal } from "@/components/attestations/AttestersModal";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
 import {
   useMultipleTokenDetails,

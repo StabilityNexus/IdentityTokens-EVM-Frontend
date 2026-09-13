@@ -4,7 +4,7 @@ import React, { useState, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { TokenList } from "@/components/dashboard/TokenList";
 import { AttestModal } from "@/components/forms/AttestModal";
-import { AttestersModal } from "@/components/profile/AttestersModal";
+import { AttestersModal } from "@/components/attestations/AttestersModal";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
 import {
   useTokenDetail,

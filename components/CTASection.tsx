@@ -19,7 +19,7 @@ const CTASection = () => {
         </p>
 
         {/* --- Footer Area (Logos) --- */}
-        <div className="mt-auto flex w-full flex-row items-center justify-between px-6 pb-8 md:px-20 md:pb-16">
+        <div className="mt-auto flex w-full flex-row items-center justify-between px-6 pb-8 md:px-20 md:pb-8">
           <div className="flex items-center gap-2 md:gap-3">
             <span className="relative h-6 w-6 md:h-12 md:w-12">
               {/* Logo Icon — always use the black logo in CTA (light gradient bg in light, black bg in dark) */}
@@ -95,6 +95,88 @@ const CTASection = () => {
                 width={40}
                 height={40}
                 className="h-6 w-6 object-contain md:h-10 md:w-10"
+              />
+            </Link>
+          </div>
+        </div>
+
+        {/* Privacy Policy & Support Us */}
+        <div className="mb-2 flex flex-wrap items-center justify-center gap-3 md:mb-10 md:gap-4">
+          <Link
+            href="/privacy-policy"
+            className="font-utsaha text-xs text-black/60 underline decoration-black/30 underline-offset-2 transition-colors hover:text-black hover:decoration-black md:text-sm"
+          >
+            Privacy Policy
+          </Link>
+
+          <span className="text-xs text-black/30 md:text-sm">•</span>
+
+          <span className="font-utsaha text-xs text-black/60 md:text-sm">
+            Support Us
+          </span>
+
+          <div className="flex items-center gap-2 md:gap-3">
+            <Link
+              href="https://docs.stability.nexus/about-us/fund-us/donate"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transform opacity-50 transition-all hover:scale-110 hover:opacity-100"
+              title="Donate via Stability Nexus"
+            >
+              <Image
+                src="/stability.svg"
+                alt="Donate via Stability Nexus"
+                width={24}
+                height={24}
+                className="h-4 w-4 object-contain md:h-6 md:w-6"
+              />
+            </Link>
+
+            <Link
+              href="https://www.patreon.com/cw/AOSSIE"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transform opacity-50 transition-all hover:scale-110 hover:opacity-100"
+              title="Patreon"
+            >
+              <Image
+                src="/socials/Patreon.svg"
+                alt="Patreon"
+                width={24}
+                height={24}
+                className="h-4 w-4 object-contain md:h-6 md:w-6"
+              />
+            </Link>
+
+            <Link
+              href="https://opencollective.com/aossie"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transform opacity-50 transition-all hover:scale-110 hover:opacity-100"
+              title="Open Collective"
+            >
+              <Image
+                src="/socials/opencollective-icon.svg"
+                alt="Open Collective"
+                width={24}
+                height={24}
+                className="h-4 w-4 object-contain md:h-6 md:w-6"
+              />
+            </Link>
+
+            <Link
+              href="https://buymeacoffee.com/aossie"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transform opacity-50 transition-all hover:scale-110 hover:opacity-100"
+              title="Buy Me a Coffee"
+            >
+              <Image
+                src="/socials/buymeacoffee.svg"
+                alt="Buy Me a Coffee"
+                width={24}
+                height={24}
+                className="h-4 w-4 object-contain md:h-6 md:w-6"
               />
             </Link>
           </div>

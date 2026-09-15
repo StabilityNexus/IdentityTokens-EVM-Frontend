@@ -7,6 +7,7 @@ import { FiBell, FiPlus } from "react-icons/fi";
 import { CreateTokenModal } from "../forms/CreateTokenModal";
 import { CreateProfileModal } from "../forms/CreateProfileModal";
 import { SearchBar } from "../dashboard/SearchBar";
+import ConnectBtn from "../ui/ConnectBtn";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
 
 export function DashboardNavbar() {
@@ -131,35 +132,41 @@ export function DashboardNavbar() {
 
           {/* ── Create Profile / New Token / icon-only on /discover ──
               Public profiles are read-only surfaces, so no create action. */}
-          {!isUserProfile && (
-            <Button
-              className={`flex items-center justify-center rounded-full border-none font-utsaha shadow-none transition-transform duration-200 ease-out hover:scale-[1.02] active:scale-[0.98] ${
-                isDashboard && hasProfile
-                  ? "bg-landing-bg text-dashboard-bg hover:bg-landing-bg/90"
-                  : "bg-brand-green text-dashboard-bg hover:bg-brand-green/90"
-              } ${
-                isDiscover
-                  ? "h-10 w-10 p-0"
-                  : "gap-2.5 px-4 py-2.5 text-base md:px-5 md:text-xl"
-              } ${!isConnected || isAwaitingProfile ? "cursor-not-allowed opacity-50" : ""}`}
-              aria-label={
-                isDiscover
-                  ? "New Token"
-                  : isDashboard
-                    ? hasProfile
-                      ? "Visit Profile"
-                      : "Create Profile"
-                    : undefined
-              }
-              onClick={handleButtonClick}
-              disabled={!isConnected || isAwaitingProfile}
-            >
-              {!(isDashboard && hasProfile) && (
-                <FiPlus size={20} className="shrink-0" strokeWidth={3} />
-              )}
-              {!isDiscover && <span>{getButtonLabel()}</span>}
-            </Button>
-          )}
+          {!isUserProfile &&
+            (!isConnected ? (
+              // /home and /discover are browsable without a wallet, but the
+              // dashboard shell itself needs to offer a way to connect —
+              // otherwise this action button is just permanently dead.
+              <ConnectBtn />
+            ) : (
+              <Button
+                className={`flex items-center justify-center rounded-full border-none font-utsaha shadow-none transition-transform duration-200 ease-out hover:scale-[1.02] active:scale-[0.98] ${
+                  isDashboard && hasProfile
+                    ? "bg-landing-bg text-dashboard-bg hover:bg-landing-bg/90"
+                    : "bg-brand-green text-dashboard-bg hover:bg-brand-green/90"
+                } ${
+                  isDiscover
+                    ? "h-10 w-10 p-0"
+                    : "gap-2.5 px-4 py-2.5 text-base md:px-5 md:text-xl"
+                } ${isAwaitingProfile ? "cursor-not-allowed opacity-50" : ""}`}
+                aria-label={
+                  isDiscover
+                    ? "New Token"
+                    : isDashboard
+                      ? hasProfile
+                        ? "Visit Profile"
+                        : "Create Profile"
+                      : undefined
+                }
+                onClick={handleButtonClick}
+                disabled={isAwaitingProfile}
+              >
+                {!(isDashboard && hasProfile) && (
+                  <FiPlus size={20} className="shrink-0" strokeWidth={3} />
+                )}
+                {!isDiscover && <span>{getButtonLabel()}</span>}
+              </Button>
+            ))}
         </div>
       </nav>
 

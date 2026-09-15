@@ -2,21 +2,23 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { motion } from "framer-motion";
 import { useAccount } from "wagmi";
 import { useTypewriter } from "@/hooks/useTypewriter";
 import { HERO_WORDS } from "@/lib/constants";
+import { useConnectPrompt } from "@/contexts/ConnectPromptContext";
 
 export default function Hero() {
   const displayedText = useTypewriter(HERO_WORDS);
   const router = useRouter();
   const { isConnected } = useAccount();
-  const [isShaking, setIsShaking] = useState(false);
+  const { promptConnect } = useConnectPrompt();
 
   const handleBuildYourIdentity = () => {
     if (!isConnected) {
-      setIsShaking(true);
+      // Draw attention to the navbar's ConnectBtn instead of this button —
+      // this button isn't what the user needs to interact with next.
+      promptConnect();
       return;
     }
     router.push("/dashboard");
@@ -79,11 +81,6 @@ export default function Hero() {
           <motion.button
             type="button"
             onClick={handleBuildYourIdentity}
-            animate={
-              isShaking ? { x: [0, -10, 10, -8, 8, -4, 4, 0] } : { x: 0 }
-            }
-            transition={{ duration: 0.4 }}
-            onAnimationComplete={() => setIsShaking(false)}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             className="inline-flex items-center justify-center rounded-xl bg-brand-green px-6 py-3 font-utsaha text-lg text-dashboard-bg shadow-md hover:bg-brand-green/90 md:px-8 md:py-3.5 md:text-xl"

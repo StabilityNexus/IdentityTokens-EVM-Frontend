@@ -1,11 +1,14 @@
 "use client";
 
 import { CONNECT_BTN_LABEL } from "@/lib/constants";
+import { useConnectPrompt } from "@/contexts/ConnectPromptContext";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { motion } from "framer-motion";
 import Image from "next/image";
 
 function ConnectBtn() {
+  const { isShaking, clearShake } = useConnectPrompt();
+
   return (
     <ConnectButton.Custom>
       {({
@@ -24,6 +27,11 @@ function ConnectBtn() {
           return (
             <motion.button
               onClick={openConnectModal}
+              animate={
+                isShaking ? { x: [0, -10, 10, -8, 8, -4, 4, 0] } : { x: 0 }
+              }
+              transition={{ duration: 0.4 }}
+              onAnimationComplete={clearShake}
               whileHover={{ scale: 1.035 }}
               whileTap={{ scale: 0.98 }}
               className="rounded-xl bg-emerald-500 px-4 py-2 font-bold text-white shadow-md transition-shadow duration-200 hover:shadow-emerald-300/40 dark:bg-emerald-400 dark:text-black dark:hover:shadow-emerald-400/30"

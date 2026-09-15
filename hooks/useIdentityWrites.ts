@@ -1,11 +1,14 @@
 "use client";
 
-import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import {
+  useChainId,
+  useWriteContract,
+  useWaitForTransactionReceipt,
+} from "wagmi";
 import { toHex } from "viem";
 import {
-  IDENTITY_SYSTEM_ADDRESS,
+  getContractAddresses,
   IDENTITY_SYSTEM_ABI,
-  PROFILE_SYSTEM_ADDRESS,
   PROFILE_SYSTEM_ABI,
 } from "@/lib/contracts";
 
@@ -13,6 +16,7 @@ import {
 
 /** Create a root identity (auto-called before first action if needed) */
 export function useCreateRootIdentity() {
+  const { identitySystem } = getContractAddresses(useChainId());
   const {
     writeContract,
     data: txHash,
@@ -27,7 +31,7 @@ export function useCreateRootIdentity() {
 
   const write = (displayName: string) => {
     writeContract({
-      address: IDENTITY_SYSTEM_ADDRESS,
+      address: identitySystem,
       abi: IDENTITY_SYSTEM_ABI,
       functionName: "createRootIdentity",
       args: [displayName],
@@ -48,6 +52,7 @@ export function useCreateRootIdentity() {
 
 /** Create a new identity token */
 export function useCreateToken() {
+  const { identitySystem } = getContractAddresses(useChainId());
   const {
     writeContract,
     data: txHash,
@@ -68,7 +73,7 @@ export function useCreateToken() {
     validUntil: bigint;
   }) => {
     writeContract({
-      address: IDENTITY_SYSTEM_ADDRESS,
+      address: identitySystem,
       abi: IDENTITY_SYSTEM_ABI,
       functionName: "createToken",
       args: [
@@ -95,6 +100,7 @@ export function useCreateToken() {
 
 /** Attest a token with a user-selected duration (in seconds) */
 export function useAttestToken() {
+  const { identitySystem } = getContractAddresses(useChainId());
   const {
     writeContract,
     data: txHash,
@@ -109,7 +115,7 @@ export function useAttestToken() {
 
   const write = (tokenId: bigint, durationSeconds: bigint) => {
     writeContract({
-      address: IDENTITY_SYSTEM_ADDRESS,
+      address: identitySystem,
       abi: IDENTITY_SYSTEM_ABI,
       functionName: "attestToken",
       args: [tokenId, durationSeconds],
@@ -130,6 +136,7 @@ export function useAttestToken() {
 
 /** Revoke your active attestation on a token */
 export function useRevokeAttestation() {
+  const { identitySystem } = getContractAddresses(useChainId());
   const {
     writeContract,
     data: txHash,
@@ -144,7 +151,7 @@ export function useRevokeAttestation() {
 
   const write = (tokenId: bigint) => {
     writeContract({
-      address: IDENTITY_SYSTEM_ADDRESS,
+      address: identitySystem,
       abi: IDENTITY_SYSTEM_ABI,
       functionName: "revokeAttestation",
       args: [tokenId],
@@ -165,6 +172,7 @@ export function useRevokeAttestation() {
 
 /** Flag a token */
 export function useFlagToken() {
+  const { identitySystem } = getContractAddresses(useChainId());
   const {
     writeContract,
     data: txHash,
@@ -179,7 +187,7 @@ export function useFlagToken() {
 
   const write = (tokenId: bigint) => {
     writeContract({
-      address: IDENTITY_SYSTEM_ADDRESS,
+      address: identitySystem,
       abi: IDENTITY_SYSTEM_ABI,
       functionName: "flagToken",
       args: [tokenId],
@@ -200,6 +208,7 @@ export function useFlagToken() {
 
 /** Burn (permanently destroy) a token */
 export function useBurnToken() {
+  const { identitySystem } = getContractAddresses(useChainId());
   const {
     writeContract,
     data: txHash,
@@ -214,7 +223,7 @@ export function useBurnToken() {
 
   const write = (tokenId: bigint) => {
     writeContract({
-      address: IDENTITY_SYSTEM_ADDRESS,
+      address: identitySystem,
       abi: IDENTITY_SYSTEM_ABI,
       functionName: "burnToken",
       args: [tokenId],
@@ -235,6 +244,7 @@ export function useBurnToken() {
 
 /** Transfer a token to another wallet */
 export function useTransferToken() {
+  const { identitySystem } = getContractAddresses(useChainId());
   const {
     writeContract,
     data: txHash,
@@ -249,7 +259,7 @@ export function useTransferToken() {
 
   const write = (tokenId: bigint, sendingTo: `0x${string}`) => {
     writeContract({
-      address: IDENTITY_SYSTEM_ADDRESS,
+      address: identitySystem,
       abi: IDENTITY_SYSTEM_ABI,
       functionName: "transferToken",
       args: [tokenId, sendingTo],
@@ -272,6 +282,7 @@ export function useTransferToken() {
 
 /** Create a profile (calls ProfileSystem which internally mints via IdentitySystem) */
 export function useCreateProfile() {
+  const { profileSystem } = getContractAddresses(useChainId());
   const {
     writeContract,
     data: txHash,
@@ -287,6 +298,7 @@ export function useCreateProfile() {
   const write = (data: {
     name: string;
     username: string;
+    age: bigint;
     nationality: string;
     github: string;
     email: string;
@@ -296,7 +308,7 @@ export function useCreateProfile() {
     ens: string;
   }) => {
     writeContract({
-      address: PROFILE_SYSTEM_ADDRESS,
+      address: profileSystem,
       abi: PROFILE_SYSTEM_ABI,
       functionName: "createProfile",
       args: [data],

@@ -178,6 +178,9 @@ export function CreateProfileModal({
     createProfile.write({
       name: formData.name.trim(),
       username: formData.username.trim(),
+      // No age input in the UI yet — contract requires the field, so send 0
+      // until product decides whether/how to collect it.
+      age: 0n,
       nationality: formData.nationality,
       github: formData.github.trim(),
       email: formData.email.trim(),
@@ -202,7 +205,6 @@ export function CreateProfileModal({
   // every keystroke, and a lazy useState initialiser would only ever pick once
   // per mount rather than once per open.
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (isOpen) setAvatarId((current) => current ?? getRandomAvatarId());
   }, [isOpen]);
 

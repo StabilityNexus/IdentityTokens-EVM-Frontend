@@ -59,30 +59,30 @@ Decentralized Identity Tokens let anyone create and own a digital identity on th
 
 ### Frontend
 
-- React / Next.js
+- Next.js (App Router, Turbopack)
+- React 19
 - TypeScript
 - TailwindCSS
+- RainbowKit & Wagmi v2 / Viem
 
-### Blockchain
+### Blockchain & Smart Contracts
 
-- Solidity
-- foundry
-- Wagmi
-- OpenZeppelin
+- Solidity 0.8.24
+- Foundry (Forge, Cast, Anvil)
+- OpenZeppelin Contracts
 
 ---
 
-## ✅ Project Checklist
+# ✅ Project Checklist
 
-TODO: Complete applicable items based on your project type
+## 📜 Deployed Smart Contracts
 
-- [ ] **The protocol** (if applicable):
-  - [ ] has been described and formally specified in a paper.
-  - [ ] has had its main properties mathematically proven.
-  - [ ] has been formally verified.
-- [ ] **The smart contracts** (if applicable):
-  - [ ] were thoroughly reviewed by at least two knights of The Stable Order.
-  - [ ] were deployed to: [Add deployment details]
+The official smart contracts for Decentralized Identity Tokens are deployed on **Ethereum Sepolia (v0.0.3)**:
+
+| Contract           | Address                                      | Explorer Link                                                                                        |
+| :----------------- | :------------------------------------------- | :--------------------------------------------------------------------------------------------------- |
+| **IdentitySystem** | `0x82b049805626202D04c7450b386732B34180D634` | [View on Etherscan](https://sepolia.etherscan.io/address/0x82b049805626202D04c7450b386732B34180D634) |
+| **ProfileSystem**  | `0x34bC039aD24cd2c13b093847612180FdbEAdC78a` | [View on Etherscan](https://sepolia.etherscan.io/address/0x34bC039aD24cd2c13b093847612180FdbEAdC78a) |
 
 ---
 
@@ -93,80 +93,152 @@ TODO: Complete applicable items based on your project type
 
 ---
 
-## 🏗️ Architecture Diagram
+## 🏗️ Architecture & Workflow
 
 To understand the development process, contribution flow, and project structure, please refer to the detailed workflow guide:
 
 👉 [View Workflow](docs/workflow.md)
 
-## 🔄 User Flow
+## 🔄 User Journeys
 
-TODO: Add user flow diagrams showing how users interact with your application
+1. **Create Root Identity**:
+   - Connect your Web3 wallet (MetaMask / Rainbow).
+   - Enter your desired display name and click **Create Root Identity**.
+   - Your wallet mints the non-transferable Root Identity token bound to your address.
 
-> [User Flow Diagram Placeholder]
+2. **Mint Profile Token**:
+   - Navigate to your identity dashboard.
+   - Mint a Profile Token linked to your root identity.
+   - Configure user profile metadata (avatar, bio, custom attributes).
 
-### Key User Journeys
-
-TODO: Document main user flows:
-
-1. **User Journey 1**: Description
-   - Step 1
-   - Step 2
-   - Step 3
-
-2. **User Journey 2**: Description
-   - Step 1
-   - Step 2
-   - Step 3
-
-3. **User Journey 3**: Description
-   - Step 1
-   - Step 2
-   - Step 3
+3. **Attestations & Trust**:
+   - Issue an attestation to another token by entering their token ID and validity duration.
+   - Browse attestations to see who has vouched for a token and verify attestation validity.
 
 ---
 
-## 🍀 Getting Started
+## 🍀 Getting Started (Local Setup)
+
+Follow this step-by-step guide to run and develop the frontend locally against an Anvil node or public testnet.
 
 ### Prerequisites
 
-TODO: List what developers need installed
+- **Node.js**: v18.x or higher
+- **Package Manager**: `npm`, `pnpm`, or `yarn`
+- **Foundry**: For local blockchain testing (`anvil`, `forge`, `cast`). Install via:
+  ```bash
+  curl -L https://foundry.paradigm.xyz | bash
+  foundryup
+  ```
+- **Web3 Wallet**: MetaMask, Rabby, or any browser wallet.
 
-- Node.js 18+
-- npm / yarn / pnpm
+---
 
-### Installation
-
-#### 1. Clone the Repository
+### Step 1: Clone the Repository & Install Dependencies
 
 ```bash
-git clone https://github.com/StabilityNexus/IdentityTokens-EVM-Frontend/
+git clone https://github.com/StabilityNexus/IdentityTokens-EVM-Frontend.git
 cd IdentityTokens-EVM-Frontend
+
+npm install
 ```
 
-#### 2. Install Dependencies
+---
+
+### Step 2: Configure Environment Variables
+
+1. Copy `.env.example` to create your `.env.local` file:
+
+   ```bash
+   cp .env.example .env.local
+   ```
+
+2. Open `.env.local`:
+
+   ```env
+   # WalletConnect / Reown Project ID (free from https://cloud.reown.com/)
+   NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=YOUR_PROJECT_ID
+
+   # Contract Addresses (Defaults to Sepolia v0.0.3)
+   NEXT_PUBLIC_IDENTITY_SYSTEM_ADDRESS=0x82b049805626202D04c7450b386732B34180D634
+   NEXT_PUBLIC_PROFILE_SYSTEM_ADDRESS=0x34bC039aD24cd2c13b093847612180FdbEAdC78a
+   ```
+
+---
+
+### Step 3: Choose Your Development Environment
+
+#### Option A: Local Development with Anvil (Recommended — Instant & Zero Gas)
+
+Running a local Anvil node allows you to test transactions instantly with 10,000 free test ETH.
+
+1. **Start Anvil node in a separate terminal**:
+
+   ```bash
+   anvil --block-time 1
+   ```
+
+   _Anvil starts at `http://127.0.0.1:8545` with Chain ID `31337`._
+
+2. **Deploy Contracts locally** (from your smart contracts repository):
+
+   ```bash
+   cd path/to/IdentityTokens-EVM-Contracts
+   make deploy-anvil
+   ```
+
+   _Default deterministic local addresses:_
+   - `IdentitySystem`: `0x5FbDB2315678afecb367f032d93F642f64180aa3`
+   - `ProfileSystem`: `0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512`
+
+3. **Update `.env.local` in this frontend repo**:
+
+   ```env
+   NEXT_PUBLIC_IDENTITY_SYSTEM_ADDRESS=0x5FbDB2315678afecb367f032d93F642f64180aa3
+   NEXT_PUBLIC_PROFILE_SYSTEM_ADDRESS=0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512
+   ```
+
+4. **Configure MetaMask for Anvil**:
+   - **Add Network Manually**:
+     - Network Name: `Anvil Localhost`
+     - RPC URL: `http://127.0.0.1:8545`
+     - Chain ID: `31337`
+     - Currency Symbol: `ETH`
+   - **Import Test Account**:
+     - Account 1 Private Key: `0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d`
+     - Account 2 Private Key: `0x5de4111afa1a4b94908f83103eb2f93f4e4e66e3e29f4561990a825b428b4a3a`
+
+> ⚠️ **Troubleshooting MetaMask "Nonce too high" Error:**  
+> When you restart `anvil`, block and nonce counters reset. If transactions remain pending or fail with nonce mismatch:  
+> In MetaMask: Go to **Settings** -> **Advanced** -> Click **"Clear activity tab data"** (or **"Reset Account"**).
+
+---
+
+#### Option B: Anvil Sepolia Forking (Test Live State with Zero Gas)
+
+To interact with already minted tokens and state on Sepolia without paying testnet gas, fork Sepolia locally:
 
 ```bash
-npm install
-# or
-yarn install
-# or
-pnpm install
+anvil --fork-url https://ethereum-sepolia-rpc.publicnode.com
 ```
 
-#### 3. Run the Development Server
+Keep the default Sepolia contract addresses in `.env.local`, and point MetaMask to `http://127.0.0.1:8545` (Chain ID `31337`).
+
+---
+
+#### Option C: Public Ethereum Sepolia or Polygon Testnets
+
+Simply connect your wallet to **Ethereum Sepolia** or **Polygon**. Ensure your wallet has testnet gas from a faucet.
+
+---
+
+### Step 4: Start the Frontend
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
 ```
 
-#### 4. Open your Browser
-
-Navigate to [http://localhost:3000](http://localhost:3000) to see the application.
+Open [http://localhost:3000](http://localhost:3000) in your browser. Connect your wallet using RainbowKit (select **Foundry** if testing on Anvil) and start interacting with Decentralized Identity Tokens!
 
 ---
 

@@ -1,33 +1,10 @@
-import { sepolia, foundry } from "wagmi/chains";
+export const IDENTITY_SYSTEM_ADDRESS =
+  (process.env.NEXT_PUBLIC_IDENTITY_SYSTEM_ADDRESS as `0x${string}`) ||
+  ("0x82b049805626202D04c7450b386732B34180D634" as const);
 
-type ContractAddresses = {
-  identitySystem: `0x${string}`;
-  profileSystem: `0x${string}`;
-};
-
-// Per-chain contract addresses. Sepolia holds the live deployment;
-// the foundry (Anvil, chain id 31337) entry matches the deterministic
-// addresses produced by `make deploy-anvil` in the Contracts repo.
-const CONTRACT_ADDRESSES: Record<number, ContractAddresses> = {
-  [sepolia.id]: {
-    identitySystem: "0xB0E21B4901DD434A2e49C983529eB7094bf4D978",
-    profileSystem: "0xDc9058F434299c619Dc6f885F850ee133327DA4e",
-  },
-  [foundry.id]: {
-    identitySystem: "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
-    profileSystem: "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
-  },
-};
-
-/** Resolve contract addresses for the given chain id, falling back to Sepolia. */
-export function getContractAddresses(
-  chainId: number | undefined
-): ContractAddresses {
-  return (
-    (chainId !== undefined ? CONTRACT_ADDRESSES[chainId] : undefined) ??
-    CONTRACT_ADDRESSES[sepolia.id]
-  );
-}
+export const PROFILE_SYSTEM_ADDRESS =
+  (process.env.NEXT_PUBLIC_PROFILE_SYSTEM_ADDRESS as `0x${string}`) ||
+  ("0x34bC039aD24cd2c13b093847612180FdbEAdC78a" as const);
 
 export * from "./types.responses";
 

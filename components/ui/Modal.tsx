@@ -98,7 +98,7 @@ export function Modal({
 
   return (
     <div
-      className="animate-in fade-in fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm duration-200"
+      className="motion-safe:animate-in motion-safe:fade-in fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm motion-safe:duration-200"
       onClick={onClose}
       role="presentation"
     >
@@ -108,7 +108,7 @@ export function Modal({
         aria-modal="true"
         aria-labelledby={titleId}
         className={cn(
-          "animate-in zoom-in-95 relative w-full rounded-2xl p-6 shadow-2xl duration-200 md:p-8",
+          "motion-safe:animate-in motion-safe:zoom-in-95 relative w-full rounded-2xl p-6 shadow-2xl motion-safe:duration-200 md:p-8",
           widthClassName
         )}
         style={{

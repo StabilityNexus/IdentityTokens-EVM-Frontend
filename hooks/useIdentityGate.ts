@@ -52,6 +52,7 @@ export function useIdentityGate() {
     data: rawProfileTokenId,
     isLoading: isProfileTokenIdLoading,
     error: profileTokenIdError,
+    refetch: refetchProfileTokenId,
   } = useProfileTokenId(address);
 
   // The contract returns 0 when the wallet holds no profile.
@@ -167,5 +168,6 @@ export function useIdentityGate() {
     refetchRootId,
     refetchHasProfile,
     refetchWalletTokens,
+    refetchProfileTokenId,
   };
 }

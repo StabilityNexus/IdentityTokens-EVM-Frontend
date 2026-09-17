@@ -76,8 +76,13 @@ export function CreateProfileModal({
     "idle" | "creating-root" | "creating-profile"
   >("idle");
 
-  const { hasRootIdentity, address, refetchHasProfile, refetchRootId } =
-    useIdentityGate();
+  const {
+    hasRootIdentity,
+    address,
+    refetchHasProfile,
+    refetchRootId,
+    refetchProfileTokenId,
+  } = useIdentityGate();
 
   const { data: isUsernameTaken, isLoading: isCheckingUsername } =
     useUsernameTaken(
@@ -275,6 +280,7 @@ export function CreateProfileModal({
   useEffect(() => {
     if (step === "creating-profile" && createProfile.isSuccess) {
       refetchHasProfile();
+      refetchProfileTokenId();
       const timer = setTimeout(() => {
         onSuccess?.();
         closeRef.current();

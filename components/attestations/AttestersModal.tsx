@@ -33,6 +33,8 @@ const STATUS_STYLES: Record<Status, string> = {
   expired: "border-white/10 bg-white/5 text-gray-400",
 };
 
+const PAGE_SIZE = 50n;
+
 /**
  * Who has attested a token. Readable by anyone — no wallet required — so a
  * visitor can see who vouched for a profile before trusting it.
@@ -44,11 +46,20 @@ export function AttestersModal({
   tokenName,
 }: AttestersModalProps) {
   const [activeOnly, setActiveOnly] = useState(true);
+  const [offset, setOffset] = useState(0n);
   const titleId = useId();
+
+  // Reset offset when the filter or token changes so we always start from page 0.
+  const resetOffset = (nextActiveOnly: boolean) => {
+    setActiveOnly(nextActiveOnly);
+    setOffset(0n);
+  };
 
   const { data, isLoading, error } = useAttestersDetailed(
     isOpen ? tokenId : undefined,
-    activeOnly
+    activeOnly,
+    offset,
+    PAGE_SIZE
   );
 
   const attesters = useMemo(
@@ -56,6 +67,7 @@ export function AttestersModal({
     [data]
   );
   const total = Number(data?.[1] ?? 0n);
+  const hasMore = Number(offset) + attesters.length < total;
 
   return (
     <Modal
@@ -65,7 +77,7 @@ export function AttestersModal({
       title="Attestations"
       subtitle={
         tokenName
-          ? `Who has vouched for “${tokenName}”`
+          ? `Who has vouched for "${tokenName}"`
           : "Who has vouched for this token"
       }
       widthClassName="max-w-lg"
@@ -73,7 +85,8 @@ export function AttestersModal({
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between gap-3">
           <p className="font-utsaha text-sm text-gray-400">
-            {activeOnly ? "Active" : "All"} · {total}
+            {activeOnly ? "Active" : "All"} · {attesters.length}
+            {total > attesters.length ? ` of ${total}` : ""}
           </p>
 
           <div className="flex rounded-lg border border-white/10 p-0.5">
@@ -86,7 +99,7 @@ export function AttestersModal({
               <button
                 key={label}
                 type="button"
-                onClick={() => setActiveOnly(value)}
+                onClick={() => resetOffset(value)}
                 aria-pressed={activeOnly === value}
                 className={cn(
                   "rounded-md px-3 py-1 font-utsaha text-xs transition-colors",
@@ -125,6 +138,34 @@ export function AttestersModal({
             ))
           )}
         </div>
+
+        {/* Pagination controls — only shown when there are more rows to fetch */}
+        {(offset > 0n || hasMore) && (
+          <div className="flex items-center justify-between gap-2 border-t border-white/8 pt-3">
+            <button
+              type="button"
+              disabled={offset === 0n || isLoading}
+              onClick={() =>
+                setOffset((o) => (o >= PAGE_SIZE ? o - PAGE_SIZE : 0n))
+              }
+              className="rounded-lg px-3 py-1 font-utsaha text-xs text-gray-400 transition-colors hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              ← Prev
+            </button>
+            <span className="font-utsaha text-xs text-gray-500">
+              {Number(offset) + 1}–{Number(offset) + attesters.length} of{" "}
+              {total}
+            </span>
+            <button
+              type="button"
+              disabled={!hasMore || isLoading}
+              onClick={() => setOffset((o) => o + PAGE_SIZE)}
+              className="rounded-lg px-3 py-1 font-utsaha text-xs text-gray-400 transition-colors hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Next →
+            </button>
+          </div>
+        )}
       </div>
     </Modal>
   );

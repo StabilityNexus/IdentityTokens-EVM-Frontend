@@ -16,9 +16,12 @@ export function formatExpiry(validUntil: bigint): string {
   const diff = Number(validUntil) - now;
   if (diff <= 0) return "Expired";
   if (diff < 86400) return "< 1 day";
-  if (diff < 2592000) return `${Math.floor(diff / 86400)} days`;
-  if (diff < 31536000) return `${Math.floor(diff / 2592000)} months`;
-  return `${Math.floor(diff / 31536000)} years`;
+  const days = Math.floor(diff / 86400);
+  if (diff < 2592000) return `${days} ${days === 1 ? "day" : "days"}`;
+  const months = Math.floor(diff / 2592000);
+  if (diff < 31536000) return `${months} ${months === 1 ? "month" : "months"}`;
+  const years = Math.floor(diff / 31536000);
+  return `${years} ${years === 1 ? "year" : "years"}`;
 }
 
 /**
@@ -32,9 +35,13 @@ export function formatTimeAgo(timestamp: bigint): string {
   if (diff < 60) return "just now";
   if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
   if (diff < 86400) return `${Math.floor(diff / 3600)} hr ago`;
-  if (diff < 2592000) return `${Math.floor(diff / 86400)} days ago`;
-  if (diff < 31536000) return `${Math.floor(diff / 2592000)} months ago`;
-  return `${Math.floor(diff / 31536000)} years ago`;
+  const days = Math.floor(diff / 86400);
+  if (diff < 2592000) return `${days} ${days === 1 ? "day" : "days"} ago`;
+  const months = Math.floor(diff / 2592000);
+  if (diff < 31536000)
+    return `${months} ${months === 1 ? "month" : "months"} ago`;
+  const years = Math.floor(diff / 31536000);
+  return `${years} ${years === 1 ? "year" : "years"} ago`;
 }
 
 export function getCardVariant(

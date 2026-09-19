@@ -35,10 +35,6 @@ const STATUS_STYLES: Record<Status, string> = {
 
 const PAGE_SIZE = 50n;
 
-/**
- * Who has attested a token. Readable by anyone — no wallet required — so a
- * visitor can see who vouched for a profile before trusting it.
- */
 export function AttestersModal({
   isOpen,
   onClose,
@@ -176,10 +172,7 @@ function AttesterRow({ attester }: { attester: AttesterView }) {
   const status = statusOf(attester);
   const wallet = attestation.attesterAddress;
 
-  // `displayName` is the name the wallet chose on its root identity -- the only
-  // name this list shows. A profile username is a separate, opt-in thing and is
-  // deliberately not surfaced here: every attester has a root identity, but a
-  // profile is optional, so a username would be blank for most of this list.
+  // The root identity name, not the optional profile username.
   const displayName = attester.displayName?.trim();
   const name = displayName || truncateAddress(wallet, 8, 6);
 
@@ -193,13 +186,9 @@ function AttesterRow({ attester }: { attester: AttesterView }) {
     >
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          {/* The attester's wallet view, not their profile: this list is about
-              who vouched, and their public on-chain holdings are what backs
-              that up. `/<address>` is resolved client-side by
-              `NotFoundRedirect`, since a static export cannot pre-render a
-              route per wallet. */}
+          {/* The attester's wallet view, not their profile. */}
           <Link
-            href={`/${wallet}`}
+            href={`/wallet?u=${wallet}`}
             className="truncate font-utsaha text-sm text-white transition-colors hover:text-brand-blue hover:underline"
           >
             {name}

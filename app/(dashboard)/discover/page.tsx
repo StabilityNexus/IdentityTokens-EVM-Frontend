@@ -4,6 +4,7 @@ import React, { useState, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { TokenList } from "@/components/dashboard/TokenList";
 import { AttestModal } from "@/components/forms/AttestModal";
+import { AttestersModal } from "@/components/attestations/AttestersModal";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
 import {
   useTokenDetail,
@@ -20,10 +21,12 @@ function SearchedToken({
   tokenId,
   onAttest,
   onRevoke,
+  onViewAttesters,
 }: {
   tokenId: bigint;
   onAttest: (tokenId: bigint, tokenName: string) => void;
   onRevoke: (tokenId: string) => void;
+  onViewAttesters: (tokenId: bigint, tokenName: string) => void;
 }) {
   const { data: token } = useTokenDetail(tokenId);
   const { data: attestationCount } = useActiveAttestationCount(tokenId);
@@ -81,6 +84,7 @@ function SearchedToken({
       tokens={tokenData}
       onAttest={() => onAttest(tokenId, tokenName)}
       onRevoke={(id) => onRevoke(id)}
+      onViewAll={() => onViewAttesters(tokenId, tokenName)}
     />
   );
 }
@@ -88,9 +92,11 @@ function SearchedToken({
 function RecentTokensFeed({
   onAttest,
   onRevoke,
+  onViewAttesters,
 }: {
   onAttest: (tokenId: bigint, tokenName: string) => void;
   onRevoke: (tokenId: string) => void;
+  onViewAttesters: (tokenId: bigint, tokenName: string) => void;
 }) {
   const { data: recentEvents, isLoading: isEventsLoading } = useRecentTokens();
 
@@ -202,6 +208,10 @@ function RecentTokensFeed({
         onAttest(numericId, token?.name || "");
       }}
       onRevoke={(id) => onRevoke(id)}
+      onViewAll={(id) => {
+        const token = tokenData.find((t) => t.tokenId === id);
+        onViewAttesters(BigInt(id.replace(/^#/, "")), token?.name || "");
+      }}
     />
   );
 }
@@ -218,6 +228,12 @@ export default function DiscoverPage() {
   }, [query]);
 
   const [attestTarget, setAttestTarget] = useState<{
+    tokenId: bigint;
+    tokenName: string;
+  } | null>(null);
+
+  // Anyone may inspect a token's attesters, connected or not.
+  const [attestersTarget, setAttestersTarget] = useState<{
     tokenId: bigint;
     tokenName: string;
   } | null>(null);
@@ -253,9 +269,27 @@ export default function DiscoverPage() {
           tokenId={searchedTokenId}
           onAttest={handleAttest}
           onRevoke={handleRevoke}
+          onViewAttesters={(tokenId, tokenName) =>
+            setAttestersTarget({ tokenId, tokenName })
+          }
         />
       ) : (
-        <RecentTokensFeed onAttest={handleAttest} onRevoke={handleRevoke} />
+        <RecentTokensFeed
+          onAttest={handleAttest}
+          onRevoke={handleRevoke}
+          onViewAttesters={(tokenId, tokenName) =>
+            setAttestersTarget({ tokenId, tokenName })
+          }
+        />
+      )}
+
+      {attestersTarget && (
+        <AttestersModal
+          isOpen
+          onClose={() => setAttestersTarget(null)}
+          tokenId={attestersTarget.tokenId}
+          tokenName={attestersTarget.tokenName}
+        />
       )}
 
       {/* Attest Modal */}

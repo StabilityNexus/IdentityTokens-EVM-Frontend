@@ -42,3 +42,8 @@ export interface RootIdentityView {
   isActive: boolean;
   tokenCount: bigint;
 }
+
+export interface AttesterView {
+  attestation: Attestation;
+  displayName: string;
+}

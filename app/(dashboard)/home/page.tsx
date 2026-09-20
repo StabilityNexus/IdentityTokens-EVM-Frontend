@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import Metrics from "@/components/dashboard/Metrics";
 import { TokenList } from "@/components/dashboard/TokenList";
+import { AttestersModal } from "@/components/attestations/AttestersModal";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
 import {
   useMultipleTokenDetails,
@@ -22,6 +23,11 @@ export default function Home() {
     isLoading,
     error,
   } = useIdentityGate();
+
+  const [attestersFor, setAttestersFor] = useState<{
+    tokenId: bigint;
+    name: string;
+  } | null>(null);
 
   // Batch-fetch token details, types, and attestation counts
   const { data: tokenDetails } = useMultipleTokenDetails(
@@ -155,7 +161,25 @@ export default function Home() {
         badgesEarned={hasProfile ? "Profile Created" : "No badges yet"}
       />
 
-      <TokenList variant="tokens" tokens={tokenListData} />
+      <TokenList
+        variant="tokens"
+        tokens={tokenListData}
+        onViewAll={(id) =>
+          setAttestersFor({
+            tokenId: BigInt(id.replace(/^#/, "")),
+            name: tokenListData.find((t) => t.tokenId === id)?.name || "",
+          })
+        }
+      />
+
+      {attestersFor && (
+        <AttestersModal
+          isOpen
+          onClose={() => setAttestersFor(null)}
+          tokenId={attestersFor.tokenId}
+          tokenName={attestersFor.name}
+        />
+      )}
     </main>
   );
 }

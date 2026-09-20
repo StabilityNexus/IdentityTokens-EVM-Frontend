@@ -39,6 +39,8 @@ export interface TokenCardProps {
   onRevoke?: () => void;
   onAttest?: () => void;
   onViewAll?: () => void;
+  /** Hide owner-only actions when showing someone else's token. */
+  readOnly?: boolean;
 }
 
 export interface FeatureCardProps {
@@ -132,9 +134,12 @@ export interface TokenListProps {
   variant: TokenListVariant;
   tokens: UITokenData[];
   className?: string;
+  title?: string;
   onRevoke?: (tokenId: string) => void;
   onAttest?: (tokenId: string) => void;
   onViewAll?: (tokenId: string) => void;
+  readOnly?: boolean;
+  emptyMessage?: string;
 }
 
 export interface MetricItemProps {

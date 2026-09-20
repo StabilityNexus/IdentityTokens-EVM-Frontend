@@ -9,12 +9,15 @@ export function TokenList({
   variant,
   tokens,
   className = "",
+  title,
   onRevoke,
   onAttest,
   onViewAll,
+  readOnly = false,
+  emptyMessage = "No tokens found.",
 }: TokenListProps) {
   const cardVariant = getCardVariant(variant);
-  const title = getSectionTitle(variant);
+  const heading = title ?? getSectionTitle(variant);
 
   return (
     <div
@@ -22,14 +25,14 @@ export function TokenList({
     >
       {/* Section Title */}
       <h2 className="mb-5 font-utsaha text-xl text-white md:mb-6 md:text-2xl">
-        {title}
+        {heading}
       </h2>
 
       {/* Token Cards */}
       <div className="flex flex-col gap-3">
         {tokens.length === 0 ? (
           <div className="flex items-center justify-center py-12 font-utsaha text-lg text-gray-500">
-            No tokens found.
+            {emptyMessage}
           </div>
         ) : (
           tokens.map((token) => (
@@ -46,6 +49,7 @@ export function TokenList({
               onRevoke={onRevoke ? () => onRevoke(token.tokenId) : undefined}
               onAttest={onAttest ? () => onAttest(token.tokenId) : undefined}
               onViewAll={onViewAll ? () => onViewAll(token.tokenId) : undefined}
+              readOnly={readOnly}
             />
           ))
         )}

@@ -10,6 +10,8 @@ interface ProfileReputationProps {
   trustScore: number;
   totalAttestations: number;
   rank: RankName;
+  /** Omit to render the headline figure as static text. */
+  onViewAttesters?: () => void;
   className?: string;
 }
 
@@ -20,6 +22,7 @@ export function ProfileReputation({
   trustScore,
   totalAttestations,
   rank,
+  onViewAttesters,
   className,
 }: ProfileReputationProps) {
   const uid = useId().replace(/:/g, "");
@@ -72,15 +75,36 @@ export function ProfileReputation({
           </div>
         </div>
 
-        {/* Headline figure */}
-        <div className="w-full rounded-xl border border-profile-border bg-profile-surface-raised px-4 py-3.5 text-center">
-          <p className="text-gradient-profile font-utsaha text-3xl">
-            {totalAttestations}
-          </p>
-          <p className="mt-0.5 font-utsaha text-xs text-profile-muted">
-            Total attestation{totalAttestations === 1 ? "" : "s"} received
-          </p>
-        </div>
+        {/* Headline figure — doubles as the way into the attester list */}
+        {(() => {
+          const figure = (
+            <>
+              <p className="text-gradient-profile font-utsaha text-3xl">
+                {totalAttestations}
+              </p>
+              <p className="mt-0.5 font-utsaha text-xs text-profile-muted">
+                Total attestation{totalAttestations === 1 ? "" : "s"} received
+              </p>
+            </>
+          );
+          const shell =
+            "w-full rounded-xl border border-profile-border bg-profile-surface-raised px-4 py-3.5 text-center";
+
+          return onViewAttesters ? (
+            <button
+              type="button"
+              onClick={onViewAttesters}
+              className={`${shell} transition-colors hover:border-profile-accent/45`}
+            >
+              {figure}
+              <span className="mt-1 block font-utsaha text-[11px] text-profile-accent-soft">
+                View attesters
+              </span>
+            </button>
+          ) : (
+            <div className={shell}>{figure}</div>
+          );
+        })()}
 
         {/* Badge + progress toward the next rank */}
         <div className="flex w-full items-center gap-3 border-t border-profile-border pt-4">

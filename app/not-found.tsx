@@ -3,20 +3,21 @@ import { NotFoundRedirect } from "@/components/NotFoundRedirect";
 
 export default function NotFound() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-landing-bg p-4 text-center">
-      <NotFoundRedirect />
-      <h2 className="text-3xl font-bold tracking-tight text-gray-900">
-        404 - Not Found
-      </h2>
-      <p className="mt-4 text-lg text-gray-600">
-        Could not find the requested resource.
-      </p>
-      <Link
-        href="/"
-        className="mt-8 rounded-[24.85px] bg-brand-blue px-6 py-3 text-base font-medium text-white transition-colors hover:bg-brand-blue-hover focus:ring-2 focus:ring-brand-blue/20 focus:outline-none"
-      >
-        Return Home
-      </Link>
-    </div>
+    <NotFoundRedirect>
+      <div className="flex min-h-screen flex-col items-center justify-center bg-landing-bg p-4 text-center">
+        <h2 className="text-3xl font-bold tracking-tight text-gray-900">
+          404 - Not Found
+        </h2>
+        <p className="mt-4 text-lg text-gray-600">
+          Could not find the requested resource.
+        </p>
+        <Link
+          href="/"
+          className="mt-8 rounded-[24.85px] bg-brand-blue px-6 py-3 text-base font-medium text-white transition-colors hover:bg-brand-blue-hover focus:ring-2 focus:ring-brand-blue/20 focus:outline-none"
+        >
+          Return Home
+        </Link>
+      </div>
+    </NotFoundRedirect>
   );
 }

@@ -16,9 +16,32 @@ export function formatExpiry(validUntil: bigint): string {
   const diff = Number(validUntil) - now;
   if (diff <= 0) return "Expired";
   if (diff < 86400) return "< 1 day";
-  if (diff < 2592000) return `${Math.floor(diff / 86400)} days`;
-  if (diff < 31536000) return `${Math.floor(diff / 2592000)} months`;
-  return `${Math.floor(diff / 31536000)} years`;
+  const days = Math.floor(diff / 86400);
+  if (diff < 2592000) return `${days} ${days === 1 ? "day" : "days"}`;
+  const months = Math.floor(diff / 2592000);
+  if (diff < 31536000) return `${months} ${months === 1 ? "month" : "months"}`;
+  const years = Math.floor(diff / 31536000);
+  return `${years} ${years === 1 ? "year" : "years"}`;
+}
+
+/**
+ * How long ago a unix timestamp was, in the same coarse buckets as
+ * `formatExpiry` so the two read consistently side by side.
+ */
+export function formatTimeAgo(timestamp: bigint): string {
+  if (timestamp === 0n) return "—";
+  const now = Math.floor(Date.now() / 1000);
+  const diff = now - Number(timestamp);
+  if (diff < 60) return "just now";
+  if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)} hr ago`;
+  const days = Math.floor(diff / 86400);
+  if (diff < 2592000) return `${days} ${days === 1 ? "day" : "days"} ago`;
+  const months = Math.floor(diff / 2592000);
+  if (diff < 31536000)
+    return `${months} ${months === 1 ? "month" : "months"} ago`;
+  const years = Math.floor(diff / 31536000);
+  return `${years} ${years === 1 ? "year" : "years"} ago`;
 }
 
 export function getCardVariant(

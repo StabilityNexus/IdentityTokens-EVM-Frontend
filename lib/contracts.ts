@@ -1,10 +1,8 @@
 export const IDENTITY_SYSTEM_ADDRESS =
-  (process.env.NEXT_PUBLIC_IDENTITY_SYSTEM_ADDRESS as `0x${string}`) ||
-  ("0x82b049805626202D04c7450b386732B34180D634" as const);
+  "0x4F9A3a0a3f1f6A46b4DC862F15923321b40E96C0" as const;
 
 export const PROFILE_SYSTEM_ADDRESS =
-  (process.env.NEXT_PUBLIC_PROFILE_SYSTEM_ADDRESS as `0x${string}`) ||
-  ("0x34bC039aD24cd2c13b093847612180FdbEAdC78a" as const);
+  "0x62Decd4cEDd40e4816418034b54A5396f487379C" as const;
 
 export * from "./types.responses";
 
@@ -313,6 +311,164 @@ export const IDENTITY_SYSTEM_ABI = [
         name: "tokenIds",
         type: "uint256[]",
         internalType: "uint256[]",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getAttestationsPaged",
+    inputs: [
+      {
+        name: "tokenId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "offset",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "limit",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [
+      {
+        name: "page",
+        type: "tuple[]",
+        internalType: "struct DataTypes.Attestation[]",
+        components: [
+          {
+            name: "attesterTokenId",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "attesterAddress",
+            type: "address",
+            internalType: "address",
+          },
+          {
+            name: "timestamp",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "revokedAt",
+            type: "uint256",
+            internalType: "uint256",
+          },
+          {
+            name: "expiresAt",
+            type: "uint256",
+            internalType: "uint256",
+          },
+        ],
+      },
+      {
+        name: "total",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getAttestersDetailed",
+    inputs: [
+      {
+        name: "tokenId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "activeOnly",
+        type: "bool",
+        internalType: "bool",
+      },
+      {
+        name: "offset",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "limit",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [
+      {
+        name: "page",
+        type: "tuple[]",
+        internalType: "struct DataTypes.AttesterView[]",
+        components: [
+          {
+            name: "attestation",
+            type: "tuple",
+            internalType: "struct DataTypes.Attestation",
+            components: [
+              {
+                name: "attesterTokenId",
+                type: "uint256",
+                internalType: "uint256",
+              },
+              {
+                name: "attesterAddress",
+                type: "address",
+                internalType: "address",
+              },
+              {
+                name: "timestamp",
+                type: "uint256",
+                internalType: "uint256",
+              },
+              {
+                name: "revokedAt",
+                type: "uint256",
+                internalType: "uint256",
+              },
+              {
+                name: "expiresAt",
+                type: "uint256",
+                internalType: "uint256",
+              },
+            ],
+          },
+          {
+            name: "displayName",
+            type: "string",
+            internalType: "string",
+          },
+        ],
+      },
+      {
+        name: "total",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getProfileTokenId",
+    inputs: [
+      {
+        name: "wallet",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
       },
     ],
     stateMutability: "view",

@@ -60,3 +60,12 @@ export const SOCIAL_LINKS = {
   discord: "https://discord.gg/YzDKeEfWtS",
   linkedin: "https://linkedin.com/company/stability-nexus",
 };
+
+/** Consent copy for the onboarding checkbox; keep in step with /privacy-policy. */
+export const TERMS_SUMMARY = [
+  "Your display name and root identity are written to a public blockchain: permanent, immutable and readable by anyone.",
+  "Anything you add later — profile, username, links, attestations — is public on-chain data too, so only publish what you are happy to make permanent.",
+  "DIT is non-custodial. You hold your keys and sign every transaction; the app never takes custody of your wallet or your tokens.",
+  "Attestations are peer-to-peer statements made by other users, not a verification or endorsement by Stability Nexus.",
+  "Network fees are paid by you to the blockchain, and a confirmed transaction cannot be undone.",
+];

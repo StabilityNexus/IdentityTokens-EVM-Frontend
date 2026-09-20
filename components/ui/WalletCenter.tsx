@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "./dropdown-menu";
 import { getEtherscanAddressUrl } from "@/lib/errors";
+import { TOUR_TARGETS } from "@/lib/tour";
 import { truncateAddress } from "@/lib/helpers";
 
 const TRIGGER_CLASSES =
@@ -56,6 +57,7 @@ export function WalletCenter() {
         type="button"
         onClick={() => openConnectModal?.()}
         className={TRIGGER_CLASSES}
+        data-tour={TOUR_TARGETS.walletCenter}
         aria-label="Connect wallet"
         title="Connect wallet"
       >
@@ -71,6 +73,7 @@ export function WalletCenter() {
         <button
           type="button"
           className={TRIGGER_CLASSES}
+          data-tour={TOUR_TARGETS.walletCenter}
           aria-label="Manage wallet"
           title="Manage wallet"
         >

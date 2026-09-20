@@ -13,7 +13,7 @@ import {
   useMultipleAttestationCounts,
 } from "@/hooks/useIdentityReads";
 import { getContractErrorMessage } from "@/lib/errors";
-import { formatExpiry, truncateAddress } from "@/lib/helpers";
+import { formatExpiry } from "@/lib/helpers";
 import { getTrustScore } from "@/lib/rank";
 import { TOKEN_TYPE } from "@/lib/types";
 
@@ -22,6 +22,7 @@ const DashboardPage = () => {
     isConnected,
     hasProfile,
     profileData,
+    displayName,
     walletTokenIds,
     isLoading,
     error,
@@ -139,8 +140,7 @@ const DashboardPage = () => {
     }, 0);
   }, [attestationCounts]);
 
-  const name =
-    profileData?.name || (address ? truncateAddress(address) : "Anonymous");
+  const name = displayName;
   const nationality = profileData?.nationality || "";
   const walletAddress = address || "0x0000000000000000000000000000000000000000";
 
@@ -222,7 +222,7 @@ const DashboardPage = () => {
   return (
     <div className="flex h-full flex-col gap-8 bg-app-bg pb-12">
       <DashboardMetrics
-        name={profileData?.name || name}
+        name={name}
         nationality={nationality}
         walletAddress={walletAddress as string}
         attesters={totalAttestations}
@@ -237,18 +237,6 @@ const DashboardPage = () => {
       />
 
       <div className="px-4 sm:px-6 md:pr-14 md:pl-10">
-        {!hasProfile && (
-          <div className="mb-6 rounded-2xl border border-brand-green/20 bg-brand-green/5 p-6 text-center">
-            <h3 className="font-utsaha text-xl text-white">
-              Welcome! Create your profile to get started
-            </h3>
-            <p className="mt-2 font-utsaha text-sm text-gray-400">
-              Click &ldquo;Create Profile&rdquo; in the top bar to set up your
-              on-chain identity
-            </p>
-          </div>
-        )}
-
         <TokenList
           variant="tokens"
           tokens={tokenListData}

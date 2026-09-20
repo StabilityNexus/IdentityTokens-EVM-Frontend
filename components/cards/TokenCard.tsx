@@ -19,7 +19,7 @@ import {
 } from "../ui/dropdown-menu";
 import Badge from "../Badge";
 import { TokenForm } from "../forms/TokenForm";
-import { TokenCardProps, TokenCardVariant } from "@/lib/types";
+import { TokenCardProps } from "@/lib/types";
 
 const getRankFromAttestations = (count: number) => {
   if (count >= 250) return "champion";

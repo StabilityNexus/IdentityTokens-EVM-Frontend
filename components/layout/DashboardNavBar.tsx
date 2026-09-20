@@ -1,9 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "../ui/Button";
 import { FiBell, FiPlus } from "react-icons/fi";
+import { WalletCenter } from "../ui/WalletCenter";
 import { CreateTokenModal } from "../forms/CreateTokenModal";
 import { CreateProfileModal } from "../forms/CreateProfileModal";
 import { SearchBar } from "../dashboard/SearchBar";
@@ -15,10 +16,9 @@ export function DashboardNavbar() {
   const searchParams = useSearchParams();
   const currentQuery = searchParams?.get("q") ?? "";
 
-  const [isCreateTokenModalOpen, setIsCreateTokenModalOpen] =
-    React.useState(false);
+  const [isCreateTokenModalOpen, setIsCreateTokenModalOpen] = useState(false);
   const [isCreateProfileModalOpen, setIsCreateProfileModalOpen] =
-    React.useState(false);
+    useState(false);
 
   const {
     isConnected,
@@ -28,7 +28,14 @@ export function DashboardNavbar() {
     refetchWalletTokens,
   } = useIdentityGate();
 
-  const knownRoutes = ["/", "/home", "/dashboard", "/discover", "/settings"];
+  const knownRoutes = [
+    "/",
+    "/home",
+    "/dashboard",
+    "/discover",
+    "/settings",
+    "/wallet",
+  ];
   const firstSegment = pathname?.split("/").filter(Boolean)[0] ?? "";
   const isUserProfile =
     pathname !== "/" &&
@@ -38,9 +45,6 @@ export function DashboardNavbar() {
   const isDiscover = pathname === "/discover";
   const isDashboard = pathname === "/dashboard";
 
-  // hasProfile and profileData come from separate reads, so the username can
-  // lag behind. Only treat the profile as visitable once both have arrived,
-  // and keep the button inert until then rather than doing nothing on click.
   const profileUsername = profileData?.username;
   const canVisitProfile = !!hasProfile && !!profileUsername;
   const isAwaitingProfile = !!hasProfile && !profileUsername;
@@ -94,10 +98,10 @@ export function DashboardNavbar() {
 
   return (
     <>
-      <nav className="flex h-[72px] w-full shrink-0 items-center justify-between border-b border-white/5 bg-dashboard-bg pr-5 pl-16 lg:px-8">
-        <div className="flex min-w-0 flex-1 items-center gap-4">
+      <nav className="flex h-[72px] w-full shrink-0 items-center justify-between border-b border-white/5 bg-dashboard-bg pr-4 pl-14 sm:pr-5 sm:pl-16 lg:px-8">
+        <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-4">
           {!isUserProfile && (
-            <h1 className="shrink-0 font-utsaha text-xl tracking-wide text-white">
+            <h1 className="max-w-[120px] shrink-0 truncate font-utsaha text-lg tracking-wide text-white sm:max-w-none sm:text-xl">
               {getPageTitle()}
             </h1>
           )}
@@ -120,17 +124,17 @@ export function DashboardNavbar() {
           )}
         </div>
 
-        <div className="flex items-center gap-3 md:gap-5">
+        <div className="flex items-center gap-2 sm:gap-3 md:gap-5">
           {/* Notification bell */}
           <button
-            className="relative flex h-10 w-10 items-center justify-center rounded-xl text-white/60 transition-all duration-200 hover:bg-white/5 hover:text-white"
+            className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white/60 transition-all duration-200 hover:bg-white/5 hover:text-white sm:h-10 sm:w-10"
             aria-label="Notifications"
           >
-            <FiBell size={22} />
+            <FiBell size={18} className="sm:hidden" />
+            <FiBell size={22} className="hidden sm:block" />
           </button>
 
-          {/* ── Create Profile / New Token / icon-only on /discover ──
-              Public profiles are read-only surfaces, so no create action. */}
+          {/* Create Profile / New Token / icon-only on /discover */}
           {!isUserProfile && (
             <Button
               className={`flex items-center justify-center rounded-full border-none font-utsaha shadow-none transition-transform duration-200 ease-out hover:scale-[1.02] active:scale-[0.98] ${
@@ -139,8 +143,8 @@ export function DashboardNavbar() {
                   : "bg-brand-green text-dashboard-bg hover:bg-brand-green/90"
               } ${
                 isDiscover
-                  ? "h-10 w-10 p-0"
-                  : "gap-2.5 px-4 py-2.5 text-base md:px-5 md:text-xl"
+                  ? "h-9 w-9 p-0 sm:h-10 sm:w-10"
+                  : "gap-1.5 px-3 py-1.5 text-sm sm:gap-2.5 sm:px-4 sm:py-2.5 sm:text-base md:px-5 md:text-xl"
               } ${!isConnected || isAwaitingProfile ? "cursor-not-allowed opacity-50" : ""}`}
               aria-label={
                 isDiscover
@@ -155,11 +159,24 @@ export function DashboardNavbar() {
               disabled={!isConnected || isAwaitingProfile}
             >
               {!(isDashboard && hasProfile) && (
-                <FiPlus size={20} className="shrink-0" strokeWidth={3} />
+                <FiPlus
+                  size={18}
+                  className="shrink-0 sm:hidden"
+                  strokeWidth={3}
+                />
+              )}
+              {!(isDashboard && hasProfile) && (
+                <FiPlus
+                  size={20}
+                  className="hidden shrink-0 sm:block"
+                  strokeWidth={3}
+                />
               )}
               {!isDiscover && <span>{getButtonLabel()}</span>}
             </Button>
           )}
+
+          <WalletCenter />
         </div>
       </nav>
 

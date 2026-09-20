@@ -140,7 +140,7 @@ const DashboardPage = () => {
     }, 0);
   }, [attestationCounts]);
 
-  const name = displayName;
+  const name = displayName ?? "";
   const nationality = profileData?.nationality || "";
   const walletAddress = address || "0x0000000000000000000000000000000000000000";
 

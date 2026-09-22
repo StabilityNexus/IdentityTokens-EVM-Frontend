@@ -23,19 +23,22 @@ export default function OnboardingPage() {
     error,
   } = useOnboardingStatus();
 
-  // The wallet this page put the form in front of. An identity appearing for
-  // it afterwards can only be the one just registered here.
+  // The wallet this page put the form in front of, and whether that form
+  // actually broadcast the transaction. An identity that appears without it —
+  // created in another tab or by another client — was never consented to here.
   const askedFor = useRef<string | undefined>(undefined);
+  const didSubmit = useRef(false);
 
   useEffect(() => {
     if (!isConnected || !isResolved || !address) return;
 
     if (!hasRootIdentity) {
+      if (askedFor.current !== address) didSubmit.current = false;
       askedFor.current = address;
       return;
     }
 
-    if (askedFor.current !== address) {
+    if (askedFor.current !== address || !didSubmit.current) {
       router.replace("/dashboard");
       return;
     }
@@ -98,7 +101,11 @@ export default function OnboardingPage() {
           </p>
         </div>
       ) : (
-        <RegistrationModal />
+        <RegistrationModal
+          onSubmitted={() => {
+            didSubmit.current = true;
+          }}
+        />
       )}
 
       <Link

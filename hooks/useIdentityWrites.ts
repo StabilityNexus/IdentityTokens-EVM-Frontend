@@ -21,9 +21,13 @@ export function useCreateRootIdentity() {
     reset,
   } = useWriteContract();
 
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
-    hash: txHash,
-  });
+  // A reverted transaction fails here, not at send time, so this error has to
+  // be surfaced too or the modal confirms forever.
+  const {
+    isLoading: isConfirming,
+    isSuccess,
+    error: receiptError,
+  } = useWaitForTransactionReceipt({ hash: txHash });
 
   const write = (displayName: string) => {
     writeContract({
@@ -41,7 +45,7 @@ export function useCreateRootIdentity() {
     isConfirming,
     isSuccess,
     isLoading: isPending || isConfirming,
-    error,
+    error: error ?? receiptError,
     reset,
   };
 }

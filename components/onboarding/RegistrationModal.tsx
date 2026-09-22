@@ -9,13 +9,13 @@ import { useOnboardingStatus } from "@/hooks/useOnboardingStatus";
 import { TransactionStatus } from "@/components/ui/TransactionStatus";
 import { TextField } from "@/components/forms/fields/TextField";
 import { TERMS_SUMMARY } from "@/lib/constants";
-import { TxStatus } from "@/lib/types";
+import { RegistrationModalProps, TxStatus } from "@/lib/types";
 import { validateName } from "@/lib/validation";
 import { truncateAddress } from "@/lib/helpers";
 
 /** Display name + consent, then the `createRootIdentity` transaction. */
 // The contract has no terms flag: that signed transaction is the acceptance record.
-export function RegistrationModal() {
+export function RegistrationModal({ onSubmitted }: RegistrationModalProps) {
   const [displayName, setDisplayName] = useState("");
   const [hasAgreed, setHasAgreed] = useState(false);
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
@@ -65,14 +65,23 @@ export function RegistrationModal() {
     ]
   );
 
-  // The receipt hook can stall, so poll rather than wait on an incidental
-  // refetch (window focus when the wallet popup closes) to move the flow on.
+  // Reported while this modal is still mounted: the identity read flipping is
+  // what unmounts it, and the page needs to know the consent came from here.
   useEffect(() => {
-    if (!createRoot.txHash || isConfirmed) return;
+    if (!createRoot.txHash) return;
+    onSubmitted?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [createRoot.txHash]);
+
+  // Polls until the root is actually readable — the receipt alone is not
+  // enough, and stopping there can leave the page waiting on a read that
+  // nothing else refetches.
+  useEffect(() => {
+    if (!createRoot.txHash || hasRootIdentity) return;
 
     const poll = setInterval(() => refetchRootId(), 1500);
     return () => clearInterval(poll);
-  }, [createRoot.txHash, isConfirmed, refetchRootId]);
+  }, [createRoot.txHash, hasRootIdentity, refetchRootId]);
 
   const isSubmitDisabled =
     !address ||

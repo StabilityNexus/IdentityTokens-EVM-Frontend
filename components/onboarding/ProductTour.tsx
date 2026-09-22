@@ -19,9 +19,14 @@ const SIDEBAR_TRANSITION_MS = 320;
 function setMobileSidebar(open: boolean) {
   if (typeof window === "undefined") return;
   if (window.innerWidth >= MOBILE_BREAKPOINT) return;
-  document.dispatchEvent(
-    new CustomEvent("openMobileSidebar", { detail: { open } })
-  );
+
+  // Deferred a frame: on first mount this component's effect runs before the
+  // sidebar's, so a synchronous dispatch would land with nothing listening.
+  window.requestAnimationFrame(() => {
+    document.dispatchEvent(
+      new CustomEvent("openMobileSidebar", { detail: { open } })
+    );
+  });
 }
 
 /** Read a design token so the overlay is not a second source of truth. */

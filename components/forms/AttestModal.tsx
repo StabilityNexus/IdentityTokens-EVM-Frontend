@@ -1,16 +1,13 @@
 "use client";
 
 import React, { useState, useEffect, useId } from "react";
-import {
-  useAttestToken,
-  useCreateRootIdentity,
-} from "@/hooks/useIdentityWrites";
+import Link from "next/link";
+import { useAttestToken } from "@/hooks/useIdentityWrites";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
 import { useTokenOwner } from "@/hooks/useIdentityReads";
 import { AttestModalProps, TxStatus } from "@/lib/types";
 import { TransactionStatus } from "@/components/ui/TransactionStatus";
 import { Modal } from "@/components/ui/Modal";
-import { truncateAddress } from "@/lib/helpers";
 
 /** Duration presets in seconds */
 const DURATION_PRESETS = [
@@ -38,7 +35,6 @@ export function AttestModal({
   const { data: ownerAddress } = useTokenOwner(tokenId);
 
   const attestToken = useAttestToken();
-  const createRoot = useCreateRootIdentity();
 
   const isSelfToken =
     !!address &&
@@ -218,23 +214,12 @@ export function AttestModal({
             <p>
               ℹ️ You need a Root Identity before you can attest tokens on-chain.
             </p>
-            <button
-              type="button"
-              onClick={() =>
-                address && createRoot.write(truncateAddress(address))
-              }
-              disabled={createRoot.isLoading || !address}
-              className="mt-1 w-full rounded-md bg-brand-blue py-1.5 font-utsaha text-xs text-white hover:bg-blue-600 disabled:opacity-50"
+            <Link
+              href="/onboarding"
+              className="mt-1 w-full rounded-md bg-brand-blue py-1.5 font-utsaha text-xs text-white transition-colors hover:bg-blue-600"
             >
-              {createRoot.isLoading
-                ? "Initializing Root Identity…"
-                : "Initialize Root Identity"}
-            </button>
-            {createRoot.isSuccess && (
-              <p className="text-xs text-brand-green">
-                Root Identity created! You can now attest.
-              </p>
-            )}
+              Set up your identity
+            </Link>
           </div>
         )}
 

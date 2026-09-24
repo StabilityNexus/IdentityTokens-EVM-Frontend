@@ -254,3 +254,92 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
 }
+
+/* ---- Product tour popover (driver.js) ----
+   Themed here because driver.js renders into the body; two-class selectors
+   outrank driver.css whichever order the stylesheets land in. */
+
+.driver-popover.dit-tour-popover {
+  background-color: var(--color-landing-bg);
+  color: #000;
+  font-family: var(--font-utsaha), cursive;
+  border-radius: 16px;
+  max-width: 320px;
+  padding: 16px 18px;
+  box-shadow: 0 18px 42px rgb(0 0 0 / 45%);
+  /* Entry animation comes from framer-motion in ProductTour.tsx. */
+  animation: none;
+}
+
+.dit-tour-popover .driver-popover-title {
+  color: #000;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.dit-tour-popover .driver-popover-description {
+  color: rgb(0 0 0 / 72%);
+  font-size: 13.5px;
+  line-height: 1.55;
+  margin-top: 6px;
+}
+
+.dit-tour-popover .driver-popover-progress-text {
+  color: rgb(0 0 0 / 50%);
+  font-size: 12px;
+}
+
+.dit-tour-popover .driver-popover-close-btn {
+  color: rgb(0 0 0 / 40%);
+}
+
+.dit-tour-popover .driver-popover-close-btn:hover,
+.dit-tour-popover .driver-popover-close-btn:focus {
+  color: #000;
+}
+
+.dit-tour-popover .driver-popover-footer-btn {
+  background-color: transparent;
+  color: rgb(0 0 0 / 75%);
+  border: 1px solid rgb(0 0 0 / 15%);
+  border-radius: 8px;
+  padding: 5px 12px;
+  font-size: 12.5px;
+}
+
+.dit-tour-popover .driver-popover-footer-btn:hover,
+.dit-tour-popover .driver-popover-footer-btn:focus {
+  background-color: rgb(0 0 0 / 5%);
+}
+
+.dit-tour-popover .driver-popover-next-btn,
+.dit-tour-popover .driver-popover-done-btn {
+  background-color: var(--color-app-bg);
+  color: var(--color-landing-bg);
+  border-color: var(--color-app-bg);
+}
+
+.dit-tour-popover .driver-popover-next-btn:hover,
+.dit-tour-popover .driver-popover-next-btn:focus,
+.dit-tour-popover .driver-popover-done-btn:hover,
+.dit-tour-popover .driver-popover-done-btn:focus {
+  background-color: var(--color-dark-bg);
+}
+
+/* Only the visible arrow side is recoloured; the rest stay transparent. */
+.dit-tour-popover .driver-popover-arrow-side-left {
+  border-left-color: var(--color-landing-bg);
+}
+
+.dit-tour-popover .driver-popover-arrow-side-right {
+  border-right-color: var(--color-landing-bg);
+}
+
+.dit-tour-popover .driver-popover-arrow-side-top {
+  border-top-color: var(--color-landing-bg);
+}
+
+.dit-tour-popover .driver-popover-arrow-side-bottom {
+  border-bottom-color: var(--color-landing-bg);
+}

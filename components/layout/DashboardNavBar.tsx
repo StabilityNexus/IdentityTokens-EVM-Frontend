@@ -9,6 +9,7 @@ import { CreateTokenModal } from "../forms/CreateTokenModal";
 import { CreateProfileModal } from "../forms/CreateProfileModal";
 import { SearchBar } from "../dashboard/SearchBar";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
+import { TOUR_TARGETS } from "@/lib/tour";
 
 export function DashboardNavbar() {
   const pathname = usePathname();
@@ -146,6 +147,9 @@ export function DashboardNavbar() {
                   ? "h-9 w-9 p-0 sm:h-10 sm:w-10"
                   : "gap-1.5 px-3 py-1.5 text-sm sm:gap-2.5 sm:px-4 sm:py-2.5 sm:text-base md:px-5 md:text-xl"
               } ${!isConnected || isAwaitingProfile ? "cursor-not-allowed opacity-50" : ""}`}
+              data-tour={
+                isDashboard ? TOUR_TARGETS.createProfile : TOUR_TARGETS.newToken
+              }
               aria-label={
                 isDiscover
                   ? "New Token"

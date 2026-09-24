@@ -9,10 +9,7 @@ import React, {
 } from "react";
 import { AtSign, Globe, Mail, X } from "lucide-react";
 import { FaDiscord, FaGithub, FaXTwitter } from "react-icons/fa6";
-import {
-  useCreateProfile,
-  useCreateRootIdentity,
-} from "@/hooks/useIdentityWrites";
+import { useCreateProfile } from "@/hooks/useIdentityWrites";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
 import { useUsernameTaken } from "@/hooks/useIdentityReads";
 import { CreateProfileModalProps, TxStatus } from "@/lib/types";
@@ -72,24 +69,16 @@ export function CreateProfileModal({
   const [avatarId, setAvatarId] = useState<string | null>(null);
   const [customLinks, setCustomLinks] = useState<CustomLink[]>([]);
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
-  const [step, setStep] = useState<
-    "idle" | "creating-root" | "creating-profile"
-  >("idle");
+  const [step, setStep] = useState<"idle" | "creating-profile">("idle");
 
-  const {
-    hasRootIdentity,
-    address,
-    refetchHasProfile,
-    refetchRootId,
-    refetchProfileTokenId,
-  } = useIdentityGate();
+  const { address, refetchHasProfile, refetchProfileTokenId } =
+    useIdentityGate();
 
   const { data: isUsernameTaken, isLoading: isCheckingUsername } =
     useUsernameTaken(
       formData.username.length >= 3 ? formData.username : undefined
     );
 
-  const createRoot = useCreateRootIdentity();
   const createProfile = useCreateProfile();
 
   const setField = <K extends keyof ProfileFormData>(
@@ -141,11 +130,6 @@ export function CreateProfileModal({
   // Transaction flow
 
   const getTxStatus = (): TxStatus => {
-    if (step === "creating-root") {
-      if (createRoot.isPending) return "pending";
-      if (createRoot.isConfirming) return "confirming";
-      if (createRoot.error) return "error";
-    }
     if (step === "creating-profile") {
       if (createProfile.isPending) return "pending";
       if (createProfile.isConfirming) return "confirming";
@@ -164,10 +148,9 @@ export function CreateProfileModal({
     setCustomLinks([]);
     setHasAttemptedSubmit(false);
     setStep("idle");
-    createRoot.reset();
     createProfile.reset();
     onClose();
-  }, [onClose, createRoot, createProfile]);
+  }, [onClose, createProfile]);
 
   // Keep the latest closer in a ref so the key listener below can stay stable.
   // The ref is written in an effect rather than during render — refs must not
@@ -267,16 +250,6 @@ export function CreateProfileModal({
     };
   }, [isOpen]);
 
-  // Root identity must exist before a profile can be minted.
-  useEffect(() => {
-    if (step === "creating-root" && createRoot.isSuccess) {
-      refetchRootId();
-      const timer = setTimeout(() => submitProfile(), 2000);
-      return () => clearTimeout(timer);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step, createRoot.isSuccess]);
-
   useEffect(() => {
     if (step === "creating-profile" && createProfile.isSuccess) {
       refetchHasProfile();
@@ -297,18 +270,11 @@ export function CreateProfileModal({
     setHasAttemptedSubmit(true);
     if (hasBlockingError || isMissingRequired) return;
 
-    if (!hasRootIdentity) {
-      setStep("creating-root");
-      createRoot.write(formData.name.trim());
-    } else {
-      submitProfile();
-    }
+    submitProfile();
   };
 
-  const currentError =
-    step === "creating-root" ? createRoot.error : createProfile.error;
-  const currentTxHash =
-    step === "creating-root" ? createRoot.txHash : createProfile.txHash;
+  const currentError = createProfile.error;
+  const currentTxHash = createProfile.txHash;
 
   return (
     <div
@@ -515,13 +481,6 @@ export function CreateProfileModal({
                 successMessage="Profile created — welcome aboard!"
               />
             </div>
-          )}
-
-          {step === "creating-root" && !createRoot.error && (
-            <p className="mb-3 font-utsaha text-xs text-gray-400">
-              Step 1 of 2 — creating your root identity first. You&rsquo;ll be
-              asked to confirm a second transaction for the profile itself.
-            </p>
           )}
 
           <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">

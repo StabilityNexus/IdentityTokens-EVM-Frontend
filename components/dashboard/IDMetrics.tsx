@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import IDCard from "../cards/IDCard";
-import { IDCardProps, IDMetricsProps } from "@/lib/types";
+import { IDMetricsProps } from "@/lib/types";
 import { IoCopyOutline, IoShareSocialOutline } from "react-icons/io5";
 
 const IDMetrics: React.FC<IDMetricsProps> = ({

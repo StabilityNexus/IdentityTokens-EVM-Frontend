@@ -5,17 +5,35 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FiMenu } from "react-icons/fi";
+import { TOUR_TARGETS, type TourTarget } from "@/lib/tour";
 
 interface NavItem {
   label: string;
   href: string;
   icon: string;
+  /** Handle the product tour highlights this item by. */
+  tourTarget: TourTarget;
 }
 
 const navItems: NavItem[] = [
-  { label: "Dashboard", href: "/dashboard", icon: "/assets/dashboard.svg" },
-  { label: "Home", href: "/home", icon: "/assets/home.svg" },
-  { label: "Discover", href: "/discover", icon: "/assets/discover.svg" },
+  {
+    label: "Dashboard",
+    href: "/dashboard",
+    icon: "/assets/dashboard.svg",
+    tourTarget: TOUR_TARGETS.navDashboard,
+  },
+  {
+    label: "Home",
+    href: "/home",
+    icon: "/assets/home.svg",
+    tourTarget: TOUR_TARGETS.navHome,
+  },
+  {
+    label: "Discover",
+    href: "/discover",
+    icon: "/assets/discover.svg",
+    tourTarget: TOUR_TARGETS.navDiscover,
+  },
 ];
 
 export function DashboardSidebar() {
@@ -112,6 +130,7 @@ export function DashboardSidebar() {
               <Link
                 key={item.href}
                 href={item.href}
+                data-tour={item.tourTarget}
                 onClick={() => setIsMobileOpen(false)}
                 className={`group relative flex items-center gap-4 rounded-xl py-3 transition-all duration-200 ease-out ${
                   active

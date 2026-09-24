@@ -1,41 +1,32 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useAccount } from "wagmi";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
+import { useOnboardingStatus } from "@/hooks/useOnboardingStatus";
 import { useTypewriter } from "@/hooks/useTypewriter";
 import { HERO_WORDS } from "@/lib/constants";
 
 export default function Hero() {
   const displayedText = useTypewriter(HERO_WORDS);
   const router = useRouter();
-  const { isConnected } = useAccount();
   const { openConnectModal } = useConnectModal();
-  const [hasRequestedConnect, setHasRequestedConnect] = useState(false);
-  const wasConnectedRef = useRef(isConnected);
+  const { isConnected, isResolved, needsOnboarding } = useOnboardingStatus();
 
+  // A connected wallet has no business on the landing page: it registers if it
+  // has no root identity, and goes to the dashboard if it has one. `replace`
+  // keeps the back button from bouncing off this redirect.
   useEffect(() => {
-    if (
-      (!wasConnectedRef.current && isConnected) ||
-      (hasRequestedConnect && isConnected)
-    ) {
-      router.push("/dashboard");
-    }
-    wasConnectedRef.current = isConnected;
-  }, [isConnected, hasRequestedConnect, router]);
+    if (!isConnected || !isResolved) return;
+    router.replace(needsOnboarding ? "/onboarding" : "/dashboard");
+  }, [isConnected, isResolved, needsOnboarding, router]);
 
   const handleBuildIdentity = () => {
-    if (isConnected) {
-      router.push("/dashboard");
-    } else {
-      setHasRequestedConnect(true);
-      if (openConnectModal) {
-        openConnectModal();
-      }
-    }
+    if (!isConnected) openConnectModal?.();
   };
+
+  const isCheckingIdentity = isConnected && !isResolved;
 
   return (
     <section className="relative flex min-h-screen w-full flex-col items-center bg-landing-bg dark:bg-landing-bg-dark">
@@ -94,9 +85,12 @@ export default function Hero() {
           <button
             type="button"
             onClick={handleBuildIdentity}
-            className="inline-flex cursor-pointer items-center justify-center rounded-xl bg-brand-green px-6 py-3 font-utsaha text-lg text-dashboard-bg shadow-md transition-transform duration-200 ease-out hover:scale-[1.02] hover:bg-brand-green/90 active:scale-[0.98] md:px-8 md:py-3.5 md:text-xl"
+            disabled={isCheckingIdentity}
+            className="inline-flex cursor-pointer items-center justify-center rounded-xl bg-brand-green px-6 py-3 font-utsaha text-lg text-dashboard-bg shadow-md transition-transform duration-200 ease-out hover:scale-[1.02] hover:bg-brand-green/90 active:scale-[0.98] disabled:cursor-wait disabled:opacity-70 md:px-8 md:py-3.5 md:text-xl"
           >
-            Build Your Identity
+            {isCheckingIdentity
+              ? "Checking your identity…"
+              : "Build Your Identity"}
           </button>
         </div>
       </div>

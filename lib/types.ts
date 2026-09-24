@@ -75,6 +75,11 @@ export interface CreateProfileModalProps {
   onSuccess?: () => void;
 }
 
+export interface RegistrationModalProps {
+  /** Fired once the root identity transaction has been signed and broadcast. */
+  onSubmitted?: () => void;
+}
+
 export interface CreateTokenModalProps {
   isOpen: boolean;
   onClose: () => void;

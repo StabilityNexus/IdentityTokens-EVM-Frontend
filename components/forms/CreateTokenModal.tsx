@@ -1,16 +1,14 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
 import { z } from "zod";
-import {
-  useCreateToken,
-  useCreateRootIdentity,
-} from "@/hooks/useIdentityWrites";
+import { useCreateToken } from "@/hooks/useIdentityWrites";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
 import { CreateTokenModalProps, TxStatus } from "@/lib/types";
 import { TransactionStatus } from "@/components/ui/TransactionStatus";
-import { truncateAddress } from "@/lib/helpers";
 
 export const tokenSchema = z.object({
   name: z.string().min(1, "Token Name is required"),
@@ -38,26 +36,22 @@ export function CreateTokenModal({
     Partial<Record<keyof TokenState, string>>
   >({});
 
-  const { hasRootIdentity, address, refetchRootId, refetchWalletTokens } =
-    useIdentityGate();
+  const router = useRouter();
+  const { hasRootIdentity, address, refetchWalletTokens } = useIdentityGate();
 
   // Write hooks
-  const createRoot = useCreateRootIdentity();
   const createToken = useCreateToken();
 
-  const [step, setStep] = useState<"idle" | "creating-root" | "creating-token">(
-    "idle"
-  );
+  const [step, setStep] = useState<"idle" | "creating-token">("idle");
 
   // Declared ahead of the effects below, which call them from their timers.
   const handleClose = useCallback(() => {
     setTokenState({ name: "", type: "", value: "", about: "", validUntil: "" });
     setErrors({});
     setStep("idle");
-    createRoot.reset();
     createToken.reset();
     onClose();
-  }, [onClose, createRoot, createToken]);
+  }, [onClose, createToken]);
 
   const submitToken = useCallback(() => {
     // Convert validUntil date to Unix timestamp (0 = no expiry)
@@ -76,18 +70,6 @@ export function CreateTokenModal({
       validUntil: validUntilTimestamp,
     });
   }, [tokenState, createToken]);
-
-  // After root creation succeeds, proceed to token creation
-  useEffect(() => {
-    if (step === "creating-root" && createRoot.isSuccess) {
-      refetchRootId();
-      const timer = setTimeout(() => {
-        submitToken();
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step, createRoot.isSuccess]);
 
   // After token creation succeeds, clean up
   useEffect(() => {
@@ -118,6 +100,14 @@ export function CreateTokenModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // A token hangs off a root identity, and that is created in /onboarding
+    // where the display name and the terms are confirmed — never from here.
+    if (!hasRootIdentity) {
+      router.push("/onboarding");
+      return;
+    }
+
     const result = tokenSchema.safeParse(tokenState);
     if (!result.success) {
       const newErrors: Partial<Record<keyof TokenState, string>> = {};
@@ -142,22 +132,10 @@ export function CreateTokenModal({
       }
     }
 
-    if (!hasRootIdentity) {
-      setStep("creating-root");
-      // An empty display name leaves the root identity nameless everywhere it
-      // is shown later, so fall back to the wallet address.
-      createRoot.write(address ? truncateAddress(address) : "");
-    } else {
-      submitToken();
-    }
+    submitToken();
   };
 
   const getTxStatus = (): TxStatus => {
-    if (step === "creating-root") {
-      if (createRoot.isPending) return "pending";
-      if (createRoot.isConfirming) return "confirming";
-      if (createRoot.error) return "error";
-    }
     if (step === "creating-token") {
       if (createToken.isPending) return "pending";
       if (createToken.isConfirming) return "confirming";
@@ -169,10 +147,8 @@ export function CreateTokenModal({
 
   const txStatus = getTxStatus();
   const isSubmitting = txStatus === "pending" || txStatus === "confirming";
-  const currentError =
-    step === "creating-root" ? createRoot.error : createToken.error;
-  const currentTxHash =
-    step === "creating-root" ? createRoot.txHash : createToken.txHash;
+  const currentError = createToken.error;
+  const currentTxHash = createToken.txHash;
 
   // Minimum date for the date picker (tomorrow)
   const tomorrow = new Date();
@@ -340,6 +316,19 @@ export function CreateTokenModal({
             successMessage="Token minted successfully!"
           />
 
+          {!hasRootIdentity && (
+            <p className="font-utsaha text-xs text-gray-400">
+              Tokens hang off your root identity, and this wallet has none yet.{" "}
+              <Link
+                href="/onboarding"
+                className="text-brand-blue-link underline underline-offset-2 hover:opacity-80"
+              >
+                Set one up first
+              </Link>{" "}
+              — it takes a single transaction.
+            </p>
+          )}
+
           {/* Submit */}
           <div className="mt-2">
             <button
@@ -351,7 +340,9 @@ export function CreateTokenModal({
                 ? "Minting…"
                 : !address
                   ? "Connect Wallet First"
-                  : "Mint Identity"}
+                  : !hasRootIdentity
+                    ? "Set up your identity first"
+                    : "Mint Identity"}
             </button>
           </div>
         </form>

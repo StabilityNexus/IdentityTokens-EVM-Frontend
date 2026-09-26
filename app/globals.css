@@ -107,15 +107,13 @@
   }
 }
 
-@layer components {
-  /* ---- Claim page buttons (/claim) ---- */
-  .claim-button-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-brand-green px-7 py-3.5 font-utsaha text-lg text-dashboard-bg shadow-md transition-transform duration-200 ease-out hover:scale-[1.02] hover:bg-brand-green/90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100;
-  }
+/* ---- Claim page buttons (/claim) ---- */
+@utility claim-button-primary {
+  @apply inline-flex items-center justify-center gap-2 rounded-full bg-brand-green px-7 py-2.5 font-utsaha text-base text-dashboard-bg shadow-md transition-transform duration-200 ease-out hover:scale-[1.02] hover:bg-brand-green/90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100;
+}
 
-  .claim-button-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-corner-stroke bg-white/60 px-7 py-3.5 font-utsaha text-lg text-landhead-text transition-colors hover:bg-white dark:border-corner-stroke-dark dark:bg-white/5 dark:text-landhead-text-dark dark:hover:bg-white/10;
-  }
+@utility claim-button-secondary {
+  @apply inline-flex items-center justify-center gap-2 rounded-full border border-corner-stroke bg-white/60 px-7 py-2.5 font-utsaha text-base text-landhead-text transition-colors hover:bg-white dark:border-corner-stroke-dark dark:bg-white/5 dark:text-landhead-text-dark dark:hover:bg-white/10;
 }
 
 @layer utilities {

@@ -248,7 +248,7 @@ export default function ClaimPage() {
             <button
               type="submit"
               disabled={isButtonDisabled}
-              className="claim-button-primary mt-6"
+              className="mt-6 claim-button-primary"
             >
               {isSubmitting && (
                 <Loader2

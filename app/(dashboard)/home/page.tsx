@@ -14,17 +14,12 @@ import {
 } from "@/hooks/useIdentityReads";
 import { getContractErrorMessage } from "@/lib/errors";
 import { formatExpiry } from "@/lib/helpers";
+import { getRankFromAttesters } from "@/lib/rank";
 import { TOKEN_TYPE } from "@/lib/types";
 
 export default function Home() {
-  const {
-    isConnected,
-    walletTokenIds,
-    hasProfile,
-    profileData,
-    isLoading,
-    error,
-  } = useIdentityGate();
+  const { isConnected, walletTokenIds, profileData, isLoading, error } =
+    useIdentityGate();
 
   const [attestersFor, setAttestersFor] = useState<{
     tokenId: bigint;
@@ -177,7 +172,7 @@ export default function Home() {
         totalAttestations={totalAttestations}
         activeTokens={tokenListData.length}
         socials={socialsCount}
-        badgesEarned={hasProfile ? "Profile Created" : "No badges yet"}
+        badgeRank={getRankFromAttesters(totalAttestations)}
       />
 
       <TokenList

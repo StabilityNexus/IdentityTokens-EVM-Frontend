@@ -67,6 +67,31 @@
 
   /* ---- Custom Breakpoints ---- */
   --breakpoint-xs: 400px;
+
+  /* ---- Claim card motion (/claim) ---- */
+  --animate-claim-drift: claim-drift 18s ease-in-out infinite alternate;
+  --animate-claim-drift-slow: claim-drift 26s ease-in-out infinite
+    alternate-reverse;
+  --animate-claim-waves: claim-waves 28s linear infinite;
+
+  @keyframes claim-drift {
+    0% {
+      transform: translate3d(-8%, -6%, 0) rotate(0deg) scale(1);
+    }
+    100% {
+      transform: translate3d(10%, 8%, 0) rotate(24deg) scale(1.18);
+    }
+  }
+
+  /* The wave layer is twice as wide as the card and tiles every half. */
+  @keyframes claim-waves {
+    from {
+      transform: translate3d(0, 0, 0);
+    }
+    to {
+      transform: translate3d(-50%, 0, 0);
+    }
+  }
 }
 
 @layer base {
@@ -80,6 +105,15 @@
   * {
     border-color: var(--color-border);
   }
+}
+
+/* ---- Claim page buttons (/claim) ---- */
+@utility claim-button-primary {
+  @apply inline-flex items-center justify-center gap-2 rounded-full bg-brand-green px-7 py-2.5 font-utsaha text-base text-dashboard-bg shadow-md transition-transform duration-200 ease-out hover:scale-[1.02] hover:bg-brand-green/90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100;
+}
+
+@utility claim-button-secondary {
+  @apply inline-flex items-center justify-center gap-2 rounded-full border border-corner-stroke bg-white/60 px-7 py-2.5 font-utsaha text-base text-landhead-text transition-colors hover:bg-white dark:border-corner-stroke-dark dark:bg-white/5 dark:text-landhead-text-dark dark:hover:bg-white/10;
 }
 
 @layer utilities {
@@ -128,6 +162,71 @@
       background: none;
       color: CanvasText;
     }
+  }
+
+  /* ---- Claim card (/claim): tints mixed from the brand tokens ---- */
+  .claim-card-base {
+    background:
+      radial-gradient(
+        120% 95% at 0% 0%,
+        color-mix(in oklab, var(--color-brand-blue) 62%, white) 0%,
+        transparent 58%
+      ),
+      radial-gradient(
+        95% 95% at 100% 100%,
+        color-mix(in oklab, var(--color-brand-blue) 55%, black) 0%,
+        transparent 62%
+      ),
+      var(--color-brand-blue);
+  }
+
+  .claim-card-blob-light {
+    background: radial-gradient(
+      closest-side,
+      color-mix(in oklab, var(--color-brand-blue) 38%, white),
+      transparent
+    );
+  }
+
+  .claim-card-blob-deep {
+    background: radial-gradient(
+      closest-side,
+      color-mix(in oklab, var(--color-brand-blue) 45%, black),
+      transparent
+    );
+  }
+
+  .claim-card-blob-cyan {
+    background: radial-gradient(
+      closest-side,
+      color-mix(in oklab, var(--color-profile-accent-alt) 65%, transparent),
+      transparent
+    );
+  }
+
+  /* Lacquer: a bright top edge fading out, and a touch of shade at the foot. */
+  .claim-card-gloss {
+    background: linear-gradient(
+      168deg,
+      rgb(255 255 255 / 0.36) 0%,
+      rgb(255 255 255 / 0.1) 30%,
+      transparent 46%,
+      transparent 78%,
+      rgb(0 0 0 / 0.16) 100%
+    );
+  }
+
+  /* Page grid behind the card; line colour comes from `currentColor`. */
+  .claim-grid {
+    background-image:
+      linear-gradient(to right, currentColor 1px, transparent 1px),
+      linear-gradient(to bottom, currentColor 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: radial-gradient(
+      ellipse 75% 60% at 50% 30%,
+      black 20%,
+      transparent 78%
+    );
   }
 
   /* Hide scrollbar for Chrome, Safari and Opera */

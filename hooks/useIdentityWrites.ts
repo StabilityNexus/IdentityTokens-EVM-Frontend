@@ -12,7 +12,7 @@ import {
 // IdentitySystem Writes
 
 /** Create a root identity (auto-called before first action if needed) */
-export function useCreateRootIdentity() {
+export function useCreateRootIdentity({ chainId }: { chainId?: number } = {}) {
   const {
     writeContract,
     data: txHash,
@@ -27,7 +27,7 @@ export function useCreateRootIdentity() {
     isLoading: isConfirming,
     isSuccess,
     error: receiptError,
-  } = useWaitForTransactionReceipt({ hash: txHash });
+  } = useWaitForTransactionReceipt({ hash: txHash, chainId });
 
   const write = (displayName: string) => {
     writeContract({
@@ -35,6 +35,7 @@ export function useCreateRootIdentity() {
       abi: IDENTITY_SYSTEM_ABI,
       functionName: "createRootIdentity",
       args: [displayName],
+      chainId,
     });
   };
 

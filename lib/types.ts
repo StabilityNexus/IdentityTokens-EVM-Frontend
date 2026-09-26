@@ -50,15 +50,22 @@ export interface FeatureCardProps {
 }
 
 export interface IDCardProps {
-  name?: string;
-  nationality?: string;
+  /** Username without the `@`; empty shows the placeholder. */
+  username: string;
   walletAddress?: string;
+  /** Issue date printed top right, e.g. "SEPTEMBER / 2026". */
+  dateLabel?: string;
+  /** When given, top right shows the rank badge and this count instead. */
   attesters?: number;
+  /** No float, tilt or surface motion — a static card (the dashboard). */
+  still?: boolean;
+  /** Turns the card slowly, right to left, while a reservation confirms. */
+  spinning?: boolean;
+  /** Fired when the card has come to rest facing front after spinning. */
+  onSpinSettled?: () => void;
+  /** Each new non-null value shakes the card once, e.g. for a taken name. */
+  shakeSignal?: string | null;
   className?: string;
-  telegramUrl?: string;
-  linkedinUrl?: string;
-  githubUrl?: string;
-  discordUrl?: string;
 }
 
 export interface TransactionStatusProps {
@@ -78,6 +85,15 @@ export interface CreateProfileModalProps {
 export interface RegistrationModalProps {
   /** Fired once the root identity transaction has been signed and broadcast. */
   onSubmitted?: () => void;
+}
+
+export interface ShareCardModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  username: string;
+  walletAddress?: string;
+  dateLabel: string;
+  txHash?: string;
 }
 
 export interface CreateTokenModalProps {
@@ -104,7 +120,8 @@ export interface AttestModalProps {
 
 export interface BadgeProps {
   rank: RankName;
-  size?: number;
+  /** Pixels, or any CSS length (e.g. "7.5cqw" to scale with a card). */
+  size?: number | string;
   className?: string;
 }
 
@@ -153,8 +170,15 @@ export interface MetricItemProps {
   badgeContent?: React.ReactNode;
 }
 
-export interface IDMetricsProps extends IDCardProps {
+export interface IDMetricsProps {
+  name?: string;
+  walletAddress?: string;
+  /** Attestations on the wallet's tokens, its profile token excluded. */
+  attesters?: number;
+  className?: string;
   lastUpdated?: string;
+  /** Whether this is the viewer's own wallet; picks the share copy. */
+  isOwn?: boolean;
 }
 
 export interface DashboardMetricsProps extends IDMetricsProps, MetricsProps {
@@ -167,7 +191,6 @@ export interface MetricsProps {
   totalAttestations?: number;
   activeTokens?: number;
   socials?: number;
-  badgesEarned?: string;
   badgeRank?: RankName;
   badgeDescription?: string;
   className?: string;

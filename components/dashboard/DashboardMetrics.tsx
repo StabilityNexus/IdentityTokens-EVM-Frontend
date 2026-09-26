@@ -7,17 +7,17 @@ import { DashboardMetricsProps } from "@/lib/types";
 
 const DashboardMetrics: React.FC<DashboardMetricsProps> = ({
   name,
-  nationality,
   walletAddress,
   attesters,
   lastUpdated,
+  isOwn,
   trustScore,
   trustFlags,
   trustDescription,
   totalAttestations,
   activeTokens,
   socials,
-  badgesEarned,
+  badgeRank,
   className = "",
 }) => {
   return (
@@ -30,10 +30,10 @@ const DashboardMetrics: React.FC<DashboardMetricsProps> = ({
         <div className="w-full min-w-0 lg:flex-[1.6]">
           <IDMetrics
             name={name}
-            nationality={nationality}
             walletAddress={walletAddress}
             attesters={attesters}
             lastUpdated={lastUpdated}
+            isOwn={isOwn}
           />
         </div>
 
@@ -52,7 +52,7 @@ const DashboardMetrics: React.FC<DashboardMetricsProps> = ({
         totalAttestations={totalAttestations}
         activeTokens={activeTokens}
         socials={socials}
-        badgesEarned={badgesEarned}
+        badgeRank={badgeRank}
       />
     </div>
   );

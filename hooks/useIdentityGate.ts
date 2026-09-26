@@ -151,6 +151,7 @@ export function useIdentityGate() {
     hasRootIdentity: !!rootId && rootId > 0n,
     rootId: rootId ?? null,
     displayName: rootView?.displayName ?? null,
+    rootCreatedAt: rootView?.createdAt ?? null,
 
     // Profile
     hasProfile: !!hasProfile,

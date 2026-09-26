@@ -11,8 +11,8 @@ import { TOKEN_TYPE, UITokenData } from "@/lib/types";
 
 /**
  * The `tokens` mapping getter returns a flat tuple rather than a named struct.
- * Only three positions are read here: 2 = tokenName, 3 = tokenType,
- * 6 = validUntil.
+ * Only four positions are read here: 2 = tokenName, 3 = tokenType,
+ * 6 = validUntil, 7 = createdAt.
  */
 type TokenTuple = readonly [
   bigint,
@@ -85,5 +85,33 @@ export function useWalletTokenList(tokenIds: readonly bigint[]) {
     );
   }, [attestationCounts]);
 
-  return { tokens, totalAttestations };
+  /** When the newest of these tokens was minted, or null before any load. */
+  const latestCreatedAt = useMemo(() => {
+    if (!tokenDetails) return null;
+    return tokenDetails.reduce<bigint | null>((latest, detail) => {
+      if (detail?.status !== "success") return latest;
+      const createdAt = (detail.result as TokenTuple)[7];
+      return latest === null || createdAt > latest ? createdAt : latest;
+    }, null);
+  }, [tokenDetails]);
+
+  /** Attestations on every token except the PROFILE one, as the ID card shows. */
+  const attestationsExcludingProfile = useMemo(() => {
+    if (!attestationCounts) return 0;
+    return attestationCounts.reduce((sum, r, i) => {
+      if (r?.status !== "success") return sum;
+      const typeResult = tokenTypes?.[i];
+      // Until the types load, a token cannot be told apart from a profile.
+      if (typeResult?.status !== "success") return sum;
+      if (typeResult.result === TOKEN_TYPE.PROFILE) return sum;
+      return sum + Number(r.result);
+    }, 0);
+  }, [attestationCounts, tokenTypes]);
+
+  return {
+    tokens,
+    totalAttestations,
+    attestationsExcludingProfile,
+    latestCreatedAt,
+  };
 }

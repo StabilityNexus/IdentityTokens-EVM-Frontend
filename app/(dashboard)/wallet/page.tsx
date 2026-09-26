@@ -4,14 +4,15 @@ import React, { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { WalletMinimal } from "lucide-react";
 import { getAddress, isAddress } from "viem";
+import { useAccount } from "wagmi";
 import DashboardMetrics from "@/components/dashboard/DashboardMetrics";
 import { TokenList } from "@/components/dashboard/TokenList";
 import { AttestersModal } from "@/components/attestations/AttestersModal";
 import { useWalletIdentity } from "@/hooks/useWalletIdentity";
 import { useWalletTokenList } from "@/hooks/useWalletTokenList";
 import { getContractErrorMessage } from "@/lib/errors";
-import { truncateAddress } from "@/lib/helpers";
-import { getTrustScore } from "@/lib/rank";
+import { formatLastUpdated, truncateAddress } from "@/lib/helpers";
+import { getRankFromAttesters, getTrustScore } from "@/lib/rank";
 
 /** Centred message used by every state this page can land in but the main one. */
 function WalletNotice({
@@ -60,6 +61,7 @@ export default function WalletPage() {
   const {
     hasRootIdentity,
     displayName,
+    rootCreatedAt,
     hasProfile,
     profileData,
     walletTokenIds,
@@ -67,7 +69,18 @@ export default function WalletPage() {
     error,
   } = useWalletIdentity(walletAddress);
 
-  const { tokens, totalAttestations } = useWalletTokenList(walletTokenIds);
+  const {
+    tokens,
+    totalAttestations,
+    attestationsExcludingProfile,
+    latestCreatedAt,
+  } = useWalletTokenList(walletTokenIds);
+
+  // Share copy speaks in the first person only on the viewer's own wallet.
+  const { address: connectedAddress } = useAccount();
+  const isOwnWallet =
+    !!walletAddress &&
+    connectedAddress?.toLowerCase() === walletAddress.toLowerCase();
 
   const [attestersFor, setAttestersFor] = useState<{
     tokenId: bigint;
@@ -142,17 +155,17 @@ export default function WalletPage() {
     <div className="flex h-full flex-col gap-8 bg-app-bg pb-12">
       <DashboardMetrics
         name={name}
-        nationality={profileData?.nationality || ""}
         walletAddress={walletAddress}
-        attesters={totalAttestations}
-        lastUpdated="On-chain"
+        attesters={attestationsExcludingProfile}
+        lastUpdated={formatLastUpdated(rootCreatedAt, latestCreatedAt)}
+        isOwn={isOwnWallet}
         trustScore={getTrustScore(totalAttestations, hasProfile ? 20 : 0)}
         trustFlags={totalAttestations > 0 ? "None" : "No attestations yet"}
         trustDescription="On-Chain Reputation"
         totalAttestations={totalAttestations}
         activeTokens={tokens.length}
         socials={socialsCount}
-        badgesEarned={hasProfile ? "Profile Active" : "No Profile"}
+        badgeRank={getRankFromAttesters(totalAttestations)}
       />
 
       <div className="px-4 sm:px-6 md:pr-14 md:pl-10">

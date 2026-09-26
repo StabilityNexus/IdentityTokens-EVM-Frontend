@@ -44,6 +44,17 @@ export function formatTimeAgo(timestamp: bigint): string {
   return `${years} ${years === 1 ? "year" : "years"} ago`;
 }
 
+/** "3 days ago" for the most recent of the given on-chain timestamps. */
+export function formatLastUpdated(
+  ...timestamps: (bigint | null | undefined)[]
+): string {
+  const latest = timestamps.reduce<bigint>(
+    (max, t) => (t && t > max ? t : max),
+    0n
+  );
+  return formatTimeAgo(latest);
+}
+
 export function getCardVariant(
   listVariant: TokenListVariant
 ): TokenCardVariant {

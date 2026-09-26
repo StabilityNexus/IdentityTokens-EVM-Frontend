@@ -81,6 +81,7 @@ export function useWalletIdentity(address: `0x${string}` | undefined) {
     hasRootIdentity: !!rootId && rootId > 0n,
     rootId: rootId ?? null,
     displayName: rootView?.displayName ?? null,
+    rootCreatedAt: rootView?.createdAt ?? null,
 
     // Profile
     hasProfile: !!profileTokenId,

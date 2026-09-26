@@ -7,6 +7,7 @@ import { validateUsername } from "@/lib/validation";
 
 const KNOWN_ROUTES = [
   "/",
+  "/claim",
   "/home",
   "/dashboard",
   "/discover",

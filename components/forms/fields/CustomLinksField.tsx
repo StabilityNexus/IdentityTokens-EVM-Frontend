@@ -2,7 +2,13 @@
 
 import React from "react";
 import { LinkIcon, Plus, Trash2 } from "lucide-react";
-import { CustomLink, MAX_CUSTOM_LINKS } from "@/lib/profileExtras";
+import {
+  CustomLink,
+  MAX_CUSTOM_LINKS,
+  MAX_LINK_LABEL_LENGTH,
+  MAX_LINK_URL_LENGTH,
+  nextFreeSlot,
+} from "@/lib/profileData";
 import { validateWebsite } from "@/lib/validation";
 import { cn } from "@/lib/utils";
 
@@ -38,7 +44,8 @@ export function CustomLinksField({
   disabled = false,
   className,
 }: CustomLinksFieldProps) {
-  const canAddMore = links.length < MAX_CUSTOM_LINKS;
+  const freeSlot = nextFreeSlot(links);
+  const canAddMore = freeSlot !== undefined;
 
   const updateRow = (index: number, patch: Partial<CustomLink>) => {
     onChange(
@@ -46,12 +53,16 @@ export function CustomLinksField({
     );
   };
 
+  // The remaining rows keep their slots, so removing a link frees exactly one
+  // on-chain slot rather than shifting every link after it.
   const removeRow = (index: number) => {
     onChange(links.filter((_, i) => i !== index));
   };
 
   const addRow = () => {
-    if (canAddMore) onChange([...links, { label: "", url: "" }]);
+    if (freeSlot !== undefined) {
+      onChange([...links, { label: "", url: "", slot: freeSlot }]);
+    }
   };
 
   return (
@@ -84,7 +95,7 @@ export function CustomLinksField({
             const error = customLinkError(link);
 
             return (
-              <div key={index} className="flex flex-col gap-1">
+              <div key={link.slot} className="flex flex-col gap-1">
                 <div className="flex items-center gap-2">
                   <input
                     type="text"
@@ -93,7 +104,7 @@ export function CustomLinksField({
                       updateRow(index, { label: event.target.value })
                     }
                     placeholder="Name"
-                    maxLength={24}
+                    maxLength={MAX_LINK_LABEL_LENGTH}
                     disabled={disabled}
                     aria-label={`Custom link ${index + 1} name`}
                     className="w-28 shrink-0 rounded-xl border border-white/8 bg-modal-inner-bg px-3 py-2.5 font-utsaha text-sm text-white placeholder-gray-600 transition-colors focus:border-profile-accent/70 focus:outline-none sm:w-36"
@@ -113,7 +124,7 @@ export function CustomLinksField({
                         updateRow(index, { url: event.target.value })
                       }
                       placeholder="https://…"
-                      maxLength={200}
+                      maxLength={MAX_LINK_URL_LENGTH}
                       disabled={disabled}
                       aria-label={`Custom link ${index + 1} URL`}
                       aria-invalid={!!error}

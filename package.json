@@ -9,6 +9,7 @@
     "lint": "eslint",
     "format": "prettier --write .",
     "check-format": "prettier --check .",
+    "check:profile": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-profile-diff.mjs",
     "prepare": "husky"
   },
   "lint-staged": {

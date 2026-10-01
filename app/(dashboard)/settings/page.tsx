@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
 
 export default function SettingsPage() {
@@ -82,10 +83,19 @@ export default function SettingsPage() {
               </div>
             )}
 
+            {hasProfile && profileData && (
+              <Link
+                href={`/profile?u=${profileData.username}`}
+                className="self-start rounded-xl bg-brand-green px-5 py-2.5 font-utsaha text-black transition-all hover:bg-brand-green/90"
+              >
+                Edit your profile
+              </Link>
+            )}
+
             {/* Coming Soon */}
             <div className="rounded-xl border border-white/5 bg-white/[0.02] p-4 text-center">
               <p className="font-utsaha text-sm text-gray-500">
-                Profile editing and advanced settings coming soon
+                Advanced settings coming soon
               </p>
             </div>
           </div>

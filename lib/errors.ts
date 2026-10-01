@@ -28,7 +28,6 @@ const CONTRACT_ERROR_MESSAGES: Record<string, string> = {
   NotProfileOwner: "Only the owner of this profile can edit it.",
   ProfileNotFound: "This profile does not exist or has been burned.",
   InvalidLinkSlot: "A profile can have at most 6 custom links.",
-  EmptyProfileUpdate: "There are no changes to save.",
 
   // Token
   NotToken: "This is not a valid token for this operation.",

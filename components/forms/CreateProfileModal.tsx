@@ -19,11 +19,10 @@ import {
   CustomLink,
   EMPTY_PROFILE_FORM,
   ProfileFormData,
+  diffLinks,
   diffProfile,
   linksFromChain,
   normalizeProfile,
-  profileToForm,
-  toLinkUpdates,
 } from "@/lib/profileData";
 import {
   FieldResult,
@@ -102,7 +101,7 @@ export function CreateProfileModal({
       xDotCom: validateX(formData.xDotCom),
       discord: validateDiscord(formData.discord),
       email: validateEmail(formData.email),
-      website: validateWebsite(formData.website),
+      website: validateWebsite(formData.websitePortfolioLink),
       ens: validateEns(formData.ens),
     }),
     [formData, usernameResult]
@@ -176,7 +175,7 @@ export function CreateProfileModal({
     }
     createProfile.write(
       normalizeProfile(formData, avatarId ?? DEFAULT_AVATAR_ID),
-      toLinkUpdates(customLinks)
+      diffLinks([], customLinks)
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [edit, diff, formData, avatarId, customLinks]);
@@ -190,7 +189,7 @@ export function CreateProfileModal({
   useEffect(() => {
     if (!isOpen) return;
     if (edit) {
-      setFormData(profileToForm(edit.profile));
+      setFormData(edit.profile);
       setAvatarId(edit.profile.avatarId || null);
       setCustomLinks(linksFromChain(edit.links));
       return;
@@ -276,7 +275,7 @@ export function CreateProfileModal({
     event.preventDefault();
     setHasAttemptedSubmit(true);
     if (hasBlockingError || isMissingRequired) return;
-    if (txStatus === "success" || (isEdit && changeCount === 0)) return;
+    if (isEdit && changeCount === 0) return;
 
     submitProfile();
   };
@@ -452,9 +451,11 @@ export function CreateProfileModal({
               <TextField
                 label="Website / portfolio"
                 name="website"
-                value={formData.website}
-                onChange={(value) => setField("website", value)}
-                onApplySuggestion={(value) => setField("website", value)}
+                value={formData.websitePortfolioLink}
+                onChange={(value) => setField("websitePortfolioLink", value)}
+                onApplySuggestion={(value) =>
+                  setField("websitePortfolioLink", value)
+                }
                 result={results.website}
                 icon={<Globe size={15} />}
                 placeholder="Enter your Website URL"

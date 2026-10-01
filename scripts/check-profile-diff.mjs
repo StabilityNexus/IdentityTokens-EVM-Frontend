@@ -3,13 +3,12 @@
 // a guard even without a test runner in this repo.
 import assert from "node:assert/strict";
 import {
-  PROFILE_FIELD,
+  EDITABLE_FIELDS,
+  diffLinks,
   diffProfile,
   linksFromChain,
   nextFreeSlot,
   normalizeProfile,
-  profileToForm,
-  toLinkUpdates,
 } from "../lib/profileData.ts";
 
 const chain = {
@@ -34,7 +33,7 @@ const chainLinks = [
   empty,
 ];
 
-const form = profileToForm(chain);
+const form = chain; // the form edits the profile as-is
 const rows = linksFromChain(chainLinks);
 const diff = (nextForm, nextRows = rows, avatarId = chain.avatarId) =>
   diffProfile(
@@ -50,13 +49,13 @@ assert.deepEqual(diff(form), noChange);
 
 // "@handle" and a missing protocol are normalised away, not changes.
 assert.deepEqual(
-  diff({ ...form, xDotCom: " @alice ", website: "alice.dev" }),
+  diff({ ...form, xDotCom: " @alice ", websitePortfolioLink: "alice.dev" }),
   noChange
 );
 
 // One edited field is exactly one FieldUpdate.
 assert.deepEqual(diff({ ...form, discord: "alice_new" }).fields, [
-  { field: PROFILE_FIELD.DISCORD, value: "alice_new" },
+  { field: EDITABLE_FIELDS.indexOf("discord"), value: "alice_new" },
 ]);
 
 // The username is never sent, even if the form value changes.
@@ -64,7 +63,7 @@ assert.deepEqual(diff({ ...form, username: "mallory" }), noChange);
 
 // Avatar changes travel as their own field.
 assert.deepEqual(diff(form, rows, "a05").fields, [
-  { field: PROFILE_FIELD.AVATAR, value: "a05" },
+  { field: EDITABLE_FIELDS.indexOf("avatarId"), value: "a05" },
 ]);
 
 // Removing the middle link clears only its slot.
@@ -91,12 +90,15 @@ assert.equal(
   undefined
 );
 
-// Creating a profile writes only the filled rows, at their slots.
+// Creating a profile (no links on-chain yet) writes only the filled rows.
 assert.deepEqual(
-  toLinkUpdates([
-    { label: " Blog ", url: " https://blog.dev ", slot: 0 },
-    { label: "Draft", url: "  ", slot: 1 },
-  ]),
+  diffLinks(
+    [],
+    [
+      { label: " Blog ", url: " https://blog.dev ", slot: 0 },
+      { label: "Draft", url: "  ", slot: 1 },
+    ]
+  ),
   [{ slot: 0, label: "Blog", url: "https://blog.dev" }]
 );
 

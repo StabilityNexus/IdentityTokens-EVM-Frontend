@@ -1650,19 +1650,6 @@ export const PROFILE_SYSTEM_ABI = [
   },
   {
     type: "function",
-    name: "MAX_LINKS",
-    inputs: [],
-    outputs: [
-      {
-        name: "",
-        type: "uint8",
-        internalType: "uint8",
-      },
-    ],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
     name: "cleanupBurnedProfile",
     inputs: [
       {
@@ -2096,11 +2083,6 @@ export const PROFILE_SYSTEM_ABI = [
   {
     type: "error",
     name: "AlreadyMintedProfile",
-    inputs: [],
-  },
-  {
-    type: "error",
-    name: "EmptyProfileUpdate",
     inputs: [],
   },
   {

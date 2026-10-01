@@ -1,13 +1,12 @@
 /**
  * Profile form ↔ on-chain data.
  *
- * Owns the single normalisation step that both create and edit use, so a
- * value read back from the chain compares equal to what the form would write.
- * That is what lets the edit diff send only the fields and link slots that
- * really changed — the contract rewrites nothing else, which is the fee saving.
+ * Create and edit share one normalisation step, so a value read back from the
+ * chain compares equal to what the form would write and the edit diff sends
+ * only what really changed.
  *
  * Keep this file free of runtime imports (type imports are fine) so
- * `node scripts/check-profile-diff.mjs` can load it directly.
+ * `npm run check:profile` can load it directly.
  */
 import type { ProfileLink, ProfileMetadata } from "./types.responses";
 
@@ -16,42 +15,33 @@ export const MAX_CUSTOM_LINKS = 6;
 export const MAX_LINK_LABEL_LENGTH = 24;
 export const MAX_LINK_URL_LENGTH = 200;
 
-/** Mirrors the on-chain `DataTypes.ProfileField` enum — the order must match. */
-export const PROFILE_FIELD = {
-  NAME: 0,
-  NATIONALITY: 1,
-  GITHUB: 2,
-  EMAIL: 3,
-  DISCORD: 4,
-  X_DOT_COM: 5,
-  WEBSITE: 6,
-  ENS: 7,
-  AVATAR: 8,
-} as const;
+/**
+ * Every field an owner can edit, in on-chain `DataTypes.ProfileField` order:
+ * a key's index is its enum value. Username is permanent, so it is absent.
+ */
+export const EDITABLE_FIELDS = [
+  "name",
+  "nationality",
+  "github",
+  "email",
+  "discord",
+  "xDotCom",
+  "websitePortfolioLink",
+  "ens",
+  "avatarId",
+] as const satisfies readonly (keyof ProfileMetadata)[];
 
 export interface CustomLink {
   /** Display name, e.g. "Farcaster". */
   label: string;
   /** Absolute URL including protocol. */
   url: string;
-  /**
-   * On-chain slot. It stays put when other rows are removed, so removing one
-   * link rewrites one slot instead of shifting every link after it.
-   */
+  /** On-chain slot; it stays put when other rows are removed. */
   slot: number;
 }
 
-export interface ProfileFormData {
-  name: string;
-  username: string;
-  nationality: string;
-  github: string;
-  email: string;
-  discord: string;
-  xDotCom: string;
-  website: string;
-  ens: string;
-}
+/** The avatar is picked separately, so the form holds everything else. */
+export type ProfileFormData = Omit<ProfileMetadata, "avatarId">;
 
 export const EMPTY_PROFILE_FORM: ProfileFormData = {
   name: "",
@@ -61,7 +51,7 @@ export const EMPTY_PROFILE_FORM: ProfileFormData = {
   email: "",
   discord: "",
   xDotCom: "",
-  website: "",
+  websitePortfolioLink: "",
   ens: "",
 };
 
@@ -78,22 +68,6 @@ export interface LinkUpdate {
 }
 
 const EMPTY_LINK: ProfileLink = { label: "", url: "" };
-
-/** Every field the contract lets an owner edit. Username is permanent. */
-const EDITABLE_FIELDS: readonly [
-  number,
-  Exclude<keyof ProfileMetadata, "username">,
-][] = [
-  [PROFILE_FIELD.NAME, "name"],
-  [PROFILE_FIELD.NATIONALITY, "nationality"],
-  [PROFILE_FIELD.GITHUB, "github"],
-  [PROFILE_FIELD.EMAIL, "email"],
-  [PROFILE_FIELD.DISCORD, "discord"],
-  [PROFILE_FIELD.X_DOT_COM, "xDotCom"],
-  [PROFILE_FIELD.WEBSITE, "websitePortfolioLink"],
-  [PROFILE_FIELD.ENS, "ens"],
-  [PROFILE_FIELD.AVATAR, "avatarId"],
-];
 
 /** Normalise a website for storage — guarantees a protocol is present. */
 export function normalizeWebsite(value: string): string {
@@ -115,32 +89,16 @@ export function normalizeProfile(
     email: form.email.trim(),
     discord: form.discord.trim(),
     xDotCom: form.xDotCom.trim().replace(/^@/, ""),
-    websitePortfolioLink: normalizeWebsite(form.website),
+    websitePortfolioLink: normalizeWebsite(form.websitePortfolioLink),
     ens: form.ens.trim(),
     avatarId,
   };
 }
 
-/** Form values for an existing profile — the inverse of `normalizeProfile`. */
-export function profileToForm(profile: ProfileMetadata): ProfileFormData {
-  return {
-    name: profile.name,
-    username: profile.username,
-    nationality: profile.nationality,
-    github: profile.github,
-    email: profile.email,
-    discord: profile.discord,
-    xDotCom: profile.xDotCom,
-    website: profile.websitePortfolioLink,
-    ens: profile.ens,
-  };
-}
-
 /** A row without a URL is an empty slot, whatever its label says. */
 function normalizeLink(link: { label: string; url: string }): ProfileLink {
-  const url = link.url.trim().slice(0, MAX_LINK_URL_LENGTH);
-  if (!url) return EMPTY_LINK;
-  return { label: link.label.trim().slice(0, MAX_LINK_LABEL_LENGTH), url };
+  const url = link.url.trim();
+  return url ? { label: link.label.trim(), url } : EMPTY_LINK;
 }
 
 /** Editor rows for the filled on-chain slots, in slot order. */
@@ -158,11 +116,24 @@ export function nextFreeSlot(rows: readonly CustomLink[]): number | undefined {
   return undefined;
 }
 
-/** Link writes for a brand-new profile: every filled row. */
-export function toLinkUpdates(rows: readonly CustomLink[]): LinkUpdate[] {
-  return rows
-    .map((row) => ({ slot: row.slot, ...normalizeLink(row) }))
-    .filter((link) => link.url);
+/**
+ * Writes for the slots whose row differs from the chain. Against `[]` (a new
+ * profile) that is exactly the filled rows.
+ */
+export function diffLinks(
+  chainLinks: readonly ProfileLink[],
+  rows: readonly CustomLink[]
+): LinkUpdate[] {
+  const links: LinkUpdate[] = [];
+  for (let slot = 0; slot < MAX_CUSTOM_LINKS; slot++) {
+    const row = rows.find((candidate) => candidate.slot === slot);
+    const wanted = row ? normalizeLink(row) : EMPTY_LINK;
+    const current = chainLinks[slot] ?? EMPTY_LINK;
+    if (wanted.label !== current.label || wanted.url !== current.url) {
+      links.push({ slot, ...wanted });
+    }
+  }
+  return links;
 }
 
 /**
@@ -175,19 +146,8 @@ export function diffProfile(
   next: ProfileMetadata,
   rows: readonly CustomLink[]
 ): { fields: FieldUpdate[]; links: LinkUpdate[] } {
-  const fields = EDITABLE_FIELDS.filter(
-    ([, key]) => next[key] !== chain[key]
-  ).map(([field, key]) => ({ field, value: next[key] }));
-
-  const links: LinkUpdate[] = [];
-  for (let slot = 0; slot < MAX_CUSTOM_LINKS; slot++) {
-    const row = rows.find((candidate) => candidate.slot === slot);
-    const wanted = row ? normalizeLink(row) : EMPTY_LINK;
-    const current = chainLinks[slot] ?? EMPTY_LINK;
-    if (wanted.label !== current.label || wanted.url !== current.url) {
-      links.push({ slot, ...wanted });
-    }
-  }
-
-  return { fields, links };
+  const fields = EDITABLE_FIELDS.flatMap((key, field) =>
+    next[key] !== chain[key] ? [{ field, value: next[key] }] : []
+  );
+  return { fields, links: diffLinks(chainLinks, rows) };
 }

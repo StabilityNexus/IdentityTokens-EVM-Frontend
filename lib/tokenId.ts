@@ -1,10 +1,4 @@
-/**
- * Token ids ↔ their display form, mirroring `IdentitySystem.sol`.
- *
- * On-chain id = (type + 1) * 1e10 + 10 scrambled digits, shown as
- * `id-` / `tk-` / `pf-` + those digits. Keep this file free of runtime
- * imports so `npm run check:tokenid` can load it directly.
- */
+// Mirrors IdentitySystem.sol ids; no runtime imports so check:tokenid can load it
 
 /** Must equal `IdentitySystem.SERIAL_SPACE`, `MIX` and `SALT`. */
 const SERIAL_SPACE = 10_000_000_000n;
@@ -40,11 +34,6 @@ export function parseTokenId(input: string): bigint | undefined {
   if (!match) return undefined;
   const type = PREFIXES.indexOf(match[1] as (typeof PREFIXES)[number]);
   return BigInt(type + 1) * SERIAL_SPACE + BigInt(match[2]);
-}
-
-/** Starts like a token id, e.g. "tk-12", so search can hint instead of guessing. */
-export function looksLikeTokenId(input: string): boolean {
-  return /^(id|tk|pf)-/i.test(input.trim());
 }
 
 /** Id of the `serial`-th mint of `type` (same formula as `_nextId`). */

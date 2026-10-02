@@ -283,10 +283,7 @@ export function useMultipleTokenOwners(
 const RECENT_TYPES = [TOKEN_TYPE.SUB, TOKEN_TYPE.PROFILE] as const;
 const RECENT_PER_TYPE = 20n;
 
-/**
- * Ids of the newest token and profile mints, worked out from the per-type
- * `minted` counters. Burned ids are included; callers drop them.
- */
+// Newest ids per type from the minted counters; burned ids included, callers drop them
 export function useRecentTokens() {
   const { data: counts, isLoading } = useReadContracts({
     contracts: RECENT_TYPES.map((type) => ({

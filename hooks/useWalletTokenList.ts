@@ -14,7 +14,7 @@ import { TOKEN_TYPE, UITokenData } from "@/lib/types";
  * Only three positions are read here: 2 = tokenName, 3 = tokenType,
  * 6 = validUntil.
  */
-type TokenTuple = readonly [
+export type TokenTuple = readonly [
   bigint,
   bigint,
   string,

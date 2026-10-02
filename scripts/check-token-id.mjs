@@ -4,7 +4,6 @@
 import assert from "node:assert/strict";
 import {
   formatTokenId,
-  looksLikeTokenId,
   parseTokenId,
   tokenIdFor,
   tokenTypeOf,
@@ -43,8 +42,5 @@ assert.equal(tokenTypeOf(29321932540n), 1);
 assert.equal(tokenTypeOf(32463525193n), 2);
 assert.equal(tokenTypeOf(5n), undefined);
 assert.equal(tokenTypeOf(40000000000n), undefined);
-
-assert.ok(looksLikeTokenId("tk-12"));
-assert.ok(!looksLikeTokenId("alice"));
 
 console.log("tokenId: all checks passed");

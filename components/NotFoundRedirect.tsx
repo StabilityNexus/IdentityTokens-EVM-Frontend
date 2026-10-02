@@ -27,16 +27,10 @@ const NO_SUBSCRIPTION = () => () => {};
 const ASSET_EXTENSION =
   /\.(?:ico|png|jpe?g|gif|svg|webp|avif|txt|xml|json|map|css|js|webmanifest|woff2?)$/i;
 
-function withQuery(
-  route: string,
-  u: string,
-  search: string,
-  hash: string,
-  key = "u"
-) {
+function withQuery(route: string, u: string, search: string, hash: string) {
   const params = new URLSearchParams(search);
 
-  params.set(key, u);
+  params.set("u", u);
   return `${route}?${params.toString()}${hash}`;
 }
 
@@ -72,7 +66,7 @@ function resolveTarget(
   if (tokenId !== undefined) {
     return tokenTypeOf(tokenId) === TOKEN_TYPE.PROFILE
       ? withQuery("/profile", segment, search, hash)
-      : withQuery("/discover", segment, search, hash, "q");
+      : `/discover?q=${segment}`;
   }
 
   if (validateUsername(segment).status !== "valid") return null;

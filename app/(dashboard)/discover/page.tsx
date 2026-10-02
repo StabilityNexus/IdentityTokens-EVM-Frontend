@@ -7,6 +7,7 @@ import { TokenList } from "@/components/dashboard/TokenList";
 import { AttestModal } from "@/components/forms/AttestModal";
 import { AttestersModal } from "@/components/attestations/AttestersModal";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
+import type { TokenTuple } from "@/hooks/useWalletTokenList";
 import {
   useTokenDetail,
   useActiveAttestationCount,
@@ -20,31 +21,9 @@ import {
   useRootIdentityView,
 } from "@/hooks/useIdentityReads";
 import { formatExpiry, truncateAddress } from "@/lib/helpers";
-import {
-  formatTokenId,
-  looksLikeTokenId,
-  parseTokenId,
-  tokenTypeOf,
-} from "@/lib/tokenId";
+import { formatTokenId, parseTokenId, tokenTypeOf } from "@/lib/tokenId";
 import { TOKEN_TYPE } from "@/lib/types";
 import { validateUsername } from "@/lib/validation";
-
-/** The `tokens` getter's flat tuple: 2 = tokenName, 3 = tokenType, 6 = validUntil, 7 = createdAt. */
-type TokenTuple = readonly [
-  bigint,
-  bigint,
-  string,
-  string,
-  `0x${string}`,
-  string,
-  bigint,
-  bigint,
-  bigint,
-  bigint,
-  boolean,
-  bigint,
-  bigint,
-];
 
 function SearchMessage({ title, hint }: { title: string; hint?: string }) {
   return (
@@ -381,7 +360,7 @@ export default function DiscoverPage() {
         <RootResult rootId={searchedId} />
       ) : isUsername ? (
         <UsernameResult username={username} />
-      ) : looksLikeTokenId(query) ? (
+      ) : /^(id|tk|pf)-/i.test(query) ? (
         <SearchMessage
           title="Ids have 10 digits after the prefix"
           hint="For example tk-0901699435. Copy the full id from the token or profile."

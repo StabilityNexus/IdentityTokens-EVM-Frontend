@@ -9,8 +9,9 @@ import { AttestersModal } from "@/components/attestations/AttestersModal";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
 import { useWalletTokenList } from "@/hooks/useWalletTokenList";
 import { getContractErrorMessage } from "@/lib/errors";
+import { formatLastUpdated } from "@/lib/helpers";
+import { getRankFromAttesters, getTrustScore } from "@/lib/rank";
 import { parseTokenId } from "@/lib/tokenId";
-import { getTrustScore } from "@/lib/rank";
 
 const DashboardPage = () => {
   const {
@@ -18,6 +19,7 @@ const DashboardPage = () => {
     hasProfile,
     profileData,
     displayName,
+    rootCreatedAt,
     walletTokenIds,
     isLoading,
     error,
@@ -29,11 +31,15 @@ const DashboardPage = () => {
     name: string;
   } | null>(null);
 
-  const { tokens: tokenListData, totalAttestations } =
-    useWalletTokenList(walletTokenIds);
+  // Rows for every token except the ROOT, plus the totals the metrics need.
+  const {
+    tokens: tokenListData,
+    totalAttestations,
+    attestationsExcludingProfile,
+    latestCreatedAt,
+  } = useWalletTokenList(walletTokenIds);
 
   const name = displayName ?? "";
-  const nationality = profileData?.nationality || "";
   const walletAddress = address || "0x0000000000000000000000000000000000000000";
 
   const socialsCount = profileData
@@ -115,17 +121,17 @@ const DashboardPage = () => {
     <div className="flex h-full flex-col gap-8 bg-app-bg pb-12">
       <DashboardMetrics
         name={name}
-        nationality={nationality}
         walletAddress={walletAddress as string}
-        attesters={totalAttestations}
-        lastUpdated="Just now"
+        attesters={attestationsExcludingProfile}
+        lastUpdated={formatLastUpdated(rootCreatedAt, latestCreatedAt)}
+        isOwn
         trustScore={trustScore}
         trustFlags={totalAttestations > 0 ? "None" : "No attestations yet"}
         trustDescription="On-Chain Reputation"
         totalAttestations={totalAttestations}
         activeTokens={tokenListData.length}
         socials={socialsCount}
-        badgesEarned="Profile Active"
+        badgeRank={getRankFromAttesters(totalAttestations)}
       />
 
       <div className="px-4 sm:px-6 md:pr-14 md:pl-10">

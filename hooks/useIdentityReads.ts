@@ -15,23 +15,31 @@ import { validateUsername } from "@/lib/validation";
 // IdentitySystem Reads
 
 /** Get the root identity ID for a wallet address */
-export function useRootId(address: `0x${string}` | undefined) {
+export function useRootId(
+  address: `0x${string}` | undefined,
+  chainId?: number
+) {
   return useReadContract({
     address: IDENTITY_SYSTEM_ADDRESS,
     abi: IDENTITY_SYSTEM_ABI,
     functionName: "ownerToRootId",
     args: address ? [address] : undefined,
+    chainId,
     query: { enabled: !!address },
   });
 }
 
 /** Get the full root identity view for a root ID */
-export function useRootIdentityView(rootId: bigint | undefined) {
+export function useRootIdentityView(
+  rootId: bigint | undefined,
+  chainId?: number
+) {
   return useReadContract({
     address: IDENTITY_SYSTEM_ADDRESS,
     abi: IDENTITY_SYSTEM_ABI,
     functionName: "getRootIdentityView",
     args: rootId ? [rootId] : undefined,
+    chainId,
     query: { enabled: !!rootId && rootId > 0n },
   });
 }
@@ -202,12 +210,16 @@ export function useProfileLinks(tokenId: bigint | undefined) {
 }
 
 /** Check if a username is already taken */
-export function useUsernameTaken(username: string | undefined) {
+export function useUsernameTaken(
+  username: string | undefined,
+  chainId?: number
+) {
   return useReadContract({
     address: PROFILE_SYSTEM_ADDRESS,
     abi: PROFILE_SYSTEM_ABI,
     functionName: "usernameTaken",
     args: username ? [username] : undefined,
+    chainId,
     query: { enabled: !!username && username.length >= 3 },
   });
 }

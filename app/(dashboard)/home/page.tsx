@@ -9,17 +9,12 @@ import { AttestersModal } from "@/components/attestations/AttestersModal";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
 import { useWalletTokenList } from "@/hooks/useWalletTokenList";
 import { getContractErrorMessage } from "@/lib/errors";
+import { getRankFromAttesters } from "@/lib/rank";
 import { parseTokenId } from "@/lib/tokenId";
 
 export default function Home() {
-  const {
-    isConnected,
-    walletTokenIds,
-    hasProfile,
-    profileData,
-    isLoading,
-    error,
-  } = useIdentityGate();
+  const { isConnected, walletTokenIds, profileData, isLoading, error } =
+    useIdentityGate();
 
   const [attestersFor, setAttestersFor] = useState<{
     tokenId: bigint;
@@ -107,7 +102,7 @@ export default function Home() {
         totalAttestations={totalAttestations}
         activeTokens={tokenListData.length}
         socials={socialsCount}
-        badgesEarned={hasProfile ? "Profile Created" : "No badges yet"}
+        badgeRank={getRankFromAttesters(totalAttestations)}
       />
 
       <TokenList

@@ -11,8 +11,8 @@ import { TOKEN_TYPE, UITokenData } from "@/lib/types";
 
 /**
  * The `tokens` mapping getter returns a flat tuple rather than a named struct.
- * Only three positions are read here: 2 = tokenName, 3 = tokenType,
- * 6 = validUntil.
+ * Only four positions are read here: 2 = tokenName, 3 = tokenType,
+ * 6 = validUntil, 7 = createdAt.
  */
 export type TokenTuple = readonly [
   bigint,
@@ -80,5 +80,32 @@ export function useWalletTokenList(tokenIds: readonly bigint[]) {
     );
   }, [attestationCounts]);
 
-  return { tokens, totalAttestations };
+  /** When the newest of these tokens was minted, or null before any load. */
+  const latestCreatedAt = useMemo(() => {
+    if (!tokenDetails) return null;
+    return tokenDetails.reduce<bigint | null>((latest, detail) => {
+      if (detail?.status !== "success") return latest;
+      const createdAt = (detail.result as TokenTuple)[7];
+      return latest === null || createdAt > latest ? createdAt : latest;
+    }, null);
+  }, [tokenDetails]);
+
+  /** Attestations on every token except the PROFILE one, as the ID card shows. */
+  const attestationsExcludingProfile = useMemo(() => {
+    if (!ids || !attestationCounts) return 0;
+    return attestationCounts.reduce(
+      (sum, r, i) =>
+        r?.status === "success" && tokenTypeOf(ids[i]) !== TOKEN_TYPE.PROFILE
+          ? sum + Number(r.result)
+          : sum,
+      0
+    );
+  }, [ids, attestationCounts]);
+
+  return {
+    tokens,
+    totalAttestations,
+    attestationsExcludingProfile,
+    latestCreatedAt,
+  };
 }

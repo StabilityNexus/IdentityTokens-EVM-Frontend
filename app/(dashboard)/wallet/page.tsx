@@ -12,6 +12,7 @@ import { useWalletTokenList } from "@/hooks/useWalletTokenList";
 import { getContractErrorMessage } from "@/lib/errors";
 import { truncateAddress } from "@/lib/helpers";
 import { getTrustScore } from "@/lib/rank";
+import { parseTokenId } from "@/lib/tokenId";
 
 /** Centred message used by every state this page can land in but the main one. */
 function WalletNotice({
@@ -164,7 +165,7 @@ export default function WalletPage() {
           emptyMessage="This wallet holds no tokens yet."
           onViewAll={(id) =>
             setAttestersFor({
-              tokenId: BigInt(id.replace(/^#/, "")),
+              tokenId: parseTokenId(id)!,
               name: tokens.find((t) => t.tokenId === id)?.name || "",
             })
           }

@@ -109,7 +109,7 @@ export function DashboardNavbar() {
 
           {isDiscover && (
             <SearchBar
-              placeholder="Search by Token ID or Decentralized ID…"
+              placeholder="Search tk-, pf-, id- or a username…"
               value={currentQuery}
               onChange={handleSearchChange}
             />
@@ -117,7 +117,7 @@ export function DashboardNavbar() {
 
           {isUserProfile && (
             <SearchBar
-              placeholder="Search profiles and tokens…"
+              placeholder="Search tk-, pf-, id- or a username…"
               value={profileQuery}
               onChange={setProfileQuery}
               onSubmit={submitProfileSearch}

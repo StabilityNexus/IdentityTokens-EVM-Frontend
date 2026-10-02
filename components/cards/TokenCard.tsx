@@ -20,6 +20,7 @@ import {
 import Badge from "../Badge";
 import { TokenForm } from "../forms/TokenForm";
 import { TokenCardProps } from "@/lib/types";
+import { parseTokenId } from "@/lib/tokenId";
 
 const getRankFromAttestations = (count: number) => {
   if (count >= 250) return "champion";
@@ -269,7 +270,7 @@ export function TokenCard({
           isOpen={isTokenFormOpen}
           onClose={() => setIsTokenFormOpen(false)}
           tokenName={name}
-          tokenId={BigInt(tokenId.replace(/^#/, ""))}
+          tokenId={parseTokenId(tokenId)!}
         />
       )}
     </>

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { TokenList } from "@/components/dashboard/TokenList";
 import { AttestModal } from "@/components/forms/AttestModal";
@@ -14,8 +15,153 @@ import {
   useMultipleTokenDetails,
   useMultipleAttestationCounts,
   useMultipleTokenOwners,
+  useProfile,
+  useResolveUsername,
+  useRootIdentityView,
 } from "@/hooks/useIdentityReads";
 import { formatExpiry, truncateAddress } from "@/lib/helpers";
+import {
+  formatTokenId,
+  looksLikeTokenId,
+  parseTokenId,
+  tokenTypeOf,
+} from "@/lib/tokenId";
+import { TOKEN_TYPE } from "@/lib/types";
+import { validateUsername } from "@/lib/validation";
+
+/** The `tokens` getter's flat tuple: 2 = tokenName, 3 = tokenType, 6 = validUntil, 7 = createdAt. */
+type TokenTuple = readonly [
+  bigint,
+  bigint,
+  string,
+  string,
+  `0x${string}`,
+  string,
+  bigint,
+  bigint,
+  bigint,
+  bigint,
+  boolean,
+  bigint,
+  bigint,
+];
+
+function SearchMessage({ title, hint }: { title: string; hint?: string }) {
+  return (
+    <div className="flex items-center justify-center rounded-2xl border border-card-border bg-card-bg py-16">
+      <div className="px-4 text-center">
+        <p className="font-utsaha text-lg text-gray-400">{title}</p>
+        {hint && (
+          <p className="mt-2 font-utsaha text-sm text-gray-500">{hint}</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function SearchLoading({ label }: { label: string }) {
+  return (
+    <div className="flex items-center justify-center rounded-2xl border border-card-border bg-card-bg py-12">
+      <div className="text-center">
+        <div className="mx-auto mb-3 h-6 w-6 animate-spin rounded-full border-2 border-brand-green border-t-transparent" />
+        <p className="font-utsaha text-sm text-gray-400">{label}</p>
+      </div>
+    </div>
+  );
+}
+
+/** One search hit that links to the page that can render it in full. */
+function ResultCard({
+  title,
+  subtitle,
+  id,
+  href,
+  action,
+}: {
+  title: string;
+  subtitle: string;
+  id: string;
+  href: string;
+  action: string;
+}) {
+  return (
+    <div className="flex flex-col gap-4 rounded-2xl border border-card-border bg-card-bg p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+      <div className="min-w-0">
+        <h3 className="truncate font-utsaha text-lg text-white">{title}</h3>
+        <p className="truncate font-utsaha text-sm text-gray-500">
+          {subtitle} · ID: {id}
+        </p>
+      </div>
+      <Link
+        href={href}
+        className="inline-flex shrink-0 items-center justify-center rounded-xl bg-brand-green px-5 py-2 font-utsaha text-base font-semibold text-dashboard-bg transition-transform duration-200 hover:scale-[1.02] hover:bg-brand-green/90"
+      >
+        {action}
+      </Link>
+    </div>
+  );
+}
+
+function ProfileResult({ tokenId }: { tokenId: bigint }) {
+  const { data: profile, isLoading } = useProfile(tokenId);
+
+  if (isLoading) return <SearchLoading label="Loading profile…" />;
+  // Burned or never-minted profiles read back with an empty username
+  if (!profile?.username) {
+    return (
+      <SearchMessage
+        title={`No profile ${formatTokenId(tokenId)}`}
+        hint="Check the id, or search the username instead."
+      />
+    );
+  }
+
+  return (
+    <ResultCard
+      title={profile.name}
+      subtitle={`@${profile.username}`}
+      id={formatTokenId(tokenId)}
+      href={`/profile?u=${profile.username}`}
+      action="View profile"
+    />
+  );
+}
+
+function UsernameResult({ username }: { username: string }) {
+  const { data: tokenId, isLoading } = useResolveUsername(username);
+
+  if (isLoading) return <SearchLoading label={`Looking up @${username}…`} />;
+  if (!tokenId) {
+    return (
+      <SearchMessage
+        title={`No profile named @${username}`}
+        hint="Usernames are exact: lowercase letters, numbers, dots and underscores."
+      />
+    );
+  }
+  return <ProfileResult tokenId={tokenId} />;
+}
+
+function RootResult({ rootId }: { rootId: bigint }) {
+  const { data: root, isLoading } = useRootIdentityView(rootId);
+
+  if (isLoading) return <SearchLoading label="Loading root identity…" />;
+  if (!root || /^0x0+$/.test(root.walletAddress)) {
+    return (
+      <SearchMessage title={`No root identity ${formatTokenId(rootId)}`} />
+    );
+  }
+
+  return (
+    <ResultCard
+      title={root.displayName || "Unnamed identity"}
+      subtitle={`Root identity of ${truncateAddress(root.walletAddress)} · ${root.tokenCount} tokens`}
+      id={formatTokenId(rootId)}
+      href={`/wallet?u=${root.walletAddress}`}
+      action="View wallet"
+    />
+  );
+}
 
 function SearchedToken({
   tokenId,
@@ -33,34 +179,19 @@ function SearchedToken({
   const { data: owner } = useTokenOwner(tokenId);
 
   if (!token) {
-    return (
-      <div className="flex items-center justify-center rounded-2xl border border-card-border bg-card-bg py-12">
-        <div className="text-center">
-          <div className="mx-auto mb-3 h-6 w-6 animate-spin rounded-full border-2 border-brand-green border-t-transparent" />
-          <p className="font-utsaha text-sm text-gray-400">
-            Loading token #{tokenId.toString()}…
-          </p>
-        </div>
-      </div>
-    );
+    return <SearchLoading label={`Loading token ${formatTokenId(tokenId)}…`} />;
   }
 
-  // Token struct: [tokenId, parentRootId, tokenName, tokenType, tokenValue, about, validUntil, ...]
-  const tokenTuple = token as readonly [
-    bigint,
-    bigint,
-    string,
-    string,
-    `0x${string}`,
-    string,
-    bigint,
-    bigint,
-    bigint,
-    bigint,
-    boolean,
-    bigint,
-    bigint,
-  ];
+  const tokenTuple = token as TokenTuple;
+  // Burned or never-minted tokens read back zeroed
+  if (tokenTuple[7] === 0n) {
+    return (
+      <SearchMessage
+        title={`No token ${formatTokenId(tokenId)}`}
+        hint="It may have been burned, or the id has a typo."
+      />
+    );
+  }
   const tokenName = tokenTuple[2] || "Unnamed";
   const tokenType = tokenTuple[3] || "Unknown";
   const validUntil = tokenTuple[6];
@@ -69,7 +200,7 @@ function SearchedToken({
 
   const tokenData = [
     {
-      tokenId: `#${tokenId.toString()}`,
+      tokenId: formatTokenId(tokenId),
       name: tokenName,
       type: tokenType,
       expiresIn: formatExpiry(validUntil),
@@ -98,103 +229,65 @@ function RecentTokensFeed({
   onRevoke: (tokenId: string) => void;
   onViewAttesters: (tokenId: bigint, tokenName: string) => void;
 }) {
-  const { data: recentEvents, isLoading: isEventsLoading } = useRecentTokens();
+  const { data: recentIds, isLoading: isIdsLoading } = useRecentTokens();
+  const ids = recentIds.length > 0 ? recentIds : undefined;
 
-  const filteredEvents = useMemo(() => {
-    if (!recentEvents) return [];
-    return recentEvents.filter((e) => e.tokenType !== "ROOT");
-  }, [recentEvents]);
+  const { data: tokenDetails, isLoading: isDetailsLoading } =
+    useMultipleTokenDetails(ids);
+  const { data: attestationCounts } = useMultipleAttestationCounts(ids);
+  const { data: tokenOwners } = useMultipleTokenOwners(ids);
 
-  const tokenIds = useMemo(
-    () =>
-      filteredEvents.map(
-        (e: { tokenId: bigint; tokenType: string }) => e.tokenId
-      ),
-    [filteredEvents]
-  );
-
-  const { data: tokenDetails } = useMultipleTokenDetails(
-    tokenIds.length > 0 ? tokenIds : undefined
-  );
-  const { data: attestationCounts } = useMultipleAttestationCounts(
-    tokenIds.length > 0 ? tokenIds : undefined
-  );
-  const { data: tokenOwners } = useMultipleTokenOwners(
-    tokenIds.length > 0 ? tokenIds : undefined
-  );
-
+  // Newest 20 across tokens and profiles; burned ids read back zeroed and drop out
   const tokenData = useMemo(() => {
-    if (!tokenIds || tokenIds.length === 0) return [];
+    if (!ids || !tokenDetails) return [];
 
-    return tokenIds.map((id: bigint, i: number) => {
-      const detail = tokenDetails?.[i];
-      const attestResult = attestationCounts?.[i];
-      const ownerResult = tokenOwners?.[i];
+    return ids
+      .map((id, i) => {
+        const detail = tokenDetails[i];
+        const token =
+          detail?.status === "success"
+            ? (detail.result as TokenTuple)
+            : undefined;
+        return { id, i, token };
+      })
+      .filter(
+        (row): row is { id: bigint; i: number; token: TokenTuple } =>
+          !!row.token && row.token[7] > 0n
+      )
+      .sort((a, b) => Number(b.token[7] - a.token[7]))
+      .slice(0, 20)
+      .map(({ id, i, token }) => {
+        const attestResult = attestationCounts?.[i];
+        const ownerResult = tokenOwners?.[i];
+        const owner =
+          ownerResult?.status === "success"
+            ? (ownerResult.result as string)
+            : undefined;
 
-      const token = detail?.status === "success" ? detail.result : undefined;
-      const attestCount =
-        attestResult?.status === "success" ? Number(attestResult.result) : 0;
-      const owner =
-        ownerResult?.status === "success"
-          ? (ownerResult.result as string)
-          : undefined;
+        return {
+          tokenId: formatTokenId(id),
+          name: token[2] || "Unnamed",
+          type: token[3] || "Unknown",
+          expiresIn: formatExpiry(token[6]),
+          attestations:
+            attestResult?.status === "success"
+              ? Number(attestResult.result)
+              : 0,
+          owner: owner ? truncateAddress(owner) : "…",
+        };
+      });
+  }, [ids, tokenDetails, attestationCounts, tokenOwners]);
 
-      const tokenTuple = token as
-        | readonly [
-            bigint,
-            bigint,
-            string,
-            string,
-            `0x${string}`,
-            string,
-            bigint,
-            bigint,
-            bigint,
-            bigint,
-            boolean,
-            bigint,
-            bigint,
-          ]
-        | undefined;
-
-      const ownerStr = owner ? truncateAddress(owner) : "…";
-
-      return {
-        tokenId: `#${id.toString()}`,
-        name: tokenTuple ? tokenTuple[2] || "Unnamed" : "Loading…",
-        type: tokenTuple ? tokenTuple[3] || "Unknown" : "…",
-        expiresIn: tokenTuple ? formatExpiry(tokenTuple[6]) : "…",
-        attestations: attestCount,
-        owner: ownerStr,
-      };
-    });
-  }, [tokenIds, tokenDetails, attestationCounts, tokenOwners]);
-
-  if (isEventsLoading) {
-    return (
-      <div className="flex items-center justify-center rounded-2xl border border-card-border bg-card-bg py-12">
-        <div className="text-center">
-          <div className="mx-auto mb-3 h-6 w-6 animate-spin rounded-full border-2 border-brand-green border-t-transparent" />
-          <p className="font-utsaha text-sm text-gray-400">
-            Loading recent tokens…
-          </p>
-        </div>
-      </div>
-    );
+  if (isIdsLoading || (ids && isDetailsLoading)) {
+    return <SearchLoading label="Loading recent tokens…" />;
   }
 
   if (tokenData.length === 0) {
     return (
-      <div className="flex items-center justify-center rounded-2xl border border-card-border bg-card-bg py-16">
-        <div className="text-center">
-          <p className="font-utsaha text-lg text-gray-400">
-            No recent tokens found
-          </p>
-          <p className="mt-2 font-utsaha text-sm text-gray-500">
-            Tokens created recently will appear here
-          </p>
-        </div>
-      </div>
+      <SearchMessage
+        title="No recent tokens found"
+        hint="Tokens created recently will appear here"
+      />
     );
   }
 
@@ -203,14 +296,13 @@ function RecentTokensFeed({
       variant="discover"
       tokens={tokenData}
       onAttest={(id) => {
-        const numericId = BigInt(id.replace(/^#/, ""));
         const token = tokenData.find((t) => t.tokenId === id);
-        onAttest(numericId, token?.name || "");
+        onAttest(parseTokenId(id)!, token?.name || "");
       }}
       onRevoke={(id) => onRevoke(id)}
       onViewAll={(id) => {
         const token = tokenData.find((t) => t.tokenId === id);
-        onViewAttesters(BigInt(id.replace(/^#/, "")), token?.name || "");
+        onViewAttesters(parseTokenId(id)!, token?.name || "");
       }}
     />
   );
@@ -218,14 +310,16 @@ function RecentTokensFeed({
 
 export default function DiscoverPage() {
   const searchParams = useSearchParams();
-  const query = searchParams?.get("q") ?? "";
+  const query = (searchParams?.get("q") ?? "").trim();
 
-  // The searched id is fully derived from the query string, so it needs no
-  // state of its own.
-  const searchedTokenId = useMemo(() => {
-    const cleaned = query.trim().replace(/^#/, "");
-    return /^\d+$/.test(cleaned) ? BigInt(cleaned) : null;
-  }, [query]);
+  // Derived from the query string, so the search needs no state of its own.
+  // Ids must be complete (prefix + 10 digits): "tk-1" gets a hint, never a guess.
+  const searchedId = parseTokenId(query);
+  const searchedType =
+    searchedId !== undefined ? tokenTypeOf(searchedId) : undefined;
+  const username = query.toLowerCase();
+  const isUsername =
+    searchedId === undefined && validateUsername(username).status === "valid";
 
   const [attestTarget, setAttestTarget] = useState<{
     tokenId: bigint;
@@ -264,22 +358,38 @@ export default function DiscoverPage() {
       )}
 
       {/* Search Results or Recent Feed */}
-      {searchedTokenId !== null ? (
-        <SearchedToken
-          tokenId={searchedTokenId}
-          onAttest={handleAttest}
-          onRevoke={handleRevoke}
-          onViewAttesters={(tokenId, tokenName) =>
-            setAttestersTarget({ tokenId, tokenName })
-          }
-        />
-      ) : (
+      {!query ? (
         <RecentTokensFeed
           onAttest={handleAttest}
           onRevoke={handleRevoke}
           onViewAttesters={(tokenId, tokenName) =>
             setAttestersTarget({ tokenId, tokenName })
           }
+        />
+      ) : searchedId !== undefined && searchedType === TOKEN_TYPE.SUB ? (
+        <SearchedToken
+          tokenId={searchedId}
+          onAttest={handleAttest}
+          onRevoke={handleRevoke}
+          onViewAttesters={(tokenId, tokenName) =>
+            setAttestersTarget({ tokenId, tokenName })
+          }
+        />
+      ) : searchedId !== undefined && searchedType === TOKEN_TYPE.PROFILE ? (
+        <ProfileResult tokenId={searchedId} />
+      ) : searchedId !== undefined ? (
+        <RootResult rootId={searchedId} />
+      ) : isUsername ? (
+        <UsernameResult username={username} />
+      ) : looksLikeTokenId(query) ? (
+        <SearchMessage
+          title="Ids have 10 digits after the prefix"
+          hint="For example tk-0901699435. Copy the full id from the token or profile."
+        />
+      ) : (
+        <SearchMessage
+          title="Nothing matches that search"
+          hint="Search a token (tk-…), profile (pf-…), root identity (id-…) or a username."
         />
       )}
 

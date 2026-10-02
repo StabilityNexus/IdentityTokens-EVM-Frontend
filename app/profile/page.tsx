@@ -23,8 +23,9 @@ import { ProfileReputation } from "@/components/profile/ProfileReputation";
 import { ProfileLinks } from "@/components/profile/ProfileLinks";
 import { ProfileIdentity } from "@/components/profile/ProfileIdentity";
 import { linksFromChain } from "@/lib/profileData";
+import { parseTokenId, tokenTypeOf } from "@/lib/tokenId";
 import { getRankFromAttesters, getTrustScore } from "@/lib/rank";
-import { TxStatus } from "@/lib/types";
+import { TOKEN_TYPE, TxStatus } from "@/lib/types";
 
 export default function ProfilePage() {
   const searchParams = useSearchParams();
@@ -32,12 +33,12 @@ export default function ProfilePage() {
 
   const { isConnected, address, rootId } = useIdentityGate();
 
-  // An all-digit segment is a token id, but only a positive one: 0n is not
-  // nullish, so it would satisfy the ?? below and skip username resolution
-  // entirely for an otherwise-valid username like "000".
-  const parsedTokenId = /^\d+$/.test(username) ? BigInt(username) : undefined;
-  const numericTokenId =
-    parsedTokenId !== undefined && parsedTokenId > 0n
+  // "pf-…" is a profile id; anything else is looked up as a username. Usernames
+  // can't contain "-", so the two never clash.
+  const parsedTokenId = parseTokenId(username);
+  const idTokenId =
+    parsedTokenId !== undefined &&
+    tokenTypeOf(parsedTokenId) === TOKEN_TYPE.PROFILE
       ? parsedTokenId
       : undefined;
 
@@ -45,7 +46,7 @@ export default function ProfilePage() {
     useResolveUsername(username);
 
   const profileTokenId =
-    numericTokenId ??
+    idTokenId ??
     (resolvedTokenId && resolvedTokenId > 0n ? resolvedTokenId : undefined);
 
   const {
@@ -124,7 +125,7 @@ export default function ProfilePage() {
             No profile specified
           </h1>
           <p className="mt-2 font-utsaha text-sm text-profile-muted">
-            Please provide a username or token ID in the URL.
+            Please provide a username or profile id (pf-…) in the URL.
           </p>
         </div>
       </div>

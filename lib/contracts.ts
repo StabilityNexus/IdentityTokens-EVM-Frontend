@@ -168,6 +168,25 @@ export const IDENTITY_SYSTEM_ABI = [
   },
   {
     type: "function",
+    name: "formatTokenId",
+    inputs: [
+      {
+        name: "id",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "string",
+        internalType: "string",
+      },
+    ],
+    stateMutability: "pure",
+  },
+  {
+    type: "function",
     name: "getActiveAttestationCount",
     inputs: [
       {
@@ -669,6 +688,25 @@ export const IDENTITY_SYSTEM_ABI = [
   },
   {
     type: "function",
+    name: "minted",
+    inputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
     name: "name",
     inputs: [],
     outputs: [
@@ -923,10 +961,10 @@ export const IDENTITY_SYSTEM_ABI = [
   },
   {
     type: "function",
-    name: "tokenTypes",
+    name: "tokenTypeOf",
     inputs: [
       {
-        name: "",
+        name: "id",
         type: "uint256",
         internalType: "uint256",
       },
@@ -938,7 +976,7 @@ export const IDENTITY_SYSTEM_ABI = [
         internalType: "enum DataTypes.TokenType",
       },
     ],
-    stateMutability: "view",
+    stateMutability: "pure",
   },
   {
     type: "function",
@@ -1554,7 +1592,17 @@ export const IDENTITY_SYSTEM_ABI = [
   },
   {
     type: "error",
+    name: "IdSpaceExhausted",
+    inputs: [],
+  },
+  {
+    type: "error",
     name: "InvalidExpiry",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "InvalidTokenId",
     inputs: [],
   },
   {

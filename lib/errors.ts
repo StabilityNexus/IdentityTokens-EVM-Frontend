@@ -32,6 +32,8 @@ const CONTRACT_ERROR_MESSAGES: Record<string, string> = {
   // Token
   NotToken: "This is not a valid token for this operation.",
   TokenExpired: "This token has expired.",
+  InvalidTokenId: "That is not a valid token id.",
+  IdSpaceExhausted: "No more ids are left for this token type.",
 
   // Attestation
   CannotAttestOwnToken: "You cannot attest your own token.",

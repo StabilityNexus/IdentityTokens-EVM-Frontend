@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import {
   MoreVertical,
   Copy,
@@ -21,6 +22,7 @@ import Badge from "../Badge";
 import { TokenForm } from "../forms/TokenForm";
 import { TokenCardProps } from "@/lib/types";
 import { parseTokenId } from "@/lib/tokenId";
+import { truncateAddress } from "@/lib/helpers";
 
 const getRankFromAttestations = (count: number) => {
   if (count >= 250) return "champion";
@@ -44,6 +46,7 @@ export function TokenCard({
   onAttest,
   onViewAll,
   readOnly = false,
+  owner,
 }: TokenCardProps) {
   const rank = getRankFromAttestations(attestations);
   const [isTokenFormOpen, setIsTokenFormOpen] = React.useState(false);
@@ -56,6 +59,15 @@ export function TokenCard({
           <h3 className="truncate font-utsaha text-lg leading-tight text-white">
             {name}
           </h3>
+          {owner && (
+            <Link
+              href={`/wallet?u=${owner}`}
+              title={owner}
+              className="w-fit truncate font-utsaha text-sm text-brand-blue-link hover:underline"
+            >
+              Owned by {truncateAddress(owner)}
+            </Link>
+          )}
           <p className="truncate font-utsaha text-sm text-gray-500">
             ID: {tokenId}
           </p>

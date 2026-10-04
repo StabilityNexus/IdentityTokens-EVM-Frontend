@@ -175,7 +175,6 @@ function SearchedToken({
   const tokenType = tokenTuple[3] || "Unknown";
   const validUntil = tokenTuple[6];
   const attestCount = Number(attestationCount ?? 0n);
-  const ownerStr = owner ? truncateAddress(owner as string) : "…";
 
   const tokenData = [
     {
@@ -184,7 +183,7 @@ function SearchedToken({
       type: tokenType,
       expiresIn: formatExpiry(validUntil),
       attestations: attestCount,
-      owner: ownerStr,
+      owner: owner as string | undefined,
     },
   ];
 
@@ -252,7 +251,7 @@ function RecentTokensFeed({
             attestResult?.status === "success"
               ? Number(attestResult.result)
               : 0,
-          owner: owner ? truncateAddress(owner) : "…",
+          owner,
         };
       });
   }, [ids, tokenDetails, attestationCounts, tokenOwners]);

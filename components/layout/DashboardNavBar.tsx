@@ -1,65 +1,18 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import React, { useState } from "react";
+import { usePathname } from "next/navigation";
 import { Button } from "../ui/Button";
 import { FiBell, FiPlus } from "react-icons/fi";
 import { WalletCenter } from "../ui/WalletCenter";
 import { CreateTokenModal } from "../forms/CreateTokenModal";
 import { CreateProfileModal } from "../forms/CreateProfileModal";
-import { SearchBar } from "../dashboard/SearchBar";
+import { GlobalSearch } from "../dashboard/GlobalSearch";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
 import { TOUR_TARGETS } from "@/lib/tour";
 
-const SEARCH_DEBOUNCE_MS = 350;
-
-// Typing stays local; ?q= (and the lookup it starts) only changes once typing
-// pauses or on Enter, so fast typing never waits on a navigation per keystroke.
-function DiscoverSearch() {
-  const router = useRouter();
-  const urlQuery = useSearchParams()?.get("q") ?? "";
-  const [draft, setDraft] = useState(urlQuery);
-  const [seenQuery, setSeenQuery] = useState(urlQuery);
-  const [sentQuery, setSentQuery] = useState(urlQuery);
-
-  // ?q= changed elsewhere (sidebar link, short link): show it, unless it is our own update landing
-  if (urlQuery !== seenQuery) {
-    setSeenQuery(urlQuery);
-    if (urlQuery !== sentQuery) {
-      setSentQuery(urlQuery);
-      setDraft(urlQuery);
-    }
-  }
-
-  const send = useCallback(
-    (value: string) => {
-      const q = value.trim();
-      if (q === sentQuery) return;
-      setSentQuery(q);
-      // replace, so Back leaves Discover instead of undoing one search at a time
-      router.replace(q ? `/discover?q=${encodeURIComponent(q)}` : "/discover");
-    },
-    [router, sentQuery]
-  );
-
-  useEffect(() => {
-    const timer = setTimeout(() => send(draft), SEARCH_DEBOUNCE_MS);
-    return () => clearTimeout(timer);
-  }, [draft, send]);
-
-  return (
-    <SearchBar
-      placeholder="Search tk-, pf-, id- or a username…"
-      value={draft}
-      onChange={setDraft}
-      onSubmit={() => send(draft)}
-    />
-  );
-}
-
 export function DashboardNavbar() {
   const pathname = usePathname();
-  const router = useRouter();
 
   const [isCreateTokenModalOpen, setIsCreateTokenModalOpen] = useState(false);
   const [isCreateProfileModalOpen, setIsCreateProfileModalOpen] =
@@ -126,13 +79,6 @@ export function DashboardNavbar() {
     return "New Token";
   };
 
-  const [profileQuery, setProfileQuery] = React.useState("");
-
-  const submitProfileSearch = () => {
-    const query = profileQuery.trim();
-    if (query) router.push(`/discover?q=${encodeURIComponent(query)}`);
-  };
-
   return (
     <>
       <nav className="flex h-[72px] w-full shrink-0 items-center justify-between border-b border-white/5 bg-dashboard-bg pr-4 pl-14 sm:pr-5 sm:pl-16 lg:px-8">
@@ -143,16 +89,7 @@ export function DashboardNavbar() {
             </h1>
           )}
 
-          {isDiscover && <DiscoverSearch />}
-
-          {isUserProfile && (
-            <SearchBar
-              placeholder="Search tk-, pf-, id- or a username…"
-              value={profileQuery}
-              onChange={setProfileQuery}
-              onSubmit={submitProfileSearch}
-            />
-          )}
+          {(isDiscover || isUserProfile) && <GlobalSearch />}
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3 md:gap-5">

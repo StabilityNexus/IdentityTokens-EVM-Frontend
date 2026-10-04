@@ -1,8 +1,8 @@
 export const IDENTITY_SYSTEM_ADDRESS =
-  "0x4F9A3a0a3f1f6A46b4DC862F15923321b40E96C0" as const;
+  "0x7e4d3e0b03353Bc344e50FB315e3CAC56385F44C" as const;
 
 export const PROFILE_SYSTEM_ADDRESS =
-  "0x62Decd4cEDd40e4816418034b54A5396f487379C" as const;
+  "0xf5252b758f777B44fDC247ab97388bF6B1c44A7D" as const;
 
 export * from "./types.responses";
 

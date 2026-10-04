@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "../ui/Button";
 import { FiBell, FiPlus } from "react-icons/fi";
@@ -11,11 +11,55 @@ import { SearchBar } from "../dashboard/SearchBar";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
 import { TOUR_TARGETS } from "@/lib/tour";
 
+const SEARCH_DEBOUNCE_MS = 350;
+
+// Typing stays local; ?q= (and the lookup it starts) only changes once typing
+// pauses or on Enter, so fast typing never waits on a navigation per keystroke.
+function DiscoverSearch() {
+  const router = useRouter();
+  const urlQuery = useSearchParams()?.get("q") ?? "";
+  const [draft, setDraft] = useState(urlQuery);
+  const [seenQuery, setSeenQuery] = useState(urlQuery);
+  const [sentQuery, setSentQuery] = useState(urlQuery);
+
+  // ?q= changed elsewhere (sidebar link, short link): show it, unless it is our own update landing
+  if (urlQuery !== seenQuery) {
+    setSeenQuery(urlQuery);
+    if (urlQuery !== sentQuery) {
+      setSentQuery(urlQuery);
+      setDraft(urlQuery);
+    }
+  }
+
+  const send = useCallback(
+    (value: string) => {
+      const q = value.trim();
+      if (q === sentQuery) return;
+      setSentQuery(q);
+      // replace, so Back leaves Discover instead of undoing one search at a time
+      router.replace(q ? `/discover?q=${encodeURIComponent(q)}` : "/discover");
+    },
+    [router, sentQuery]
+  );
+
+  useEffect(() => {
+    const timer = setTimeout(() => send(draft), SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(timer);
+  }, [draft, send]);
+
+  return (
+    <SearchBar
+      placeholder="Search tk-, pf-, id- or a username…"
+      value={draft}
+      onChange={setDraft}
+      onSubmit={() => send(draft)}
+    />
+  );
+}
+
 export function DashboardNavbar() {
   const pathname = usePathname();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const currentQuery = searchParams?.get("q") ?? "";
 
   const [isCreateTokenModalOpen, setIsCreateTokenModalOpen] = useState(false);
   const [isCreateProfileModalOpen, setIsCreateProfileModalOpen] =
@@ -82,14 +126,6 @@ export function DashboardNavbar() {
     return "New Token";
   };
 
-  const handleSearchChange = (val: string) => {
-    if (!val) {
-      router.push("/discover");
-    } else {
-      router.push(`/discover?q=${encodeURIComponent(val)}`);
-    }
-  };
-
   const [profileQuery, setProfileQuery] = React.useState("");
 
   const submitProfileSearch = () => {
@@ -107,13 +143,7 @@ export function DashboardNavbar() {
             </h1>
           )}
 
-          {isDiscover && (
-            <SearchBar
-              placeholder="Search tk-, pf-, id- or a username…"
-              value={currentQuery}
-              onChange={handleSearchChange}
-            />
-          )}
+          {isDiscover && <DiscoverSearch />}
 
           {isUserProfile && (
             <SearchBar

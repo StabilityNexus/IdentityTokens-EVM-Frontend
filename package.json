@@ -11,6 +11,7 @@
     "check-format": "prettier --check .",
     "check:profile": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-profile-diff.mjs",
     "check:tokenid": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-token-id.mjs",
+    "check:search": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-search.mjs",
     "prepare": "husky"
   },
   "lint-staged": {

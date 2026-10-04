@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAccount } from "wagmi";
-import { isAddress } from "viem";
 import { Fingerprint, Flag, Hash, MoreVertical, UserRound } from "lucide-react";
 import { SearchBar } from "./SearchBar";
 import {
@@ -13,114 +12,37 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { AttestModal } from "@/components/forms/AttestModal";
-import {
-  useActiveAttestationCount,
-  useHasAttested,
-  useProfile,
-  useResolveUsername,
-  useRootId,
-  useRootIdentityView,
-  useTokenDetail,
-  useTokenOwner,
-} from "@/hooks/useIdentityReads";
+import { useHasAttested, useRootId } from "@/hooks/useIdentityReads";
 import { useFlagToken, useRevokeAttestation } from "@/hooks/useIdentityWrites";
-import type { TokenTuple } from "@/hooks/useWalletTokenList";
+import { useSearchIndex } from "@/hooks/useSearchIndex";
 import { getContractErrorMessage } from "@/lib/errors";
 import { truncateAddress } from "@/lib/helpers";
-import { formatTokenId, parseTokenId, tokenTypeOf } from "@/lib/tokenId";
-import { validateUsername } from "@/lib/validation";
+import { searchEntries, type SearchEntry, type SearchType } from "@/lib/search";
+import { formatTokenId } from "@/lib/tokenId";
 
-type SearchType = "token" | "profile" | "id" | "username";
-
-const TYPES: { key: SearchType; label: string; hint: string }[] = [
-  {
-    key: "token",
-    label: "Token",
-    hint: "Type the token's 10-digit number, e.g. 9321932540",
-  },
-  {
-    key: "profile",
-    label: "Profile",
-    hint: "Type the profile's 10-digit number",
-  },
-  {
-    key: "id",
-    label: "ID",
-    hint: "Type the 10-digit ID number or a wallet address",
-  },
-  { key: "username", label: "Username", hint: "Type a username, e.g. alice" },
+const TYPES: { key: SearchType; label: string }[] = [
+  { key: "all", label: "All" },
+  { key: "token", label: "Token" },
+  { key: "profile", label: "Profile" },
+  { key: "id", label: "ID" },
+  { key: "username", label: "Username" },
 ];
 
-// Indexed by on-chain TokenType (ROOT, SUB, PROFILE)
-const TYPE_OF_ID: SearchType[] = ["id", "token", "profile"];
-const KIND_OF_ID = ["root", "token", "profile"] as const;
-const PREFIX = { token: "tk", profile: "pf", id: "id" } as const;
+const PREFIX_TYPE: Record<string, SearchType> = {
+  id: "id",
+  tk: "token",
+  pf: "profile",
+};
 
 const SEARCH_DEBOUNCE_MS = 350;
 
-type Target =
-  | { kind: "token" | "profile" | "root"; id: bigint }
-  | { kind: "wallet"; address: `0x${string}` }
-  | { kind: "username"; username: string }
-  | { kind: "hint"; message: string };
+const typeOfPrefix = (q: string) =>
+  PREFIX_TYPE[/^(id|tk|pf)-/i.exec(q.trim())?.[1].toLowerCase() ?? ""];
 
-function resolve(type: SearchType, raw: string): Target | null {
-  const q = raw.trim();
-  if (!q) return null;
-
-  // A full id like pf-2463525193 wins over the selected type
-  const prefixed = parseTokenId(q);
-  if (prefixed !== undefined) {
-    return { kind: KIND_OF_ID[tokenTypeOf(prefixed)!], id: prefixed };
-  }
-  if (/^(id|tk|pf)-/i.test(q)) {
-    return { kind: "hint", message: "IDs have 10 digits after the prefix" };
-  }
-
-  if (type === "username") {
-    const username = q.replace(/^@/, "").toLowerCase();
-    const check = validateUsername(username);
-    return check.status === "valid"
-      ? { kind: "username", username }
-      : { kind: "hint", message: check.message ?? "Not a valid username" };
-  }
-  if (type === "id" && isAddress(q)) return { kind: "wallet", address: q };
-  if (/^\d{10}$/.test(q)) {
-    const id = parseTokenId(`${PREFIX[type]}-${q}`)!;
-    return { kind: type === "id" ? "root" : type, id };
-  }
-  if (/^\d+$/.test(q)) {
-    return {
-      kind: "hint",
-      message: `Numbers have 10 digits, ${q.length} so far`,
-    };
-  }
-  return {
-    kind: "hint",
-    message:
-      type === "id"
-        ? "Type a 10-digit ID number or a 0x wallet address"
-        : "That isn't a number. To find a person by name, pick Username",
-  };
-}
-
-const plural = (n: bigint, word: string) =>
-  `${n} ${word}${n === 1n ? "" : "s"}`;
-
-function hrefFor(target: Target): string | null {
-  switch (target.kind) {
-    case "token":
-    case "root":
-      return `/discover?q=${formatTokenId(target.id)}`;
-    case "profile":
-      return `/profile?u=${formatTokenId(target.id)}`;
-    case "username":
-      return `/profile?u=${target.username}`;
-    case "wallet":
-      return `/wallet?u=${target.address}`;
-    default:
-      return null;
-  }
+function hrefFor(entry: SearchEntry): string {
+  if (entry.kind === "root") return `/wallet?u=${entry.owner}`;
+  if (entry.kind === "profile") return `/profile?u=${entry.username}`;
+  return `/discover?q=${formatTokenId(entry.id)}`;
 }
 
 export function GlobalSearch() {
@@ -128,14 +50,11 @@ export function GlobalSearch() {
   const urlQuery = useSearchParams()?.get("q") ?? "";
   const [draft, setDraft] = useState(urlQuery);
   const [settled, setSettled] = useState(urlQuery);
-  const [type, setType] = useState<SearchType>(() => {
-    const id = parseTokenId(urlQuery);
-    return id === undefined ? "token" : TYPE_OF_ID[tokenTypeOf(id)!];
-  });
+  const [type, setType] = useState<SearchType>("all");
   const [isOpen, setIsOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
-  // Look up only once typing pauses, never on every keystroke
+  // Search once typing pauses, so slow and fast typists both get one lookup
   useEffect(() => {
     const timer = setTimeout(() => setSettled(draft), SEARCH_DEBOUNCE_MS);
     return () => clearTimeout(timer);
@@ -162,10 +81,13 @@ export function GlobalSearch() {
     };
   }, [isOpen]);
 
-  const prefixedId = parseTokenId(draft);
-  const activeType =
-    prefixedId === undefined ? type : TYPE_OF_ID[tokenTypeOf(prefixedId)!];
-  const target = resolve(type, draft);
+  const { isConnected } = useAccount();
+  const { entries, isLoading } = useSearchIndex(isOpen);
+  const results = useMemo(
+    () => searchEntries(entries, type, settled),
+    [entries, type, settled]
+  );
+  const activeType = typeOfPrefix(draft) ?? type;
 
   const navigate = (href: string) => {
     setIsOpen(false);
@@ -173,8 +95,10 @@ export function GlobalSearch() {
   };
 
   const pickType = (key: SearchType) => {
+    const stripped = draft.replace(/^(id|tk|pf)-/i, "");
     setType(key);
-    setDraft((d) => d.replace(/^(id|tk|pf)-/i, ""));
+    setDraft(stripped);
+    setSettled(stripped);
   };
 
   return (
@@ -188,8 +112,7 @@ export function GlobalSearch() {
         }}
         onFocus={() => setIsOpen(true)}
         onSubmit={() => {
-          const href = target && hrefFor(target);
-          if (href) navigate(href);
+          if (results[0]) navigate(hrefFor(results[0]));
         }}
       />
 
@@ -216,22 +139,35 @@ export function GlobalSearch() {
             ))}
           </div>
 
-          <div className="border-t border-white/6 px-4 py-3 sm:px-5">
-            <p className="mb-1 font-utsaha text-base text-white">Top Match</p>
-            {!target ? (
-              <Note>{TYPES.find((t) => t.key === activeType)!.hint}</Note>
-            ) : target.kind === "hint" ? (
-              <Note>{target.message}</Note>
-            ) : draft !== settled ? (
-              <Note>Searching…</Note>
-            ) : (
-              <Match
-                key={`${target.kind}:${"id" in target ? target.id : "address" in target ? target.address : target.username}`}
-                target={target}
-                onNavigate={navigate}
-              />
-            )}
-          </div>
+          {settled.trim() && (
+            <div className="border-t border-white/6 px-4 py-3 sm:px-5">
+              <div className="mb-1 flex items-baseline justify-between">
+                <p className="font-utsaha text-base text-white">Top Match</p>
+                {results.length > 0 && (
+                  <span className="font-utsaha text-xs text-gray-500">
+                    {results.length === 50 ? "50+" : results.length} results
+                  </span>
+                )}
+              </div>
+              {results.length > 0 ? (
+                <ul
+                  aria-label="Search results"
+                  className="max-h-[min(60vh,26rem)] overflow-y-auto"
+                >
+                  {results.map((entry) => (
+                    <li key={`${entry.kind}:${entry.id}`}>
+                      <EntryRow entry={entry} onNavigate={navigate} />
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+              {results.length > 0 && !isConnected ? (
+                <Note>Connect a wallet to attest, revoke or flag.</Note>
+              ) : results.length === 0 ? (
+                <Note>{isLoading ? "Searching…" : "No matches"}</Note>
+              ) : null}
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -244,27 +180,44 @@ function Note({ children }: { children: React.ReactNode }) {
   );
 }
 
-function Match({
-  target,
+function EntryRow({
+  entry,
   onNavigate,
 }: {
-  target: Exclude<Target, { kind: "hint" }>;
+  entry: SearchEntry;
   onNavigate: (href: string) => void;
 }) {
-  switch (target.kind) {
-    case "token":
-      return <TokenMatch id={target.id} onNavigate={onNavigate} />;
-    case "profile":
-      return <ProfileMatch id={target.id} onNavigate={onNavigate} />;
-    case "root":
-      return <RootMatch id={target.id} onNavigate={onNavigate} />;
-    case "wallet":
-      return <WalletMatch address={target.address} onNavigate={onNavigate} />;
-    case "username":
-      return (
-        <UsernameMatch username={target.username} onNavigate={onNavigate} />
-      );
+  const id = formatTokenId(entry.id);
+  const owner = entry.owner ? truncateAddress(entry.owner) : "";
+  const view = () => onNavigate(hrefFor(entry));
+
+  if (entry.kind === "root") {
+    return (
+      <Row
+        icon={<Fingerprint size={18} />}
+        title={entry.title}
+        subtitle={`ID · ${id} · wallet ${owner}`}
+        viewLabel="View wallet"
+        onView={view}
+      />
+    );
   }
+  return (
+    <Row
+      icon={
+        entry.kind === "profile" ? <UserRound size={18} /> : <Hash size={18} />
+      }
+      title={entry.title}
+      subtitle={
+        entry.kind === "profile"
+          ? `Profile · @${entry.username} · ${id}`
+          : `Token · ${id}${owner ? ` · owner ${owner}` : ""}`
+      }
+      onView={view}
+    >
+      <MatchActions tokenId={entry.id} name={entry.title} owner={entry.owner} />
+    </Row>
+  );
 }
 
 function Row({
@@ -313,117 +266,15 @@ function Row({
   );
 }
 
-type MatchProps = { id: bigint; onNavigate: (href: string) => void };
-
-function TokenMatch({ id, onNavigate }: MatchProps) {
-  const { data, isLoading } = useTokenDetail(id);
-  const { data: owner } = useTokenOwner(id);
-  const { data: count, refetch } = useActiveAttestationCount(id);
-
-  if (isLoading) return <Note>Searching…</Note>;
-  const token = data as TokenTuple | undefined;
-  // Burned or never-minted tokens read back zeroed
-  if (!token || token[7] === 0n) {
-    return <Note>No token {formatTokenId(id)}</Note>;
-  }
-
-  const name = token[2] || "Unnamed";
-  return (
-    <Row
-      icon={<Hash size={18} />}
-      title={name}
-      subtitle={`Token · ${formatTokenId(id)} · ${plural(count ?? 0n, "attestation")}${owner ? ` · owner ${truncateAddress(owner)}` : ""}`}
-      onView={() => onNavigate(`/discover?q=${formatTokenId(id)}`)}
-    >
-      <MatchActions tokenId={id} name={name} owner={owner} onChange={refetch} />
-    </Row>
-  );
-}
-
-function ProfileMatch({ id, onNavigate }: MatchProps) {
-  const { data: profile, isLoading } = useProfile(id);
-  const { data: owner } = useTokenOwner(id);
-  const { data: count, refetch } = useActiveAttestationCount(id);
-
-  if (isLoading) return <Note>Searching…</Note>;
-  // Burned or never-minted profiles read back with an empty username
-  if (!profile?.username) return <Note>No profile {formatTokenId(id)}</Note>;
-
-  return (
-    <Row
-      icon={<UserRound size={18} />}
-      title={profile.name}
-      subtitle={`Profile · @${profile.username} · ${formatTokenId(id)} · ${plural(count ?? 0n, "attestation")}`}
-      onView={() => onNavigate(`/profile?u=${profile.username}`)}
-    >
-      <MatchActions
-        tokenId={id}
-        name={profile.name}
-        owner={owner}
-        onChange={refetch}
-      />
-    </Row>
-  );
-}
-
-function RootMatch({ id, onNavigate }: MatchProps) {
-  const { data: root, isLoading } = useRootIdentityView(id);
-
-  if (isLoading) return <Note>Searching…</Note>;
-  if (!root || /^0x0+$/.test(root.walletAddress)) {
-    return <Note>No ID {formatTokenId(id)}</Note>;
-  }
-
-  return (
-    <Row
-      icon={<Fingerprint size={18} />}
-      title={root.displayName || "Unnamed identity"}
-      subtitle={`ID · ${formatTokenId(id)} · wallet ${truncateAddress(root.walletAddress)} · ${plural(root.tokenCount, "token")}`}
-      viewLabel="View wallet"
-      onView={() => onNavigate(`/wallet?u=${root.walletAddress}`)}
-    />
-  );
-}
-
-function WalletMatch({
-  address,
-  onNavigate,
-}: {
-  address: `0x${string}`;
-  onNavigate: (href: string) => void;
-}) {
-  const { data: rootId, isLoading } = useRootId(address);
-
-  if (isLoading) return <Note>Searching…</Note>;
-  if (!rootId) return <Note>{truncateAddress(address)} has no DIT ID yet</Note>;
-  return <RootMatch id={rootId} onNavigate={onNavigate} />;
-}
-
-function UsernameMatch({
-  username,
-  onNavigate,
-}: {
-  username: string;
-  onNavigate: (href: string) => void;
-}) {
-  const { data: id, isLoading } = useResolveUsername(username);
-
-  if (isLoading) return <Note>Searching…</Note>;
-  if (!id) return <Note>No profile named @{username}</Note>;
-  return <ProfileMatch id={id} onNavigate={onNavigate} />;
-}
-
 // Attest, or Revoke while the viewer's attestation is live, plus ⋮ → Flag / Report
 function MatchActions({
   tokenId,
   name,
   owner,
-  onChange,
 }: {
   tokenId: bigint;
   name: string;
   owner?: string;
-  onChange: () => void;
 }) {
   const { address, isConnected } = useAccount();
   const { data: rootId } = useRootId(address);
@@ -438,16 +289,9 @@ function MatchActions({
   useEffect(() => {
     if (!revoke.isSuccess) return;
     refetchAttested();
-    onChange();
-  }, [revoke.isSuccess, refetchAttested, onChange]);
+  }, [revoke.isSuccess, refetchAttested]);
 
-  if (!isConnected) {
-    return (
-      <span className="font-utsaha text-xs text-gray-500">
-        Connect a wallet to attest
-      </span>
-    );
-  }
+  if (!isConnected) return null;
   if (address && owner && address.toLowerCase() === owner.toLowerCase()) {
     return <span className="font-utsaha text-xs text-gray-500">Yours</span>;
   }
@@ -537,10 +381,7 @@ function MatchActions({
           onClose={() => setIsAttestOpen(false)}
           tokenId={tokenId}
           tokenName={name}
-          onSuccess={() => {
-            refetchAttested();
-            onChange();
-          }}
+          onSuccess={() => refetchAttested()}
         />
       )}
     </>

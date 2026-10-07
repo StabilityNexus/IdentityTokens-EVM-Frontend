@@ -112,7 +112,8 @@ export function GlobalSearch() {
         }}
         onFocus={() => setIsOpen(true)}
         onSubmit={() => {
-          if (results[0]) navigate(hrefFor(results[0]));
+          const top = searchEntries(entries, type, draft, 1)[0];
+          if (top) navigate(hrefFor(top));
         }}
       />
 

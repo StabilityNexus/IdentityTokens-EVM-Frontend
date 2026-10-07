@@ -1,4 +1,5 @@
 import React from "react";
+import type { ProfileLink, ProfileMetadata } from "./types.responses";
 
 // --- Enums & Shared Types ---
 export type TokenCardVariant = "home" | "history" | "discover";
@@ -41,6 +42,7 @@ export interface TokenCardProps {
   onViewAll?: () => void;
   /** Hide owner-only actions when showing someone else's token. */
   readOnly?: boolean;
+  owner?: string;
 }
 
 export interface FeatureCardProps {
@@ -80,6 +82,12 @@ export interface CreateProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  /** Open as an editor of this existing profile instead of creating one. */
+  edit?: {
+    tokenId: bigint;
+    profile: ProfileMetadata;
+    links: readonly ProfileLink[];
+  };
 }
 
 export interface RegistrationModalProps {
@@ -149,6 +157,7 @@ export interface SearchBarProps {
   onChange?: (value: string) => void;
   /** Fired on Enter — lets a host defer navigation until the query is complete. */
   onSubmit?: () => void;
+  onFocus?: () => void;
   className?: string;
 }
 

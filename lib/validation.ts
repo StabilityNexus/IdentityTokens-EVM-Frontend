@@ -175,9 +175,6 @@ export function validateEmail(value: string): FieldResult {
 export function validateWebsite(value: string): FieldResult {
   const trimmed = value.trim();
   if (!trimmed) return IDLE;
-  if (trimmed.includes("#dit=")) {
-    return invalid("This link contains a reserved marker.");
-  }
   const withProtocol = /^https?:\/\//i.test(trimmed)
     ? trimmed
     : `https://${trimmed}`;
@@ -213,13 +210,6 @@ export function validateLinkLabel(value: string): FieldResult {
 }
 
 // Aggregate helpers
-
-/** Normalise a website for storage — guarantees a protocol is present. */
-export function normalizeWebsite(value: string): string {
-  const trimmed = value.trim();
-  if (!trimmed) return "";
-  return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
-}
 
 /** A field blocks submission only when it is outright invalid. */
 export function blocksSubmit(result: FieldResult): boolean {

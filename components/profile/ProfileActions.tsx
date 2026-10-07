@@ -1,7 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
-import { Check, Copy, Share2, ShieldCheck, ShieldMinus } from "lucide-react";
+import {
+  Check,
+  Copy,
+  Pencil,
+  Share2,
+  ShieldCheck,
+  ShieldMinus,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ProfileActionsProps {
@@ -14,6 +21,8 @@ interface ProfileActionsProps {
   isRevoking?: boolean;
   onAttest: () => void;
   onRevoke: () => void;
+  /** Shown to the owner only; omit to hide the button (e.g. while data loads). */
+  onEdit?: () => void;
   className?: string;
 }
 
@@ -25,6 +34,7 @@ export function ProfileActions({
   isRevoking = false,
   onAttest,
   onRevoke,
+  onEdit,
   className,
 }: ProfileActionsProps) {
   const [copied, setCopied] = useState(false);
@@ -64,6 +74,17 @@ export function ProfileActions({
 
   return (
     <div className={cn("flex flex-wrap items-center gap-2.5", className)}>
+      {isOwnProfile && onEdit && (
+        <button
+          type="button"
+          onClick={onEdit}
+          className="flex items-center gap-2 rounded-xl bg-profile-accent px-4 py-2.5 font-utsaha text-sm text-[#1a1033] transition-all hover:bg-profile-accent-soft active:scale-[0.98] sm:text-base"
+        >
+          <Pencil size={16} />
+          Edit profile
+        </button>
+      )}
+
       {!isOwnProfile && (
         <>
           <button

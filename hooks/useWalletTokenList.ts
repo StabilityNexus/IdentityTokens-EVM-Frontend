@@ -4,9 +4,9 @@ import { useMemo } from "react";
 import {
   useMultipleAttestationCounts,
   useMultipleTokenDetails,
-  useMultipleTokenTypes,
 } from "./useIdentityReads";
 import { formatExpiry } from "@/lib/helpers";
+import { formatTokenId, tokenTypeOf } from "@/lib/tokenId";
 import { TOKEN_TYPE, UITokenData } from "@/lib/types";
 
 /**
@@ -14,7 +14,7 @@ import { TOKEN_TYPE, UITokenData } from "@/lib/types";
  * Only four positions are read here: 2 = tokenName, 3 = tokenType,
  * 6 = validUntil, 7 = createdAt.
  */
-type TokenTuple = readonly [
+export type TokenTuple = readonly [
   bigint,
   bigint,
   string,
@@ -31,14 +31,13 @@ type TokenTuple = readonly [
 ];
 
 /**
- * Turn a wallet's token ids into rows a `TokenList` can render, in three
- * multicalls rather than three reads per token.
+ * Turn a wallet's token ids into rows a `TokenList` can render, in two
+ * multicalls rather than two reads per token.
  */
 export function useWalletTokenList(tokenIds: readonly bigint[]) {
   const ids = tokenIds.length > 0 ? tokenIds : undefined;
 
   const { data: tokenDetails } = useMultipleTokenDetails(ids);
-  const { data: tokenTypes } = useMultipleTokenTypes(ids);
   const { data: attestationCounts } = useMultipleAttestationCounts(ids);
 
   const tokens = useMemo<UITokenData[]>(() => {
@@ -46,13 +45,9 @@ export function useWalletTokenList(tokenIds: readonly bigint[]) {
 
     return ids
       .map((id, i): UITokenData | null => {
-        const typeResult = tokenTypes?.[i];
-        const tokenType =
-          typeResult?.status === "success" ? (typeResult.result as number) : -1;
-
         // Skip only ROOT, the wallet's identity anchor. The PROFILE token is
         // meant to be listed alongside the wallet's other tokens.
-        if (tokenType === TOKEN_TYPE.ROOT) return null;
+        if (tokenTypeOf(id) === TOKEN_TYPE.ROOT) return null;
 
         const detail = tokenDetails?.[i];
         const token =
@@ -63,7 +58,7 @@ export function useWalletTokenList(tokenIds: readonly bigint[]) {
         const attestResult = attestationCounts?.[i];
 
         return {
-          tokenId: `#${id.toString()}`,
+          tokenId: formatTokenId(id),
           name: token ? token[2] || "Unnamed" : "Loading…",
           type: token ? token[3] || "Unknown" : "…",
           expiresIn: token ? formatExpiry(token[6]) : "…",
@@ -74,7 +69,7 @@ export function useWalletTokenList(tokenIds: readonly bigint[]) {
         };
       })
       .filter((t): t is UITokenData => t !== null);
-  }, [ids, tokenDetails, tokenTypes, attestationCounts]);
+  }, [ids, tokenDetails, attestationCounts]);
 
   /** Attestations across every token the wallet holds, ROOT included. */
   const totalAttestations = useMemo(() => {
@@ -97,16 +92,15 @@ export function useWalletTokenList(tokenIds: readonly bigint[]) {
 
   /** Attestations on every token except the PROFILE one, as the ID card shows. */
   const attestationsExcludingProfile = useMemo(() => {
-    if (!attestationCounts) return 0;
-    return attestationCounts.reduce((sum, r, i) => {
-      if (r?.status !== "success") return sum;
-      const typeResult = tokenTypes?.[i];
-      // Until the types load, a token cannot be told apart from a profile.
-      if (typeResult?.status !== "success") return sum;
-      if (typeResult.result === TOKEN_TYPE.PROFILE) return sum;
-      return sum + Number(r.result);
-    }, 0);
-  }, [attestationCounts, tokenTypes]);
+    if (!ids || !attestationCounts) return 0;
+    return attestationCounts.reduce(
+      (sum, r, i) =>
+        r?.status === "success" && tokenTypeOf(ids[i]) !== TOKEN_TYPE.PROFILE
+          ? sum + Number(r.result)
+          : sum,
+      0
+    );
+  }, [ids, attestationCounts]);
 
   return {
     tokens,

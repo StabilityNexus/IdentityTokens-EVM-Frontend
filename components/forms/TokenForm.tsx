@@ -6,6 +6,7 @@ import { X, ChevronDown } from "lucide-react";
 import { useBurnToken, useTransferToken } from "@/hooks/useIdentityWrites";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
 import { TokenFormProps, TxStatus } from "@/lib/types";
+import { formatTokenId } from "@/lib/tokenId";
 import { TransactionStatus } from "@/components/ui/TransactionStatus";
 
 export function TokenForm({
@@ -31,7 +32,6 @@ export function TokenForm({
   // close (a `key`, or an inner component) rather than gate it on a prop.
   useEffect(() => {
     if (!isOpen) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTransferAddress("");
       setShowTransfer(false);
       setShowBurnConfirm(false);
@@ -124,7 +124,7 @@ export function TokenForm({
             <span className="max-w-[260px] truncate md:max-w-sm">
               {tokenName} /{" "}
               <span className="text-base text-gray-400">
-                #{tokenId.toString()}
+                {formatTokenId(tokenId)}
               </span>
             </span>
             <ChevronDown size={20} className="shrink-0 text-gray-400" />

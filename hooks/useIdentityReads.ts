@@ -9,6 +9,8 @@ import {
   PROFILE_SYSTEM_ABI,
 } from "@/lib/contracts";
 import { TOKEN_TYPE } from "@/lib/types";
+import { tokenIdFor } from "@/lib/tokenId";
+import { validateUsername } from "@/lib/validation";
 
 // IdentitySystem Reads
 
@@ -59,17 +61,6 @@ export function useTokenDetail(tokenId: bigint | undefined) {
     address: IDENTITY_SYSTEM_ADDRESS,
     abi: IDENTITY_SYSTEM_ABI,
     functionName: "tokens",
-    args: tokenId !== undefined ? [tokenId] : undefined,
-    query: { enabled: tokenId !== undefined },
-  });
-}
-
-/** Get the token type (ROOT=0, SUB=1, PROFILE=2) */
-export function useTokenType(tokenId: bigint | undefined) {
-  return useReadContract({
-    address: IDENTITY_SYSTEM_ADDRESS,
-    abi: IDENTITY_SYSTEM_ABI,
-    functionName: "tokenTypes",
     args: tokenId !== undefined ? [tokenId] : undefined,
     query: { enabled: tokenId !== undefined },
   });
@@ -207,6 +198,17 @@ export function useProfile(tokenId: bigint | undefined) {
   });
 }
 
+/** Get the custom-link slots of a profile (an empty url marks a free slot) */
+export function useProfileLinks(tokenId: bigint | undefined) {
+  return useReadContract({
+    address: PROFILE_SYSTEM_ADDRESS,
+    abi: PROFILE_SYSTEM_ABI,
+    functionName: "getLinks",
+    args: tokenId !== undefined ? [tokenId] : undefined,
+    query: { enabled: tokenId !== undefined },
+  });
+}
+
 /** Check if a username is already taken */
 export function useUsernameTaken(
   username: string | undefined,
@@ -224,9 +226,9 @@ export function useUsernameTaken(
 
 /** Resolve a username to a profile token ID via on-chain mapping */
 export function useResolveUsername(username: string | undefined) {
-  // Only attempt resolution for valid username strings (not numeric IDs)
+  // Usernames can't contain "-", so token ids like "pf-…" never reach this
   const isValidUsername =
-    !!username && username.length >= 3 && !/^\d+$/.test(username);
+    !!username && validateUsername(username).status === "valid";
 
   return useReadContract({
     address: PROFILE_SYSTEM_ADDRESS,
@@ -238,21 +240,6 @@ export function useResolveUsername(username: string | undefined) {
 }
 
 // Batch Reads (Multicall)
-
-/** Batch-fetch token types for multiple token IDs in a single multicall */
-export function useMultipleTokenTypes(tokenIds: readonly bigint[] | undefined) {
-  const contracts = (tokenIds ?? []).map((id) => ({
-    address: IDENTITY_SYSTEM_ADDRESS,
-    abi: IDENTITY_SYSTEM_ABI,
-    functionName: "tokenTypes" as const,
-    args: [id] as const,
-  }));
-
-  return useReadContracts({
-    contracts,
-    query: { enabled: !!tokenIds && tokenIds.length > 0 },
-  });
-}
 
 /** Batch-fetch token details for multiple token IDs in a single multicall */
 export function useMultipleTokenDetails(
@@ -305,43 +292,35 @@ export function useMultipleTokenOwners(
   });
 }
 
+const RECENT_TYPES = [TOKEN_TYPE.SUB, TOKEN_TYPE.PROFILE] as const;
+const RECENT_PER_TYPE = 20n;
+
+// Newest ids per type from the minted counters; burned ids included, callers drop them
 export function useRecentTokens() {
-  // Generate IDs 1 to 100
-  const maxTokensToCheck = 100;
+  const { data: counts, isLoading } = useReadContracts({
+    contracts: RECENT_TYPES.map((type) => ({
+      address: IDENTITY_SYSTEM_ADDRESS,
+      abi: IDENTITY_SYSTEM_ABI,
+      functionName: "minted" as const,
+      args: [BigInt(type)] as const,
+    })),
+  });
+
   const tokenIds = useMemo(() => {
-    return Array.from({ length: maxTokensToCheck }, (_, i) => BigInt(i + 1));
-  }, []);
-
-  // Batch fetch their types
-  const { data: tokenTypes, isLoading } = useMultipleTokenTypes(tokenIds);
-
-  const recentEvents = useMemo(() => {
-    if (!tokenTypes) return [];
-
-    const validTokens: { tokenId: bigint; tokenType: string }[] = [];
-
-    for (let i = 0; i < tokenTypes.length; i++) {
-      const typeResult = tokenTypes[i];
-      if (typeResult?.status === "success") {
-        const typeNum = typeResult.result as number;
-
-        let typeStr = "UNKNOWN";
-        if (typeNum === TOKEN_TYPE.ROOT) typeStr = "ROOT";
-        else if (typeNum === TOKEN_TYPE.SUB) typeStr = "SUB";
-        else if (typeNum === TOKEN_TYPE.PROFILE) typeStr = "PROFILE";
-
-        if (typeNum > 0 && typeStr !== "UNKNOWN") {
-          validTokens.push({
-            tokenId: BigInt(i + 1),
-            tokenType: typeStr,
-          });
-        }
+    const ids: bigint[] = [];
+    RECENT_TYPES.forEach((type, i) => {
+      const result = counts?.[i];
+      const minted = result?.status === "success" ? result.result : 0n;
+      for (
+        let serial = minted;
+        serial > 0n && serial > minted - RECENT_PER_TYPE;
+        serial--
+      ) {
+        ids.push(tokenIdFor(type, serial));
       }
-    }
+    });
+    return ids;
+  }, [counts]);
 
-    // Return the latest 20 valid tokens, reversed (newest first)
-    return validTokens.reverse().slice(0, 20);
-  }, [tokenTypes]);
-
-  return { data: recentEvents, isLoading };
+  return { data: tokenIds, isLoading };
 }

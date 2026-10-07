@@ -50,6 +50,7 @@ export function TokenList({
               onAttest={onAttest ? () => onAttest(token.tokenId) : undefined}
               onViewAll={onViewAll ? () => onViewAll(token.tokenId) : undefined}
               readOnly={readOnly}
+              owner={token.owner}
             />
           ))
         )}

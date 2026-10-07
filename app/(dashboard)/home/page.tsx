@@ -1,21 +1,16 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import Metrics from "@/components/dashboard/Metrics";
 import { TokenList } from "@/components/dashboard/TokenList";
 import { AttestersModal } from "@/components/attestations/AttestersModal";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
-import {
-  useMultipleTokenDetails,
-  useMultipleTokenTypes,
-  useMultipleAttestationCounts,
-} from "@/hooks/useIdentityReads";
+import { useWalletTokenList } from "@/hooks/useWalletTokenList";
 import { getContractErrorMessage } from "@/lib/errors";
-import { formatExpiry } from "@/lib/helpers";
 import { getRankFromAttesters } from "@/lib/rank";
-import { TOKEN_TYPE } from "@/lib/types";
+import { parseTokenId } from "@/lib/tokenId";
 
 export default function Home() {
   const { isConnected, walletTokenIds, profileData, isLoading, error } =
@@ -26,73 +21,8 @@ export default function Home() {
     name: string;
   } | null>(null);
 
-  // Batch-fetch token details, types, and attestation counts
-  const { data: tokenDetails } = useMultipleTokenDetails(
-    walletTokenIds.length > 0 ? walletTokenIds : undefined
-  );
-  const { data: tokenTypes } = useMultipleTokenTypes(
-    walletTokenIds.length > 0 ? walletTokenIds : undefined
-  );
-  const { data: attestationCounts } = useMultipleAttestationCounts(
-    walletTokenIds.length > 0 ? walletTokenIds : undefined
-  );
-
-  // Build tokens for display (excludes the ROOT token)
-  const tokenListData = useMemo(() => {
-    if (!walletTokenIds || walletTokenIds.length === 0) return [];
-
-    return walletTokenIds
-      .map((id, i) => {
-        const detail = tokenDetails?.[i];
-        const typeResult = tokenTypes?.[i];
-        const attestResult = attestationCounts?.[i];
-
-        // Skip only ROOT; PROFILE is listed with the other tokens.
-        const tokenType =
-          typeResult?.status === "success" ? (typeResult.result as number) : -1;
-        if (tokenType === TOKEN_TYPE.ROOT) return null;
-
-        const token = detail?.status === "success" ? detail.result : undefined;
-        const attestCount =
-          attestResult?.status === "success" ? Number(attestResult.result) : 0;
-
-        const tokenTuple = token as
-          | readonly [
-              bigint,
-              bigint,
-              string,
-              string,
-              `0x${string}`,
-              string,
-              bigint,
-              bigint,
-              bigint,
-              bigint,
-              boolean,
-              bigint,
-              bigint,
-            ]
-          | undefined;
-
-        return {
-          tokenId: `#${id.toString()}`,
-          name: tokenTuple ? tokenTuple[2] || "Unnamed" : "Loading…",
-          type: tokenTuple ? tokenTuple[3] || "Unknown" : "…",
-          expiresIn: tokenTuple ? formatExpiry(tokenTuple[6]) : "…",
-          attestations: attestCount,
-        };
-      })
-      .filter((t): t is NonNullable<typeof t> => t !== null);
-  }, [walletTokenIds, tokenDetails, tokenTypes, attestationCounts]);
-
-  // Calculate real metrics
-  const totalAttestations = useMemo(() => {
-    if (!attestationCounts) return 0;
-    return attestationCounts.reduce((sum, r) => {
-      if (r?.status === "success") return sum + Number(r.result);
-      return sum;
-    }, 0);
-  }, [attestationCounts]);
+  const { tokens: tokenListData, totalAttestations } =
+    useWalletTokenList(walletTokenIds);
 
   const socialsCount = profileData
     ? [
@@ -180,7 +110,7 @@ export default function Home() {
         tokens={tokenListData}
         onViewAll={(id) =>
           setAttestersFor({
-            tokenId: BigInt(id.replace(/^#/, "")),
+            tokenId: parseTokenId(id)!,
             name: tokenListData.find((t) => t.tokenId === id)?.name || "",
           })
         }

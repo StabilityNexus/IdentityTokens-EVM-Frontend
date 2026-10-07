@@ -1,8 +1,8 @@
 export const IDENTITY_SYSTEM_ADDRESS =
-  "0x4F9A3a0a3f1f6A46b4DC862F15923321b40E96C0" as const;
+  "0x7e4d3e0b03353Bc344e50FB315e3CAC56385F44C" as const;
 
 export const PROFILE_SYSTEM_ADDRESS =
-  "0x62Decd4cEDd40e4816418034b54A5396f487379C" as const;
+  "0xf5252b758f777B44fDC247ab97388bF6B1c44A7D" as const;
 
 export * from "./types.responses";
 
@@ -165,6 +165,25 @@ export const IDENTITY_SYSTEM_ABI = [
     ],
     outputs: [],
     stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "formatTokenId",
+    inputs: [
+      {
+        name: "id",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "string",
+        internalType: "string",
+      },
+    ],
+    stateMutability: "pure",
   },
   {
     type: "function",
@@ -669,6 +688,25 @@ export const IDENTITY_SYSTEM_ABI = [
   },
   {
     type: "function",
+    name: "minted",
+    inputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
     name: "name",
     inputs: [],
     outputs: [
@@ -923,10 +961,10 @@ export const IDENTITY_SYSTEM_ABI = [
   },
   {
     type: "function",
-    name: "tokenTypes",
+    name: "tokenTypeOf",
     inputs: [
       {
-        name: "",
+        name: "id",
         type: "uint256",
         internalType: "uint256",
       },
@@ -938,7 +976,7 @@ export const IDENTITY_SYSTEM_ABI = [
         internalType: "enum DataTypes.TokenType",
       },
     ],
-    stateMutability: "view",
+    stateMutability: "pure",
   },
   {
     type: "function",
@@ -1554,7 +1592,17 @@ export const IDENTITY_SYSTEM_ABI = [
   },
   {
     type: "error",
+    name: "IdSpaceExhausted",
+    inputs: [],
+  },
+  {
+    type: "error",
     name: "InvalidExpiry",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "InvalidTokenId",
     inputs: [],
   },
   {
@@ -1715,6 +1763,33 @@ export const PROFILE_SYSTEM_ABI = [
             type: "string",
             internalType: "string",
           },
+          {
+            name: "avatarId",
+            type: "string",
+            internalType: "string",
+          },
+        ],
+      },
+      {
+        name: "links",
+        type: "tuple[]",
+        internalType: "struct DataTypes.LinkUpdate[]",
+        components: [
+          {
+            name: "slot",
+            type: "uint8",
+            internalType: "uint8",
+          },
+          {
+            name: "label",
+            type: "string",
+            internalType: "string",
+          },
+          {
+            name: "url",
+            type: "string",
+            internalType: "string",
+          },
         ],
       },
     ],
@@ -1726,6 +1801,37 @@ export const PROFILE_SYSTEM_ABI = [
       },
     ],
     stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "getLinks",
+    inputs: [
+      {
+        name: "tokenId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "tuple[6]",
+        internalType: "struct DataTypes.ProfileLink[6]",
+        components: [
+          {
+            name: "label",
+            type: "string",
+            internalType: "string",
+          },
+          {
+            name: "url",
+            type: "string",
+            internalType: "string",
+          },
+        ],
+      },
+    ],
+    stateMutability: "view",
   },
   {
     type: "function",
@@ -1785,6 +1891,11 @@ export const PROFILE_SYSTEM_ABI = [
           },
           {
             name: "ens",
+            type: "string",
+            internalType: "string",
+          },
+          {
+            name: "avatarId",
             type: "string",
             internalType: "string",
           },
@@ -1881,8 +1992,65 @@ export const PROFILE_SYSTEM_ABI = [
         type: "string",
         internalType: "string",
       },
+      {
+        name: "avatarId",
+        type: "string",
+        internalType: "string",
+      },
     ],
     stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "updateProfile",
+    inputs: [
+      {
+        name: "tokenId",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "fields",
+        type: "tuple[]",
+        internalType: "struct DataTypes.FieldUpdate[]",
+        components: [
+          {
+            name: "field",
+            type: "uint8",
+            internalType: "enum DataTypes.ProfileField",
+          },
+          {
+            name: "value",
+            type: "string",
+            internalType: "string",
+          },
+        ],
+      },
+      {
+        name: "links",
+        type: "tuple[]",
+        internalType: "struct DataTypes.LinkUpdate[]",
+        components: [
+          {
+            name: "slot",
+            type: "uint8",
+            internalType: "uint8",
+          },
+          {
+            name: "label",
+            type: "string",
+            internalType: "string",
+          },
+          {
+            name: "url",
+            type: "string",
+            internalType: "string",
+          },
+        ],
+      },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
   },
   {
     type: "function",
@@ -1948,13 +2116,36 @@ export const PROFILE_SYSTEM_ABI = [
     anonymous: false,
   },
   {
+    type: "event",
+    name: "ProfileUpdated",
+    inputs: [
+      {
+        name: "tokenId",
+        type: "uint256",
+        indexed: true,
+        internalType: "uint256",
+      },
+    ],
+    anonymous: false,
+  },
+  {
     type: "error",
     name: "AlreadyMintedProfile",
     inputs: [],
   },
   {
     type: "error",
+    name: "InvalidLinkSlot",
+    inputs: [],
+  },
+  {
+    type: "error",
     name: "InvalidProfileUsernameChar",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "NotProfileOwner",
     inputs: [],
   },
   {
@@ -1965,6 +2156,11 @@ export const PROFILE_SYSTEM_ABI = [
   {
     type: "error",
     name: "ProfileNameRequired",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "ProfileNotFound",
     inputs: [],
   },
   {

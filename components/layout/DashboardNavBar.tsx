@@ -1,21 +1,18 @@
 "use client";
 
 import React, { useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { Button } from "../ui/Button";
 import { FiBell, FiPlus } from "react-icons/fi";
 import { WalletCenter } from "../ui/WalletCenter";
 import { CreateTokenModal } from "../forms/CreateTokenModal";
 import { CreateProfileModal } from "../forms/CreateProfileModal";
-import { SearchBar } from "../dashboard/SearchBar";
+import { GlobalSearch } from "../dashboard/GlobalSearch";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
 import { TOUR_TARGETS } from "@/lib/tour";
 
 export function DashboardNavbar() {
   const pathname = usePathname();
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const currentQuery = searchParams?.get("q") ?? "";
 
   const [isCreateTokenModalOpen, setIsCreateTokenModalOpen] = useState(false);
   const [isCreateProfileModalOpen, setIsCreateProfileModalOpen] =
@@ -82,21 +79,6 @@ export function DashboardNavbar() {
     return "New Token";
   };
 
-  const handleSearchChange = (val: string) => {
-    if (!val) {
-      router.push("/discover");
-    } else {
-      router.push(`/discover?q=${encodeURIComponent(val)}`);
-    }
-  };
-
-  const [profileQuery, setProfileQuery] = React.useState("");
-
-  const submitProfileSearch = () => {
-    const query = profileQuery.trim();
-    if (query) router.push(`/discover?q=${encodeURIComponent(query)}`);
-  };
-
   return (
     <>
       <nav className="flex h-[72px] w-full shrink-0 items-center justify-between border-b border-white/5 bg-dashboard-bg pr-4 pl-14 sm:pr-5 sm:pl-16 lg:px-8">
@@ -107,22 +89,7 @@ export function DashboardNavbar() {
             </h1>
           )}
 
-          {isDiscover && (
-            <SearchBar
-              placeholder="Search by Token ID or Decentralized ID…"
-              value={currentQuery}
-              onChange={handleSearchChange}
-            />
-          )}
-
-          {isUserProfile && (
-            <SearchBar
-              placeholder="Search profiles and tokens…"
-              value={profileQuery}
-              onChange={setProfileQuery}
-              onSubmit={submitProfileSearch}
-            />
-          )}
+          {(isDiscover || isUserProfile) && <GlobalSearch />}
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3 md:gap-5">

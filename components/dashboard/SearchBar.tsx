@@ -9,6 +9,7 @@ export function SearchBar({
   value,
   onChange,
   onSubmit,
+  onFocus,
   className = "",
 }: SearchBarProps) {
   return (
@@ -26,6 +27,7 @@ export function SearchBar({
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange?.(e.target.value)}
+        onFocus={onFocus}
         onKeyDown={(e) => {
           if (e.key === "Enter") onSubmit?.();
         }}

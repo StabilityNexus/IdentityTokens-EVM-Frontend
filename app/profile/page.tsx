@@ -41,7 +41,7 @@ export default function ProfilePage() {
       ? parsedTokenId
       : undefined;
 
-  const { data: resolvedTokenId, isFetching: isResolvingUsername } =
+  const { data: resolvedTokenId, isLoading: isResolvingUsername } =
     useResolveUsername(username);
 
   const profileTokenId =

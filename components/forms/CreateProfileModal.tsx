@@ -9,16 +9,23 @@ import React, {
 } from "react";
 import { AtSign, Globe, Mail, X } from "lucide-react";
 import { FaDiscord, FaGithub, FaXTwitter } from "react-icons/fa6";
-import { useCreateProfile } from "@/hooks/useIdentityWrites";
+import { useCreateProfile, useUpdateProfile } from "@/hooks/useIdentityWrites";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
 import { useUsernameTaken } from "@/hooks/useIdentityReads";
 import { CreateProfileModalProps, TxStatus } from "@/lib/types";
 import { TransactionStatus } from "@/components/ui/TransactionStatus";
 import { DEFAULT_AVATAR_ID, getRandomAvatarId } from "@/lib/avatars";
-import { CustomLink, encodeProfileExtras } from "@/lib/profileExtras";
+import {
+  CustomLink,
+  EMPTY_PROFILE_FORM,
+  ProfileFormData,
+  diffLinks,
+  diffProfile,
+  linksFromChain,
+  normalizeProfile,
+} from "@/lib/profileData";
 import {
   FieldResult,
-  normalizeWebsite,
   validateDiscord,
   validateEmail,
   validateEns,
@@ -36,50 +43,31 @@ import {
 } from "./fields/CustomLinksField";
 import { TextField } from "./fields/TextField";
 
-interface ProfileFormData {
-  name: string;
-  username: string;
-  nationality: string;
-  github: string;
-  email: string;
-  discord: string;
-  xDotCom: string;
-  website: string;
-  ens: string;
-}
-
-const INITIAL_FORM: ProfileFormData = {
-  name: "",
-  username: "",
-  nationality: "",
-  github: "",
-  email: "",
-  discord: "",
-  xDotCom: "",
-  website: "",
-  ens: "",
-};
-
 export function CreateProfileModal({
   isOpen,
   onClose,
   onSuccess,
+  edit,
 }: CreateProfileModalProps) {
-  const [formData, setFormData] = useState<ProfileFormData>(INITIAL_FORM);
+  const isEdit = edit !== undefined;
+  const [formData, setFormData] = useState<ProfileFormData>(EMPTY_PROFILE_FORM);
   const [avatarId, setAvatarId] = useState<string | null>(null);
   const [customLinks, setCustomLinks] = useState<CustomLink[]>([]);
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
-  const [step, setStep] = useState<"idle" | "creating-profile">("idle");
+  const [step, setStep] = useState<"idle" | "submitting">("idle");
 
   const { address, refetchHasProfile, refetchProfileTokenId } =
     useIdentityGate();
 
+  // Editing keeps the existing username, which would read as "taken".
   const { data: isUsernameTaken, isLoading: isCheckingUsername } =
     useUsernameTaken(
-      formData.username.length >= 3 ? formData.username : undefined
+      !isEdit && formData.username.length >= 3 ? formData.username : undefined
     );
 
   const createProfile = useCreateProfile();
+  const updateProfile = useUpdateProfile();
+  const activeWrite = isEdit ? updateProfile : createProfile;
 
   const setField = <K extends keyof ProfileFormData>(
     key: K,
@@ -93,6 +81,7 @@ export function CreateProfileModal({
    * check, so a single field message covers both.
    */
   const usernameResult = useMemo<FieldResult>(() => {
+    if (isEdit) return { status: "idle" };
     const local = validateUsername(formData.username);
     if (local.status !== "valid") return local;
     if (isCheckingUsername) {
@@ -102,7 +91,7 @@ export function CreateProfileModal({
       return { status: "invalid", message: "That username is already taken." };
     }
     return { status: "valid", message: "Available." };
-  }, [formData.username, isCheckingUsername, isUsernameTaken]);
+  }, [isEdit, formData.username, isCheckingUsername, isUsernameTaken]);
 
   const results = useMemo(
     () => ({
@@ -112,7 +101,7 @@ export function CreateProfileModal({
       xDotCom: validateX(formData.xDotCom),
       discord: validateDiscord(formData.discord),
       email: validateEmail(formData.email),
-      website: validateWebsite(formData.website),
+      website: validateWebsite(formData.websitePortfolioLink),
       ens: validateEns(formData.ens),
     }),
     [formData, usernameResult]
@@ -125,16 +114,32 @@ export function CreateProfileModal({
     Object.values(results).some((result) => result.status === "invalid") ||
     hasCustomLinkError(customLinks);
   const isMissingRequired =
-    !formData.name.trim() || usernameResult.status !== "valid";
+    !formData.name.trim() || (!isEdit && usernameResult.status !== "valid");
+
+  // An edit sends only what differs from the chain, so an untouched form has
+  // nothing to submit and each change costs one write.
+  const diff = useMemo(
+    () =>
+      edit
+        ? diffProfile(
+            edit.profile,
+            edit.links,
+            normalizeProfile(formData, avatarId ?? edit.profile.avatarId),
+            customLinks
+          )
+        : undefined,
+    [edit, formData, avatarId, customLinks]
+  );
+  const changeCount = diff ? diff.fields.length + diff.links.length : 0;
 
   // Transaction flow
 
   const getTxStatus = (): TxStatus => {
-    if (step === "creating-profile") {
-      if (createProfile.isPending) return "pending";
-      if (createProfile.isConfirming) return "confirming";
-      if (createProfile.isSuccess) return "success";
-      if (createProfile.error) return "error";
+    if (step === "submitting") {
+      if (activeWrite.isPending) return "pending";
+      if (activeWrite.isConfirming) return "confirming";
+      if (activeWrite.isSuccess) return "success";
+      if (activeWrite.error) return "error";
     }
     return "idle";
   };
@@ -143,14 +148,15 @@ export function CreateProfileModal({
   const isSubmitting = txStatus === "pending" || txStatus === "confirming";
 
   const handleClose = useCallback(() => {
-    setFormData(INITIAL_FORM);
+    setFormData(EMPTY_PROFILE_FORM);
     setAvatarId(null);
     setCustomLinks([]);
     setHasAttemptedSubmit(false);
     setStep("idle");
     createProfile.reset();
+    updateProfile.reset();
     onClose();
-  }, [onClose, createProfile]);
+  }, [onClose, createProfile, updateProfile]);
 
   // Keep the latest closer in a ref so the key listener below can stay stable.
   // The ref is written in an effect rather than during render — refs must not
@@ -162,36 +168,34 @@ export function CreateProfileModal({
   }, [handleClose]);
 
   const submitProfile = useCallback(() => {
-    setStep("creating-profile");
-    createProfile.write({
-      name: formData.name.trim(),
-      username: formData.username.trim(),
-      nationality: formData.nationality,
-      github: formData.github.trim(),
-      email: formData.email.trim(),
-      discord: formData.discord.trim(),
-      xDotCom: formData.xDotCom.trim().replace(/^@/, ""),
-      // Avatar and custom links ride along inside this field until the
-      // contract grows dedicated slots — see lib/profileExtras.ts.
-      websitePortfolioLink: encodeProfileExtras(
-        normalizeWebsite(formData.website),
-        {
-          avatarId: avatarId ?? DEFAULT_AVATAR_ID,
-          customLinks,
-        }
-      ),
-      ens: formData.ens.trim(),
-    });
+    setStep("submitting");
+    if (edit && diff) {
+      updateProfile.write(edit.tokenId, diff.fields, diff.links);
+      return;
+    }
+    createProfile.write(
+      normalizeProfile(formData, avatarId ?? DEFAULT_AVATAR_ID),
+      diffLinks([], customLinks)
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formData, avatarId, customLinks]);
+  }, [edit, diff, formData, avatarId, customLinks]);
 
-  // Give the modal a fresh random avatar each time it opens. This stays in an
-  // effect deliberately: deriving it during render would re-roll the avatar on
-  // every keystroke, and a lazy useState initialiser would only ever pick once
-  // per mount rather than once per open.
+  // Seed the form each time the modal opens: an edit starts from what is
+  // on-chain, a new profile from blank fields and a fresh random avatar. This
+  // stays in an effect deliberately: deriving it during render would re-roll
+  // the avatar on every keystroke, and a lazy useState initialiser would only
+  // run once per mount rather than once per open. Later refetches of `edit`
+  // must not clobber what the user is typing, so it is read only on open.
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (isOpen) setAvatarId((current) => current ?? getRandomAvatarId());
+    if (!isOpen) return;
+    if (edit) {
+      setFormData(edit.profile);
+      setAvatarId(edit.profile.avatarId || null);
+      setCustomLinks(linksFromChain(edit.links));
+      return;
+    }
+    setAvatarId((current) => current ?? getRandomAvatarId());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   // Escape to dismiss, background scroll lock, and focus management: pull focus
@@ -251,9 +255,11 @@ export function CreateProfileModal({
   }, [isOpen]);
 
   useEffect(() => {
-    if (step === "creating-profile" && createProfile.isSuccess) {
-      refetchHasProfile();
-      refetchProfileTokenId();
+    if (step === "submitting" && activeWrite.isSuccess) {
+      if (!isEdit) {
+        refetchHasProfile();
+        refetchProfileTokenId();
+      }
       const timer = setTimeout(() => {
         onSuccess?.();
         closeRef.current();
@@ -261,7 +267,7 @@ export function CreateProfileModal({
       return () => clearTimeout(timer);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step, createProfile.isSuccess]);
+  }, [step, activeWrite.isSuccess]);
 
   if (!isOpen) return null;
 
@@ -269,12 +275,13 @@ export function CreateProfileModal({
     event.preventDefault();
     setHasAttemptedSubmit(true);
     if (hasBlockingError || isMissingRequired) return;
+    if (isEdit && changeCount === 0) return;
 
     submitProfile();
   };
 
-  const currentError = createProfile.error;
-  const currentTxHash = createProfile.txHash;
+  const currentError = activeWrite.error;
+  const currentTxHash = activeWrite.txHash;
 
   return (
     <div
@@ -301,7 +308,7 @@ export function CreateProfileModal({
               id="create-profile-title"
               className="font-utsaha text-2xl text-white"
             >
-              Create your public profile
+              {isEdit ? "Edit your profile" : "Create your public profile"}
             </h2>
             <p className="mt-1 max-w-lg font-utsaha text-sm text-gray-400">
               Your profile data will be stored on a public blockchain. Only
@@ -365,8 +372,12 @@ export function CreateProfileModal({
                 placeholder="Enter your Username"
                 maxLength={32}
                 required
-                disabled={isSubmitting}
-                hint="3–32 characters. This becomes your profile URL."
+                disabled={isSubmitting || isEdit}
+                hint={
+                  isEdit
+                    ? "Usernames are permanent — your profile URL never changes."
+                    : "3–32 characters. This becomes your profile URL."
+                }
               />
 
               <CountrySelect
@@ -440,9 +451,11 @@ export function CreateProfileModal({
               <TextField
                 label="Website / portfolio"
                 name="website"
-                value={formData.website}
-                onChange={(value) => setField("website", value)}
-                onApplySuggestion={(value) => setField("website", value)}
+                value={formData.websitePortfolioLink}
+                onChange={(value) => setField("websitePortfolioLink", value)}
+                onApplySuggestion={(value) =>
+                  setField("websitePortfolioLink", value)
+                }
                 result={results.website}
                 icon={<Globe size={15} />}
                 placeholder="Enter your Website URL"
@@ -478,7 +491,11 @@ export function CreateProfileModal({
                 status={txStatus}
                 txHash={currentTxHash}
                 error={currentError}
-                successMessage="Profile created — welcome aboard!"
+                successMessage={
+                  isEdit
+                    ? "Profile updated."
+                    : "Profile created — welcome aboard!"
+                }
               />
             </div>
           )}
@@ -498,16 +515,26 @@ export function CreateProfileModal({
               form="create-profile-form"
               disabled={
                 isSubmitting ||
+                // The modal closes itself shortly after success; until then a
+                // second click would resend the same write.
+                txStatus === "success" ||
                 !address ||
+                (isEdit && changeCount === 0) ||
                 (hasAttemptedSubmit && (hasBlockingError || isMissingRequired))
               }
               className="rounded-xl bg-brand-green px-6 py-2.5 font-utsaha text-black transition-all hover:bg-brand-green/90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
             >
               {isSubmitting
-                ? "Creating profile…"
+                ? isEdit
+                  ? "Saving…"
+                  : "Creating profile…"
                 : !address
                   ? "Connect wallet first"
-                  : "Create profile"}
+                  : !isEdit
+                    ? "Create profile"
+                    : changeCount === 0
+                      ? "No changes"
+                      : `Save ${changeCount} change${changeCount === 1 ? "" : "s"}`}
             </button>
           </div>
         </div>

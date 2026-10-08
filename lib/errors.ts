@@ -25,6 +25,9 @@ const CONTRACT_ERROR_MESSAGES: Record<string, string> = {
   ProfileUsernameTooLong: "Username must be 32 characters or fewer.",
   InvalidProfileUsernameChar:
     "Username can only contain lowercase letters, numbers, dots (.) and underscores (_).",
+  NotProfileOwner: "Only the owner of this profile can edit it.",
+  ProfileNotFound: "This profile does not exist or has been burned.",
+  InvalidLinkSlot: "A profile can have at most 6 custom links.",
 
   // Token
   NotToken: "This is not a valid token for this operation.",

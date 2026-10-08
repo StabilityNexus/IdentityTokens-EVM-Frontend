@@ -1,4 +1,5 @@
 import React from "react";
+import type { ProfileLink, ProfileMetadata } from "./types.responses";
 
 // --- Enums & Shared Types ---
 export type TokenCardVariant = "home" | "history" | "discover";
@@ -80,6 +81,12 @@ export interface CreateProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  /** Open as an editor of this existing profile instead of creating one. */
+  edit?: {
+    tokenId: bigint;
+    profile: ProfileMetadata;
+    links: readonly ProfileLink[];
+  };
 }
 
 export interface RegistrationModalProps {

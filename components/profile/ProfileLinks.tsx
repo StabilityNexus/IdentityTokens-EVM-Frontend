@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { ArrowUpRight, Check, Copy, Globe, LinkIcon, Mail } from "lucide-react";
 import { FaDiscord, FaGithub, FaXTwitter } from "react-icons/fa6";
 import { ProfileCard } from "./ProfileCard";
-import { CustomLink } from "@/lib/profileExtras";
+import { CustomLink } from "@/lib/profileData";
 
 interface ProfileLinksProps {
   github: string;
@@ -100,11 +100,11 @@ export function ProfileLinks({
     );
   }
 
-  customLinks.forEach((link, index) => {
+  customLinks.forEach((link) => {
     if (!link.url) return;
     entries.push(
       <LinkTile
-        key={`custom-${index}`}
+        key={`custom-${link.slot}`}
         icon={<LinkIcon size={16} />}
         label={link.label || "Link"}
         value={link.url.replace(/^https?:\/\//i, "")}

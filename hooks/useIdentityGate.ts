@@ -107,6 +107,7 @@ export function useIdentityGate() {
         xDotCom: profileData.xDotCom,
         websitePortfolioLink: profileData.websitePortfolioLink,
         ens: profileData.ens,
+        avatarId: profileData.avatarId,
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

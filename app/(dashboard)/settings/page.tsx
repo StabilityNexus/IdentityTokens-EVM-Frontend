@@ -85,7 +85,7 @@ export default function SettingsPage() {
             {/* Coming Soon */}
             <div className="rounded-xl border border-white/5 bg-white/[0.02] p-4 text-center">
               <p className="font-utsaha text-sm text-gray-500">
-                Profile editing and advanced settings coming soon
+                Advanced settings coming soon
               </p>
             </div>
           </div>

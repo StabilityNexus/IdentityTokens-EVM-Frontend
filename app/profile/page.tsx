@@ -7,12 +7,14 @@ import {
   useActiveAttestationCount,
   useHasAttested,
   useProfile,
+  useProfileLinks,
   useResolveUsername,
   useTokenOwner,
 } from "@/hooks/useIdentityReads";
 import { useRevokeAttestation } from "@/hooks/useIdentityWrites";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
 import { AttestModal } from "@/components/forms/AttestModal";
+import { CreateProfileModal } from "@/components/forms/CreateProfileModal";
 import { AttestersModal } from "@/components/attestations/AttestersModal";
 import { TransactionStatus } from "@/components/ui/TransactionStatus";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
@@ -20,7 +22,7 @@ import { ProfileActions } from "@/components/profile/ProfileActions";
 import { ProfileReputation } from "@/components/profile/ProfileReputation";
 import { ProfileLinks } from "@/components/profile/ProfileLinks";
 import { ProfileIdentity } from "@/components/profile/ProfileIdentity";
-import { decodeProfileExtras } from "@/lib/profileExtras";
+import { linksFromChain } from "@/lib/profileData";
 import { getRankFromAttesters, getTrustScore } from "@/lib/rank";
 import { TxStatus } from "@/lib/types";
 
@@ -39,15 +41,20 @@ export default function ProfilePage() {
       ? parsedTokenId
       : undefined;
 
-  const { data: resolvedTokenId, isFetching: isResolvingUsername } =
+  const { data: resolvedTokenId, isLoading: isResolvingUsername } =
     useResolveUsername(username);
 
   const profileTokenId =
     numericTokenId ??
     (resolvedTokenId && resolvedTokenId > 0n ? resolvedTokenId : undefined);
 
-  const { data: profileData, isFetching: isProfileFetching } =
-    useProfile(profileTokenId);
+  const {
+    data: profileData,
+    isLoading: isProfileLoading,
+    refetch: refetchProfile,
+  } = useProfile(profileTokenId);
+  const { data: profileLinks, refetch: refetchLinks } =
+    useProfileLinks(profileTokenId);
   const { data: ownerAddress } = useTokenOwner(profileTokenId);
 
   const { data: attestationCount, refetch: refetchAttestations } =
@@ -60,15 +67,16 @@ export default function ProfilePage() {
 
   const [isAttestModalOpen, setIsAttestModalOpen] = useState(false);
   const [isAttestersModalOpen, setIsAttestersModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
   const totalAttestations = Number(attestationCount ?? 0n);
   const rank = getRankFromAttesters(totalAttestations);
   const trustScore = getTrustScore(totalAttestations);
 
-  const extras = useMemo(
-    () => decodeProfileExtras(profileData?.websitePortfolioLink),
-    [profileData?.websitePortfolioLink]
+  const customLinks = useMemo(
+    () => linksFromChain(profileLinks ?? []),
+    [profileLinks]
   );
 
   const isOwnProfile =
@@ -123,9 +131,11 @@ export default function ProfilePage() {
     );
   }
 
+  // First load only: a background refetch (e.g. after an edit) must not swap
+  // the page for a spinner, which would also unmount the open edit modal.
   const isLoading =
     isResolvingUsername ||
-    isProfileFetching ||
+    isProfileLoading ||
     (profileTokenId !== undefined && profileData === undefined);
 
   if (isLoading) {
@@ -175,7 +185,7 @@ export default function ProfilePage() {
       <ProfileHeader
         name={profileData.name}
         username={profileData.username}
-        avatarId={extras.avatarId}
+        avatarId={profileData.avatarId || null}
         seed={(ownerAddress as string) ?? profileData.username}
         nationality={profileData.nationality}
         rank={rank}
@@ -192,6 +202,9 @@ export default function ProfilePage() {
                 if (profileTokenId) revokeAttestation.write(profileTokenId);
               })
             }
+            // The edit diff compares against the link slots, so wait for them
+            // or an edit would read every slot as removed.
+            onEdit={profileLinks ? () => setIsEditModalOpen(true) : undefined}
           />
         }
       />
@@ -228,8 +241,8 @@ export default function ProfilePage() {
             xDotCom={profileData.xDotCom}
             discord={profileData.discord}
             email={profileData.email}
-            website={extras.website}
-            customLinks={extras.customLinks}
+            website={profileData.websitePortfolioLink}
+            customLinks={customLinks}
           />
 
           <ProfileIdentity
@@ -246,6 +259,22 @@ export default function ProfilePage() {
           onClose={() => setIsAttestersModalOpen(false)}
           tokenId={profileTokenId}
           tokenName={profileData.name}
+        />
+      )}
+
+      {isEditModalOpen && profileTokenId && profileLinks && (
+        <CreateProfileModal
+          isOpen
+          onClose={() => setIsEditModalOpen(false)}
+          edit={{
+            tokenId: profileTokenId,
+            profile: profileData,
+            links: profileLinks,
+          }}
+          onSuccess={() => {
+            refetchProfile();
+            refetchLinks();
+          }}
         />
       )}
 

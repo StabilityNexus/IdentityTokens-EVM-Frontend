@@ -7,7 +7,9 @@ import {
   IDENTITY_SYSTEM_ABI,
   PROFILE_SYSTEM_ADDRESS,
   PROFILE_SYSTEM_ABI,
+  type ProfileMetadata,
 } from "@/lib/contracts";
+import type { FieldUpdate, LinkUpdate } from "@/lib/profileData";
 
 // IdentitySystem Writes
 
@@ -285,26 +287,19 @@ export function useCreateProfile() {
     reset,
   } = useWriteContract();
 
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
-    hash: txHash,
-  });
+  // A reverted transaction fails here, not at send time, so surface it too.
+  const {
+    isLoading: isConfirming,
+    isSuccess,
+    error: receiptError,
+  } = useWaitForTransactionReceipt({ hash: txHash });
 
-  const write = (data: {
-    name: string;
-    username: string;
-    nationality: string;
-    github: string;
-    email: string;
-    discord: string;
-    xDotCom: string;
-    websitePortfolioLink: string;
-    ens: string;
-  }) => {
+  const write = (data: ProfileMetadata, links: LinkUpdate[]) => {
     writeContract({
       address: PROFILE_SYSTEM_ADDRESS,
       abi: PROFILE_SYSTEM_ABI,
       functionName: "createProfile",
-      args: [data],
+      args: [data, links],
     });
   };
 
@@ -315,7 +310,48 @@ export function useCreateProfile() {
     isConfirming,
     isSuccess,
     isLoading: isPending || isConfirming,
+    error: error ?? receiptError,
+    reset,
+  };
+}
+
+/** Edit a profile — only the given fields and link slots are written */
+export function useUpdateProfile() {
+  const {
+    writeContract,
+    data: txHash,
+    isPending,
     error,
+    reset,
+  } = useWriteContract();
+
+  const {
+    isLoading: isConfirming,
+    isSuccess,
+    error: receiptError,
+  } = useWaitForTransactionReceipt({ hash: txHash });
+
+  const write = (
+    tokenId: bigint,
+    fields: FieldUpdate[],
+    links: LinkUpdate[]
+  ) => {
+    writeContract({
+      address: PROFILE_SYSTEM_ADDRESS,
+      abi: PROFILE_SYSTEM_ABI,
+      functionName: "updateProfile",
+      args: [tokenId, fields, links],
+    });
+  };
+
+  return {
+    write,
+    txHash,
+    isPending,
+    isConfirming,
+    isSuccess,
+    isLoading: isPending || isConfirming,
+    error: error ?? receiptError,
     reset,
   };
 }

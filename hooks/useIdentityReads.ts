@@ -207,6 +207,17 @@ export function useProfile(tokenId: bigint | undefined) {
   });
 }
 
+/** Get the custom-link slots of a profile (an empty url marks a free slot) */
+export function useProfileLinks(tokenId: bigint | undefined) {
+  return useReadContract({
+    address: PROFILE_SYSTEM_ADDRESS,
+    abi: PROFILE_SYSTEM_ABI,
+    functionName: "getLinks",
+    args: tokenId !== undefined ? [tokenId] : undefined,
+    query: { enabled: tokenId !== undefined },
+  });
+}
+
 /** Check if a username is already taken */
 export function useUsernameTaken(
   username: string | undefined,

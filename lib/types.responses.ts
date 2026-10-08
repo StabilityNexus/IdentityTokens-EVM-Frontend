@@ -8,6 +8,13 @@ export interface ProfileMetadata {
   xDotCom: string;
   websitePortfolioLink: string;
   ens: string;
+  avatarId: string;
+}
+
+/** One on-chain custom-link slot; an empty url means the slot is free. */
+export interface ProfileLink {
+  label: string;
+  url: string;
 }
 
 export interface TokenData {

@@ -11,6 +11,7 @@ import { useWalletTokenList } from "@/hooks/useWalletTokenList";
 import { getContractErrorMessage } from "@/lib/errors";
 import { formatLastUpdated } from "@/lib/helpers";
 import { getRankFromAttesters, getTrustScore } from "@/lib/rank";
+import { parseTokenId } from "@/lib/tokenId";
 
 const DashboardPage = () => {
   const {
@@ -139,7 +140,7 @@ const DashboardPage = () => {
           tokens={tokenListData}
           onViewAll={(id) =>
             setAttestersFor({
-              tokenId: BigInt(id.replace(/^#/, "")),
+              tokenId: parseTokenId(id)!,
               name: tokenListData.find((t) => t.tokenId === id)?.name || "",
             })
           }

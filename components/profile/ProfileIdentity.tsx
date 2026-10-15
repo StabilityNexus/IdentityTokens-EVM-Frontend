@@ -5,6 +5,7 @@ import { ArrowUpRight, Check, Copy } from "lucide-react";
 import { ProfileCard } from "./ProfileCard";
 import { getEtherscanAddressUrl } from "@/lib/errors";
 import { truncateAddress } from "@/lib/helpers";
+import { formatTokenId } from "@/lib/tokenId";
 
 interface ProfileIdentityProps {
   walletAddress?: string;
@@ -83,7 +84,7 @@ export function ProfileIdentity({
               Profile token
             </dt>
             <dd className="font-utsaha text-sm text-white">
-              #{profileTokenId.toString()}
+              {formatTokenId(profileTokenId)}
             </dd>
           </div>
         )}

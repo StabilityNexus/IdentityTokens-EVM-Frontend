@@ -42,6 +42,7 @@ export interface TokenCardProps {
   onViewAll?: () => void;
   /** Hide owner-only actions when showing someone else's token. */
   readOnly?: boolean;
+  owner?: string;
 }
 
 export interface FeatureCardProps {
@@ -156,6 +157,7 @@ export interface SearchBarProps {
   onChange?: (value: string) => void;
   /** Fired on Enter — lets a host defer navigation until the query is complete. */
   onSubmit?: () => void;
+  onFocus?: () => void;
   className?: string;
 }
 

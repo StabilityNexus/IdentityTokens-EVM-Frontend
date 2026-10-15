@@ -6,6 +6,7 @@ import { useAttestToken } from "@/hooks/useIdentityWrites";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
 import { useTokenOwner } from "@/hooks/useIdentityReads";
 import { AttestModalProps, TxStatus } from "@/lib/types";
+import { formatTokenId } from "@/lib/tokenId";
 import { TransactionStatus } from "@/components/ui/TransactionStatus";
 import { Modal } from "@/components/ui/Modal";
 
@@ -109,7 +110,7 @@ export function AttestModal({
       title="Attest Token"
       subtitle={
         tokenName
-          ? `Attesting \u201C${tokenName}\u201D (#${tokenId.toString()})`
+          ? `Attesting \u201C${tokenName}\u201D (${formatTokenId(tokenId)})`
           : undefined
       }
     >

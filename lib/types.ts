@@ -182,6 +182,8 @@ export interface MetricItemProps {
 export interface IDMetricsProps {
   name?: string;
   walletAddress?: string;
+  /** The wallet's identity id, shown as id-…; null when it has none. */
+  rootId?: bigint | null;
   /** Attestations on the wallet's tokens, its profile token excluded. */
   attesters?: number;
   className?: string;
@@ -201,6 +203,5 @@ export interface MetricsProps {
   activeTokens?: number;
   socials?: number;
   badgeRank?: RankName;
-  badgeDescription?: string;
   className?: string;
 }

@@ -1,4 +1,4 @@
-export const HERO_WORDS = ["Earned", "Decentralized", "Sovereign", "Yours..."];
+export const HERO_WORDS = ["Earned", "Decentralized", "On-chain", "Yours..."];
 
 export const NAV_LINKS = [
   // Add navigation links here if needed in the future
@@ -28,7 +28,7 @@ export const FEATURES_DATA = [
   },
   {
     image: "/cards/FeatureCard5.png",
-    title: "You own the lock, You own the key. Recover your identity.",
+    title: "You own the lock, You own the key.",
   },
   {
     image: "/cards/FeatureCard6.png",
@@ -63,7 +63,7 @@ export const SOCIAL_LINKS = {
 
 /** Consent copy for the onboarding checkbox; keep in step with /privacy-policy. */
 export const TERMS_SUMMARY = [
-  "Your display name and root identity are written to a public blockchain: permanent, immutable and readable by anyone.",
+  "Your display name and identity are written to a public blockchain: permanent, immutable and readable by anyone.",
   "Anything you add later — profile, username, links, attestations — is public on-chain data too, so only publish what you are happy to make permanent.",
   "DIT is non-custodial. You hold your keys and sign every transaction; the app never takes custody of your wallet or your tokens.",
   "Attestations are peer-to-peer statements made by other users, not a verification or endorsement by Stability Nexus.",

@@ -177,11 +177,10 @@ export default function PrivacyPolicyPage() {
               </li>
               <li>
                 <strong>RPC Node Providers:</strong> To read from and broadcast
-                transactions to supported blockchains (e.g., Ethereum Sepolia),
-                the App connects to remote procedure call (RPC) nodes. These
-                third-party node providers may process network-level information
-                (such as your IP address) in accordance with their respective
-                privacy policies.
+                transactions to supported blockchains, the App connects to
+                remote procedure call (RPC) nodes. These third-party node
+                providers may process network-level information (such as your IP
+                address) in accordance with their respective privacy policies.
               </li>
               <li>
                 <strong>Static Hosting Infrastructure (GitHub Pages):</strong>{" "}

@@ -115,8 +115,8 @@ export function RegistrationModal({ onSubmitted }: RegistrationModalProps) {
             Claim your identity
           </h2>
           <p className="mt-1 font-utsaha text-sm text-gray-400">
-            One transaction creates the root identity that every token and
-            attestation of yours hangs from.
+            One transaction creates the identity that all your tokens and
+            attestations belong to.
           </p>
           {address && (
             <p className="mt-2 font-mono text-xs text-gray-500">
@@ -146,7 +146,7 @@ export function RegistrationModal({ onSubmitted }: RegistrationModalProps) {
           maxLength={64}
           required
           disabled={isSubmitting || isDone}
-          hint="Stored on-chain with your root identity. You can add a full public profile later."
+          hint="Stored on-chain with your identity. You can add a full public profile later."
         />
 
         {/* Terms, shown rather than linked away to. */}

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 const TITLE = "Claim your username | DIT";
 const DESCRIPTION =
-  "Reserve your DIT username and claim your ID card: a portable, recoverable, self-sovereign identity that lives on-chain.";
+  "Reserve your DIT username and claim your ID card: an on-chain identity you own.";
 
 export const metadata: Metadata = {
   title: TITLE,

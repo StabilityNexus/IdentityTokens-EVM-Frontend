@@ -29,8 +29,8 @@ export function ReservedView({
       </h1>
       <p className="mt-5 max-w-md font-utsaha text-base leading-relaxed text-gray-600 md:text-lg dark:text-gray-300">
         {isNew
-          ? "Your soulbound root identity is live on Sepolia. Share your card and get your friends to claim theirs."
-          : "This wallet already holds a root identity. Share your card, or head to your dashboard to build on it."}
+          ? "Your identity is on-chain. Share your card and get your friends to claim theirs."
+          : "This wallet already has an identity. Share your card, or head to your dashboard to build on it."}
       </p>
 
       <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
@@ -52,7 +52,7 @@ export function ReservedView({
         <TransactionStatus
           status="success"
           txHash={txHash}
-          successMessage={`@${name} is reserved on Sepolia.`}
+          successMessage={`@${name} is reserved.`}
           className="mt-6 w-full max-w-md text-left"
         />
       )}

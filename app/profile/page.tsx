@@ -163,7 +163,7 @@ export default function ProfilePage() {
             <span className="text-white">&ldquo;{username}&rdquo;</span>.
           </p>
           <p className="mt-3 font-utsaha text-xs text-profile-muted">
-            If you expected one here, check that your wallet is on the Sepolia
+            If you expected one here, check that your wallet is on a supported
             network.
           </p>
         </div>

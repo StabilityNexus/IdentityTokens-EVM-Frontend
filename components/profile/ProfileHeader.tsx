@@ -1,10 +1,10 @@
 "use client";
 
 import React from "react";
-import { MapPin } from "lucide-react";
 import Badge from "@/components/Badge";
 import { Avatar } from "@/components/ui/Avatar";
-import { countryFlag, findCountryByName } from "@/lib/countries";
+import { RegionIcon } from "@/components/ui/RegionIcon";
+import { parseRegions } from "@/lib/countries";
 import { RANK_LABELS } from "@/lib/rank";
 import { RankName } from "@/lib/types";
 
@@ -29,7 +29,7 @@ export function ProfileHeader({
   rank,
   actions,
 }: ProfileHeaderProps) {
-  const country = findCountryByName(nationality);
+  const regions = parseRegions(nationality);
 
   return (
     <header className="overflow-hidden rounded-2xl border border-profile-border bg-profile-surface">
@@ -66,16 +66,15 @@ export function ProfileHeader({
             </span>
           </span>
 
-          {nationality && (
-            <span className="flex items-center gap-1.5 font-utsaha text-sm text-gray-400">
-              {country ? (
-                <span aria-hidden="true">{countryFlag(country.code)}</span>
-              ) : (
-                <MapPin size={14} />
-              )}
-              {nationality}
+          {regions.map((region) => (
+            <span
+              key={region.code ?? `~${region.name}`}
+              className="flex items-center gap-1.5 font-utsaha text-sm text-gray-400"
+            >
+              <RegionIcon region={region} />
+              {region.name}
             </span>
-          )}
+          ))}
         </div>
       </div>
     </header>

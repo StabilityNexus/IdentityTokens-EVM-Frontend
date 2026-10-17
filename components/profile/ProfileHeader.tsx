@@ -2,11 +2,8 @@
 
 import React from "react";
 import { MapPin } from "lucide-react";
-import Badge from "@/components/Badge";
 import { Avatar } from "@/components/ui/Avatar";
 import { countryFlag, findCountryByName } from "@/lib/countries";
-import { RANK_LABELS } from "@/lib/rank";
-import { RankName } from "@/lib/types";
 
 interface ProfileHeaderProps {
   name: string;
@@ -15,7 +12,6 @@ interface ProfileHeaderProps {
   /** Fallback seed for profiles created before avatars existed. */
   seed: string | null;
   nationality: string;
-  rank: RankName;
   /** Attest / revoke / share / copy cluster. */
   actions: React.ReactNode;
 }
@@ -26,7 +22,6 @@ export function ProfileHeader({
   avatarId,
   seed,
   nationality,
-  rank,
   actions,
 }: ProfileHeaderProps) {
   const country = findCountryByName(nationality);
@@ -58,15 +53,8 @@ export function ProfileHeader({
         </div>
 
         {/* Meta row */}
-        <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-profile-border pt-4">
-          <span className="flex items-center gap-1.5 rounded-full border border-profile-accent/25 bg-profile-accent/10 py-1 pr-3 pl-1.5">
-            <Badge rank={rank} size={20} />
-            <span className="font-utsaha text-xs text-profile-accent-soft">
-              {RANK_LABELS[rank]}
-            </span>
-          </span>
-
-          {nationality && (
+        {nationality && (
+          <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-profile-border pt-4">
             <span className="flex items-center gap-1.5 font-utsaha text-sm text-gray-400">
               {country ? (
                 <span aria-hidden="true">{countryFlag(country.code)}</span>
@@ -75,8 +63,8 @@ export function ProfileHeader({
               )}
               {nationality}
             </span>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </header>
   );

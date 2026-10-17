@@ -79,6 +79,16 @@ export function getSectionTitle(listVariant: TokenListVariant): string {
   }
 }
 
+/**
+ * Trust score on a 0-100 scale: two points per attestation, on top of a
+ * baseline. Callers own the baseline because they differ on when it is earned --
+ * a public profile always carries it, the dashboard grants it only once a
+ * profile exists.
+ */
+export function getTrustScore(attestations: number, baseline = 20): number {
+  return Math.min(100, Math.floor(attestations * 2 + baseline));
+}
+
 export function getArcColor(score: number): string {
   if (score >= 70) return "var(--color-brand-green)";
   if (score >= 40) return "var(--color-text-warning)";

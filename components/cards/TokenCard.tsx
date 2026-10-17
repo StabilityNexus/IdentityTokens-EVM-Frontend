@@ -18,20 +18,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import Badge from "../Badge";
 import { TokenForm } from "../forms/TokenForm";
 import { TokenCardProps } from "@/lib/types";
 import { parseTokenId } from "@/lib/tokenId";
 import { truncateAddress } from "@/lib/helpers";
-
-const getRankFromAttestations = (count: number) => {
-  if (count >= 250) return "champion";
-  if (count >= 100) return "diamond";
-  if (count >= 50) return "platinum";
-  if (count >= 25) return "gold";
-  if (count >= 10) return "silver";
-  return "bronze";
-};
 
 export function TokenCard({
   variant,
@@ -48,7 +38,6 @@ export function TokenCard({
   readOnly = false,
   owner,
 }: TokenCardProps) {
-  const rank = getRankFromAttestations(attestations);
   const [isTokenFormOpen, setIsTokenFormOpen] = React.useState(false);
 
   return (
@@ -94,10 +83,7 @@ export function TokenCard({
           {variant === "home" && (
             <>
               <div className="flex shrink-0 items-center gap-2 font-utsaha text-sm whitespace-nowrap text-gray-400">
-                <div className="flex items-center gap-1.5">
-                  <Badge rank={rank} size={20} />
-                  <span className="text-white">{attestations}</span>
-                </div>
+                <span className="text-white">{attestations}</span>
                 <span className="hidden xs:inline">Attestations</span>
               </div>
               <div className="flex shrink-0 items-center gap-1 sm:gap-2">
@@ -205,10 +191,7 @@ export function TokenCard({
             <div className="flex w-full items-center justify-between sm:justify-end sm:gap-4">
               {/* Left side: Stats info */}
               <div className="flex shrink-0 items-center gap-2 font-utsaha text-sm whitespace-nowrap text-gray-400">
-                <div className="flex items-center gap-1">
-                  <Badge rank={rank} size={18} />
-                  <span className="font-medium text-white">{attestations}</span>
-                </div>
+                <span className="font-medium text-white">{attestations}</span>
                 <span className="hidden xs:inline">Attestations</span>
               </div>
 

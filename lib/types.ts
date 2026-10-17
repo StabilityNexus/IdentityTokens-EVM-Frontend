@@ -1,17 +1,9 @@
-import React from "react";
 import type { ProfileLink, ProfileMetadata } from "./types.responses";
 
 // --- Enums & Shared Types ---
 export type TokenCardVariant = "home" | "history" | "discover";
 export type TokenListVariant = "tokens" | "history" | "discover";
 export type TxStatus = "idle" | "pending" | "confirming" | "success" | "error";
-export type RankName =
-  | "bronze"
-  | "silver"
-  | "gold"
-  | "platinum"
-  | "diamond"
-  | "champion";
 
 /**
  * Mirrors the on-chain `DataTypes.TokenType` enum.
@@ -57,7 +49,7 @@ export interface IDCardProps {
   walletAddress?: string;
   /** Issue date printed top right, e.g. "SEPTEMBER / 2026". */
   dateLabel?: string;
-  /** When given, top right shows the rank badge and this count instead. */
+  /** When given, top right shows this attester count instead. */
   attesters?: number;
   /** No float, tilt or surface motion — a static card (the dashboard). */
   still?: boolean;
@@ -126,13 +118,6 @@ export interface AttestModalProps {
   onSuccess?: () => void;
 }
 
-export interface BadgeProps {
-  rank: RankName;
-  /** Pixels, or any CSS length (e.g. "7.5cqw" to scale with a card). */
-  size?: number | string;
-  className?: string;
-}
-
 export interface TrustScoreProps {
   score?: number;
   flags?: string;
@@ -176,7 +161,6 @@ export interface TokenListProps {
 export interface MetricItemProps {
   label: string;
   value: string | number;
-  badgeContent?: React.ReactNode;
 }
 
 export interface IDMetricsProps {
@@ -202,6 +186,5 @@ export interface MetricsProps {
   totalAttestations?: number;
   activeTokens?: number;
   socials?: number;
-  badgeRank?: RankName;
   className?: string;
 }

@@ -11,8 +11,11 @@ import { AttestersModal } from "@/components/attestations/AttestersModal";
 import { useWalletIdentity } from "@/hooks/useWalletIdentity";
 import { useWalletTokenList } from "@/hooks/useWalletTokenList";
 import { getContractErrorMessage } from "@/lib/errors";
-import { formatLastUpdated, truncateAddress } from "@/lib/helpers";
-import { getRankFromAttesters, getTrustScore } from "@/lib/rank";
+import {
+  formatLastUpdated,
+  getTrustScore,
+  truncateAddress,
+} from "@/lib/helpers";
 import { parseTokenId } from "@/lib/tokenId";
 
 /** Centred message used by every state this page can land in but the main one. */
@@ -73,6 +76,7 @@ export default function WalletPage() {
 
   const {
     tokens,
+    socialTokens,
     totalAttestations,
     attestationsExcludingProfile,
     latestCreatedAt,
@@ -144,15 +148,6 @@ export default function WalletPage() {
     profileData?.name?.trim() ||
     truncateAddress(walletAddress);
 
-  const socialsCount = profileData
-    ? [
-        profileData.github,
-        profileData.discord,
-        profileData.xDotCom,
-        profileData.email,
-      ].filter(Boolean).length
-    : 0;
-
   return (
     <div className="flex h-full flex-col gap-8 bg-app-bg pb-12">
       <DashboardMetrics
@@ -167,8 +162,7 @@ export default function WalletPage() {
         trustDescription="On-Chain Reputation"
         totalAttestations={totalAttestations}
         activeTokens={tokens.length}
-        socials={socialsCount}
-        badgeRank={getRankFromAttesters(totalAttestations)}
+        socials={socialTokens}
       />
 
       <div className="px-4 sm:px-6 md:pr-14 md:pl-10">

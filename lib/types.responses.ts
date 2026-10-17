@@ -1,6 +1,7 @@
 export interface ProfileMetadata {
   name: string;
   username: string;
+  /** The profile's regions, see `parseRegions`. Named after the contract field. */
   nationality: string;
   github: string;
   email: string;

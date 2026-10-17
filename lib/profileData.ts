@@ -10,8 +10,6 @@
  */
 import type { ProfileLink, ProfileMetadata } from "./types.responses";
 
-/** Must equal `ProfileSystem.MAX_LINKS`. */
-export const MAX_CUSTOM_LINKS = 6;
 export const MAX_LINK_LABEL_LENGTH = 24;
 export const MAX_LINK_URL_LENGTH = 200;
 
@@ -36,8 +34,8 @@ export interface CustomLink {
   label: string;
   /** Absolute URL including protocol. */
   url: string;
-  /** On-chain slot; it stays put when other rows are removed. */
-  slot: number;
+  /** On-chain index of a saved link; a new row has a negative key instead. */
+  index: number;
 }
 
 /** The avatar is picked separately, so the form holds everything else. */
@@ -62,7 +60,7 @@ export interface FieldUpdate {
 }
 
 export interface LinkUpdate {
-  slot: number;
+  index: number;
   label: string;
   url: string;
 }
@@ -95,49 +93,65 @@ export function normalizeProfile(
   };
 }
 
-/** A row without a URL is an empty slot, whatever its label says. */
+/** A row without a URL is an empty link, whatever its label says. */
 function normalizeLink(link: { label: string; url: string }): ProfileLink {
   const url = link.url.trim();
   return url ? { label: link.label.trim(), url } : EMPTY_LINK;
 }
 
-/** Editor rows for the filled on-chain slots, in slot order. */
-export function linksFromChain(slots: readonly ProfileLink[]): CustomLink[] {
-  return slots.flatMap((link, slot) =>
-    link.url ? [{ label: link.label, url: link.url, slot }] : []
+/** Editor rows for the saved links, in index order; gaps are skipped. */
+export function linksFromChain(links: readonly ProfileLink[]): CustomLink[] {
+  return links.flatMap((link, index) =>
+    link.url ? [{ label: link.label, url: link.url, index }] : []
   );
 }
 
-/** The lowest slot no row uses, or undefined when every slot is taken. */
-export function nextFreeSlot(rows: readonly CustomLink[]): number | undefined {
-  for (let slot = 0; slot < MAX_CUSTOM_LINKS; slot++) {
-    if (!rows.some((row) => row.slot === slot)) return slot;
-  }
-  return undefined;
+/** A key for a newly added row: negative, so it never matches a saved index. */
+export function nextLinkKey(rows: readonly CustomLink[]): number {
+  return Math.min(0, ...rows.map((row) => row.index)) - 1;
 }
 
 /**
- * Writes for the slots whose row differs from the chain. Against `[]` (a new
- * profile) that is exactly the filled rows.
+ * Writes for the indexes whose link differs from the chain. Saved rows keep
+ * their index; new rows fill the lowest free ones in the order they were
+ * added (gaps and removed links first, then the end), so appends stay
+ * contiguous as the contract requires. Against `[]` (a new profile) that is
+ * the filled rows at 0, 1, 2…
  */
 export function diffLinks(
   chainLinks: readonly ProfileLink[],
   rows: readonly CustomLink[]
 ): LinkUpdate[] {
+  const saved = chainLinks.length;
+  const wanted = new Map<number, ProfileLink>();
+  const added: ProfileLink[] = [];
+  for (const row of rows) {
+    const link = normalizeLink(row);
+    if (!link.url) continue;
+    if (row.index >= 0 && row.index < saved) wanted.set(row.index, link);
+    else added.push(link);
+  }
+
+  let free = 0;
+  for (const link of added) {
+    while (wanted.has(free)) free++;
+    wanted.set(free, link);
+  }
+
+  const end = Math.max(saved, ...[...wanted.keys()].map((index) => index + 1));
   const links: LinkUpdate[] = [];
-  for (let slot = 0; slot < MAX_CUSTOM_LINKS; slot++) {
-    const row = rows.find((candidate) => candidate.slot === slot);
-    const wanted = row ? normalizeLink(row) : EMPTY_LINK;
-    const current = chainLinks[slot] ?? EMPTY_LINK;
-    if (wanted.label !== current.label || wanted.url !== current.url) {
-      links.push({ slot, ...wanted });
+  for (let index = 0; index < end; index++) {
+    const next = wanted.get(index) ?? EMPTY_LINK;
+    const current = chainLinks[index] ?? EMPTY_LINK;
+    if (next.label !== current.label || next.url !== current.url) {
+      links.push({ index, ...next });
     }
   }
   return links;
 }
 
 /**
- * Only the fields and link slots of `next` / `rows` that differ from what is
+ * Only the fields and links of `next` / `rows` that differ from what is
  * on-chain. An empty result means there is nothing to save.
  */
 export function diffProfile(

@@ -1776,9 +1776,9 @@ export const PROFILE_SYSTEM_ABI = [
         internalType: "struct DataTypes.LinkUpdate[]",
         components: [
           {
-            name: "slot",
-            type: "uint8",
-            internalType: "uint8",
+            name: "index",
+            type: "uint32",
+            internalType: "uint32",
           },
           {
             name: "label",
@@ -1811,12 +1811,22 @@ export const PROFILE_SYSTEM_ABI = [
         type: "uint256",
         internalType: "uint256",
       },
+      {
+        name: "offset",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "limit",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
     outputs: [
       {
-        name: "",
-        type: "tuple[6]",
-        internalType: "struct DataTypes.ProfileLink[6]",
+        name: "page",
+        type: "tuple[]",
+        internalType: "struct DataTypes.ProfileLink[]",
         components: [
           {
             name: "label",
@@ -1829,6 +1839,11 @@ export const PROFILE_SYSTEM_ABI = [
             internalType: "string",
           },
         ],
+      },
+      {
+        name: "total",
+        type: "uint256",
+        internalType: "uint256",
       },
     ],
     stateMutability: "view",
@@ -2032,9 +2047,9 @@ export const PROFILE_SYSTEM_ABI = [
         internalType: "struct DataTypes.LinkUpdate[]",
         components: [
           {
-            name: "slot",
-            type: "uint8",
-            internalType: "uint8",
+            name: "index",
+            type: "uint32",
+            internalType: "uint32",
           },
           {
             name: "label",
@@ -2135,7 +2150,7 @@ export const PROFILE_SYSTEM_ABI = [
   },
   {
     type: "error",
-    name: "InvalidLinkSlot",
+    name: "InvalidLinkIndex",
     inputs: [],
   },
   {

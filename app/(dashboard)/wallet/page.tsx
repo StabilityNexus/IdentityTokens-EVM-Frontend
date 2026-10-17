@@ -76,6 +76,7 @@ export default function WalletPage() {
 
   const {
     tokens,
+    socialTokens,
     totalAttestations,
     attestationsExcludingProfile,
     latestCreatedAt,
@@ -147,15 +148,6 @@ export default function WalletPage() {
     profileData?.name?.trim() ||
     truncateAddress(walletAddress);
 
-  const socialsCount = profileData
-    ? [
-        profileData.github,
-        profileData.discord,
-        profileData.xDotCom,
-        profileData.email,
-      ].filter(Boolean).length
-    : 0;
-
   return (
     <div className="flex h-full flex-col gap-8 bg-app-bg pb-12">
       <DashboardMetrics
@@ -170,7 +162,7 @@ export default function WalletPage() {
         trustDescription="On-Chain Reputation"
         totalAttestations={totalAttestations}
         activeTokens={tokens.length}
-        socials={socialsCount}
+        socials={socialTokens}
       />
 
       <div className="px-4 sm:px-6 md:pr-14 md:pl-10">

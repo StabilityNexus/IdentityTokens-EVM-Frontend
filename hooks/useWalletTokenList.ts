@@ -102,8 +102,14 @@ export function useWalletTokenList(tokenIds: readonly bigint[]) {
     );
   }, [ids, attestationCounts]);
 
+  /** Tokens minted with the Socials token type. */
+  const socialTokens = tokens.filter(
+    (t) => t.type.trim().toLowerCase() === "socials"
+  ).length;
+
   return {
     tokens,
+    socialTokens,
     totalAttestations,
     attestationsExcludingProfile,
     latestCreatedAt,

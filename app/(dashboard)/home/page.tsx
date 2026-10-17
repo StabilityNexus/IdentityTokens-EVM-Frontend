@@ -12,25 +12,18 @@ import { getContractErrorMessage } from "@/lib/errors";
 import { parseTokenId } from "@/lib/tokenId";
 
 export default function Home() {
-  const { isConnected, walletTokenIds, profileData, isLoading, error } =
-    useIdentityGate();
+  const { isConnected, walletTokenIds, isLoading, error } = useIdentityGate();
 
   const [attestersFor, setAttestersFor] = useState<{
     tokenId: bigint;
     name: string;
   } | null>(null);
 
-  const { tokens: tokenListData, totalAttestations } =
-    useWalletTokenList(walletTokenIds);
-
-  const socialsCount = profileData
-    ? [
-        profileData.github,
-        profileData.discord,
-        profileData.xDotCom,
-        profileData.email,
-      ].filter(Boolean).length
-    : 0;
+  const {
+    tokens: tokenListData,
+    socialTokens,
+    totalAttestations,
+  } = useWalletTokenList(walletTokenIds);
 
   const { openConnectModal } = useConnectModal();
 
@@ -100,7 +93,7 @@ export default function Home() {
       <Metrics
         totalAttestations={totalAttestations}
         activeTokens={tokenListData.length}
-        socials={socialsCount}
+        socials={socialTokens}
       />
 
       <TokenList

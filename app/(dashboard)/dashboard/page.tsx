@@ -16,7 +16,6 @@ const DashboardPage = () => {
   const {
     isConnected,
     hasProfile,
-    profileData,
     displayName,
     rootId,
     rootCreatedAt,
@@ -34,6 +33,7 @@ const DashboardPage = () => {
   // Rows for every token except the ROOT, plus the totals the metrics need.
   const {
     tokens: tokenListData,
+    socialTokens,
     totalAttestations,
     attestationsExcludingProfile,
     latestCreatedAt,
@@ -41,15 +41,6 @@ const DashboardPage = () => {
 
   const name = displayName ?? "";
   const walletAddress = address || "0x0000000000000000000000000000000000000000";
-
-  const socialsCount = profileData
-    ? [
-        profileData.github,
-        profileData.discord,
-        profileData.xDotCom,
-        profileData.email,
-      ].filter(Boolean).length
-    : 0;
 
   // The profile baseline is only earned here once a profile exists.
   const trustScore = getTrustScore(totalAttestations, hasProfile ? 20 : 0);
@@ -131,7 +122,7 @@ const DashboardPage = () => {
         trustDescription="On-Chain Reputation"
         totalAttestations={totalAttestations}
         activeTokens={tokenListData.length}
-        socials={socialsCount}
+        socials={socialTokens}
       />
 
       <div className="px-4 sm:px-6 md:pr-14 md:pl-10">

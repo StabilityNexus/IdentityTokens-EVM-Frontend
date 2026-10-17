@@ -23,7 +23,7 @@ const Metrics: React.FC<MetricsProps> = ({
     <div
       className={`w-full overflow-hidden rounded-2xl border border-card-border bg-card-bg px-6 py-6 md:px-10 md:py-8 ${className}`}
     >
-      <div className="grid grid-cols-2 gap-x-6 gap-y-6 md:gap-x-10 lg:grid-cols-3">
+      <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-6 md:gap-x-10">
         <MetricItem label="Total Attestations" value={totalAttestations} />
         <MetricItem label="Active Tokens" value={activeTokens} />
         <MetricItem label="Socials" value={socials} />

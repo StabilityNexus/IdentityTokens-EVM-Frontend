@@ -1,6 +1,6 @@
 import { WAVE_LINES, WAVE_VIEWBOX, waveY } from "./cardArt";
 import { truncateAddress } from "./helpers";
-import { CLAIM_CHAIN, usernameSize } from "./claim";
+import { usernameSize } from "./claim";
 
 // Draws the ID card to a PNG on canvas; rasterising the DOM is unreliable (Safari).
 
@@ -324,7 +324,7 @@ function drawContent(
   ctx.fillStyle = rgba(WHITE);
   ctx.fillText(options.username, nameX + atWidth, CARD_Y + CARD_H / 2);
 
-  // Wallet bottom left, chain bottom right.
+  // Wallet, bottom left.
   ctx.textBaseline = "alphabetic";
   ctx.font = `400 ${2.4 * CQ}px ${fonts.hand}`;
   ctx.fillStyle = rgba(WHITE, 0.8);
@@ -335,8 +335,6 @@ function drawContent(
     left,
     bottom
   );
-  ctx.textAlign = "right";
-  drawSmallCaps(CLAIM_CHAIN.name, right, bottom);
 
   ctx.restore();
 }

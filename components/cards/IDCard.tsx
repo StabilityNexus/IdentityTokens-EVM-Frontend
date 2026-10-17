@@ -11,7 +11,7 @@ import {
   useTransform,
 } from "framer-motion";
 import Badge from "@/components/Badge";
-import { CLAIM_CHAIN, USERNAME_PLACEHOLDER, usernameSize } from "@/lib/claim";
+import { USERNAME_PLACEHOLDER, usernameSize } from "@/lib/claim";
 import { WAVE_LINES, WAVE_VIEWBOX, wavePath } from "@/lib/cardArt";
 import { truncateAddress } from "@/lib/helpers";
 import { getRankFromAttesters } from "@/lib/rank";
@@ -253,16 +253,11 @@ export function IDCard({
                   )}
                 </div>
 
-                <div className="flex items-end justify-between gap-[4cqw]">
-                  <p className="truncate font-utsaha text-[2.4cqw] leading-none text-white/80">
-                    {walletAddress
-                      ? truncateAddress(walletAddress, 6, 4)
-                      : "0x0000…0000"}
-                  </p>
-                  <p className={cn(SMALL_CAPS, "shrink-0")}>
-                    {CLAIM_CHAIN.name}
-                  </p>
-                </div>
+                <p className="truncate font-utsaha text-[2.4cqw] leading-none text-white/80">
+                  {walletAddress
+                    ? truncateAddress(walletAddress, 6, 4)
+                    : "0x0000…0000"}
+                </p>
               </div>
             </motion.div>
 

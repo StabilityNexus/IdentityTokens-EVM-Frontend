@@ -11,7 +11,7 @@ export interface ProfileMetadata {
   avatarId: string;
 }
 
-/** One on-chain custom-link slot; an empty url means the slot is free. */
+/** One on-chain custom link; an empty url marks a gap left by a removed link. */
 export interface ProfileLink {
   label: string;
   url: string;

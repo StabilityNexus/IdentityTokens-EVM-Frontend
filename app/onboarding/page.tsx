@@ -85,7 +85,7 @@ export default function OnboardingPage() {
             {getContractErrorMessage(error)}
           </p>
           <p className="mt-3 font-utsaha text-xs text-gray-500">
-            Check that your wallet is on the Sepolia network and try again.
+            Check that your wallet is on a supported network and try again.
           </p>
         </div>
       ) : isLoading || !isResolved ? (

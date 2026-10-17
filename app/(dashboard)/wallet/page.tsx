@@ -61,6 +61,7 @@ export default function WalletPage() {
 
   const {
     hasRootIdentity,
+    rootId,
     displayName,
     rootCreatedAt,
     hasProfile,
@@ -130,7 +131,7 @@ export default function WalletPage() {
     return (
       <WalletNotice
         title="No identity yet"
-        detail={`${truncateAddress(walletAddress)} hasn’t created a root identity on DIT.`}
+        detail={`${truncateAddress(walletAddress)} hasn’t created an identity on DIT.`}
       />
     );
   }
@@ -157,6 +158,7 @@ export default function WalletPage() {
       <DashboardMetrics
         name={name}
         walletAddress={walletAddress}
+        rootId={rootId}
         attesters={attestationsExcludingProfile}
         lastUpdated={formatLastUpdated(rootCreatedAt, latestCreatedAt)}
         isOwn={isOwnWallet}

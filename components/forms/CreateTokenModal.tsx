@@ -230,7 +230,7 @@ export function CreateTokenModal({
               <option value="education">Education Credential</option>
               <option value="professional">Professional Skill</option>
               <option value="achievement">Achievement</option>
-              <option value="identity">Identity Document</option>
+              <option value="membership">Membership</option>
               <option value="socials">Socials</option>
             </select>
             {errors.type && (
@@ -318,7 +318,8 @@ export function CreateTokenModal({
 
           {!hasRootIdentity && (
             <p className="font-utsaha text-xs text-gray-400">
-              Tokens hang off your root identity, and this wallet has none yet.{" "}
+              Tokens are created under your identity, and this wallet
+              doesn&rsquo;t have one yet.{" "}
               <Link
                 href="/onboarding"
                 className="text-brand-blue-link underline underline-offset-2 hover:opacity-80"

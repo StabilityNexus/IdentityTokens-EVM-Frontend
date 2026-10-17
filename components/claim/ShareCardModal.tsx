@@ -131,7 +131,7 @@ export function ShareCardModal({
       onClose={onClose}
       titleId={titleId}
       title={<>@{username} is yours</>}
-      subtitle="Your root identity is live on Sepolia. Share your card and get your friends to claim theirs."
+      subtitle="Your identity is on-chain. Share your card and get your friends to claim theirs."
       widthClassName="max-w-xl max-h-[calc(100dvh-2rem)] overflow-y-auto no-scrollbar"
     >
       {/* Preview of exactly what gets shared. */}

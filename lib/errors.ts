@@ -1,18 +1,17 @@
 const CONTRACT_ERROR_MESSAGES: Record<string, string> = {
   // Transfer
-  RootNonTransferable: "Root identity tokens cannot be transferred.",
+  RootNonTransferable: "Your identity can't be transferred to another wallet.",
   UseTransferToken:
     "Please use the Transfer function instead of direct transfer.",
-  CannotTransferRoot: "Root identity tokens cannot be transferred.",
+  CannotTransferRoot: "Your identity can't be transferred to another wallet.",
   SelfTransfer: "You cannot transfer a token to yourself.",
   ZeroAddress: "Invalid address: cannot send to zero address.",
   NotHolder: "You do not own this token.",
 
   // Identity
-  NoRootIdentity:
-    "You need a root identity first. One will be created automatically.",
-  AlreadyHasRoot: "You already have a root identity.",
-  RootDeactivated: "Your root identity has been deactivated.",
+  NoRootIdentity: "You need an identity first.",
+  AlreadyHasRoot: "You already have an identity.",
+  RootDeactivated: "Your identity has been deactivated.",
   InvalidExpiry: "The expiry date must be in the future.",
 
   // Profile

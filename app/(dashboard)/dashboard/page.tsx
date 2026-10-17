@@ -19,6 +19,7 @@ const DashboardPage = () => {
     hasProfile,
     profileData,
     displayName,
+    rootId,
     rootCreatedAt,
     walletTokenIds,
     isLoading,
@@ -99,7 +100,7 @@ const DashboardPage = () => {
           </p>
           <p className="mt-3 font-utsaha text-xs text-gray-500">
             If this persists, the deployed contracts may not match this build.
-            Check that your wallet is on the Sepolia network.
+            Check that your wallet is on a supported network.
           </p>
         </div>
       </div>
@@ -122,6 +123,7 @@ const DashboardPage = () => {
       <DashboardMetrics
         name={name}
         walletAddress={walletAddress as string}
+        rootId={rootId}
         attesters={attestationsExcludingProfile}
         lastUpdated={formatLastUpdated(rootCreatedAt, latestCreatedAt)}
         isOwn

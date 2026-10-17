@@ -33,8 +33,7 @@ export function ReserveStatus({
     <div className="flex w-full max-w-md flex-col gap-2 font-utsaha text-xs">
       {switchError != null && (
         <p className="text-red-600 dark:text-red-400">
-          Couldn&rsquo;t switch to {CLAIM_CHAIN.name}:{" "}
-          {getContractErrorMessage(switchError)}
+          Couldn&rsquo;t switch networks: {getContractErrorMessage(switchError)}
         </p>
       )}
 
@@ -49,11 +48,10 @@ export function ReserveStatus({
 
       {showHints && (onWrongChain || needsGas) && (
         <p className="text-amber-700 dark:text-text-warning">
-          {onWrongChain &&
-            `Your wallet will switch to ${CLAIM_CHAIN.name} first. `}
+          {onWrongChain && "Your wallet will switch networks first. "}
           {needsGas && (
             <>
-              You need a little Sepolia ETH for gas.{" "}
+              You need a little {CLAIM_CHAIN.nativeCurrency.symbol} for gas.{" "}
               <a
                 href={SEPOLIA_FAUCET_URL}
                 target="_blank"

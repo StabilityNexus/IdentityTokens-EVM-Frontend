@@ -78,7 +78,7 @@ export default function Home() {
           </p>
           <p className="mt-3 font-utsaha text-xs text-gray-500">
             If this persists, the deployed contracts may not match this build.
-            Check that your wallet is on the Sepolia network.
+            Check that your wallet is on a supported network.
           </p>
         </div>
       </div>

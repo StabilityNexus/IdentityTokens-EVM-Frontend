@@ -104,7 +104,7 @@ export function ProfileLinks({
     if (!link.url) return;
     entries.push(
       <LinkTile
-        key={`custom-${link.slot}`}
+        key={`custom-${link.index}`}
         icon={<LinkIcon size={16} />}
         label={link.label || "Link"}
         value={link.url.replace(/^https?:\/\//i, "")}

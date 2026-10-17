@@ -54,8 +54,11 @@ export default function ProfilePage() {
     isLoading: isProfileLoading,
     refetch: refetchProfile,
   } = useProfile(profileTokenId);
-  const { data: profileLinks, refetch: refetchLinks } =
-    useProfileLinks(profileTokenId);
+  const {
+    data: profileLinks,
+    isFetching: isFetchingLinks,
+    refetch: refetchLinks,
+  } = useProfileLinks(profileTokenId);
   const { data: ownerAddress } = useTokenOwner(profileTokenId);
 
   const { data: attestationCount, refetch: refetchAttestations } =
@@ -203,9 +206,13 @@ export default function ProfilePage() {
                 if (profileTokenId) revokeAttestation.write(profileTokenId);
               })
             }
-            // The edit diff compares against the link slots, so wait for them
-            // or an edit would read every slot as removed.
-            onEdit={profileLinks ? () => setIsEditModalOpen(true) : undefined}
+            // The edit diff compares against the saved links, so wait for the
+            // current list or an edit could overwrite links it never saw.
+            onEdit={
+              profileLinks && !isFetchingLinks
+                ? () => setIsEditModalOpen(true)
+                : undefined
+            }
           />
         }
       />

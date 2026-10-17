@@ -12,13 +12,16 @@ import { TransactionStatus } from "@/components/ui/TransactionStatus";
 
 export const tokenSchema = z.object({
   name: z.string().min(1, "Token Name is required"),
-  type: z.string().min(1, "Token Type is required"),
+  type: z.string().trim().min(1, "Token Type is required"),
   value: z.string().min(1, "Token Value is required"),
   about: z.string().optional(),
   validUntil: z.string().optional(), // ISO date string, empty = no expiry
 });
 
 type TokenState = z.infer<typeof tokenSchema>;
+
+// Select value that swaps the preset list for a free-text type
+const CUSTOM_TYPE = "__custom__";
 
 export function CreateTokenModal({
   isOpen,
@@ -35,6 +38,7 @@ export function CreateTokenModal({
   const [errors, setErrors] = useState<
     Partial<Record<keyof TokenState, string>>
   >({});
+  const [isCustomType, setIsCustomType] = useState(false);
 
   const router = useRouter();
   const { hasRootIdentity, address, refetchWalletTokens } = useIdentityGate();
@@ -48,6 +52,7 @@ export function CreateTokenModal({
   const handleClose = useCallback(() => {
     setTokenState({ name: "", type: "", value: "", about: "", validUntil: "" });
     setErrors({});
+    setIsCustomType(false);
     setStep("idle");
     createToken.reset();
     onClose();
@@ -64,7 +69,7 @@ export function CreateTokenModal({
     setStep("creating-token");
     createToken.write({
       tokenName: tokenState.name,
-      tokenType: tokenState.type,
+      tokenType: tokenState.type.trim(),
       tokenValue: tokenState.value,
       about: tokenState.about || "",
       validUntil: validUntilTimestamp,
@@ -96,6 +101,13 @@ export function CreateTokenModal({
     if (errors[name as keyof TokenState]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
+  };
+
+  const handleTypeSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const custom = e.target.value === CUSTOM_TYPE;
+    setIsCustomType(custom);
+    setTokenState((prev) => ({ ...prev, type: custom ? "" : e.target.value }));
+    setErrors((prev) => ({ ...prev, type: undefined }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -215,8 +227,8 @@ export function CreateTokenModal({
             </label>
             <select
               name="type"
-              value={tokenState.type}
-              onChange={handleChange}
+              value={isCustomType ? CUSTOM_TYPE : tokenState.type}
+              onChange={handleTypeSelect}
               disabled={isSubmitting}
               className="w-full appearance-none rounded-lg px-4 py-2 font-utsaha text-white transition-all focus:ring-1 focus:ring-brand-blue focus:outline-none disabled:opacity-50"
               style={{
@@ -232,7 +244,26 @@ export function CreateTokenModal({
               <option value="achievement">Achievement</option>
               <option value="membership">Membership</option>
               <option value="socials">Socials</option>
+              <option value={CUSTOM_TYPE}>Custom…</option>
             </select>
+            {isCustomType && (
+              <input
+                type="text"
+                name="type"
+                value={tokenState.type}
+                onChange={handleChange}
+                placeholder="Enter your own token type"
+                aria-label="Custom token type"
+                maxLength={32}
+                autoFocus
+                disabled={isSubmitting}
+                className="w-full rounded-lg px-4 py-2 font-utsaha text-white placeholder-gray-500 transition-all focus:ring-1 focus:ring-brand-blue focus:outline-none disabled:opacity-50"
+                style={{
+                  backgroundColor: "var(--color-modal-inner-bg)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                }}
+              />
+            )}
             {errors.type && (
               <span className="text-xs text-red-500">{errors.type}</span>
             )}

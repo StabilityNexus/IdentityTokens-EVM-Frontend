@@ -20,7 +20,7 @@ export const tokenSchema = z.object({
 
 type TokenState = z.infer<typeof tokenSchema>;
 
-// Select value that swaps the preset list for a free-text type
+// Select value that reveals the free-text type input
 const CUSTOM_TYPE = "__custom__";
 
 export function CreateTokenModal({
@@ -255,7 +255,6 @@ export function CreateTokenModal({
                 placeholder="Enter your own token type"
                 aria-label="Custom token type"
                 maxLength={32}
-                autoFocus
                 disabled={isSubmitting}
                 className="w-full rounded-lg px-4 py-2 font-utsaha text-white placeholder-gray-500 transition-all focus:ring-1 focus:ring-brand-blue focus:outline-none disabled:opacity-50"
                 style={{

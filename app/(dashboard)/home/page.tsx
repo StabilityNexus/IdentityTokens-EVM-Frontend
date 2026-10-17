@@ -9,7 +9,6 @@ import { AttestersModal } from "@/components/attestations/AttestersModal";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
 import { useWalletTokenList } from "@/hooks/useWalletTokenList";
 import { getContractErrorMessage } from "@/lib/errors";
-import { getRankFromAttesters } from "@/lib/rank";
 import { parseTokenId } from "@/lib/tokenId";
 
 export default function Home() {
@@ -102,7 +101,6 @@ export default function Home() {
         totalAttestations={totalAttestations}
         activeTokens={tokenListData.length}
         socials={socialsCount}
-        badgeRank={getRankFromAttesters(totalAttestations)}
       />
 
       <TokenList

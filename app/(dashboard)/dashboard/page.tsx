@@ -9,8 +9,7 @@ import { AttestersModal } from "@/components/attestations/AttestersModal";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
 import { useWalletTokenList } from "@/hooks/useWalletTokenList";
 import { getContractErrorMessage } from "@/lib/errors";
-import { formatLastUpdated } from "@/lib/helpers";
-import { getRankFromAttesters, getTrustScore } from "@/lib/rank";
+import { formatLastUpdated, getTrustScore } from "@/lib/helpers";
 import { parseTokenId } from "@/lib/tokenId";
 
 const DashboardPage = () => {
@@ -133,7 +132,6 @@ const DashboardPage = () => {
         totalAttestations={totalAttestations}
         activeTokens={tokenListData.length}
         socials={socialsCount}
-        badgeRank={getRankFromAttesters(totalAttestations)}
       />
 
       <div className="px-4 sm:px-6 md:pr-14 md:pl-10">

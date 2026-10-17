@@ -1,14 +1,11 @@
 "use client";
 
-import Badge from "./Badge";
-import { RANK_LABELS } from "@/lib/rank";
 import { MetricsProps } from "@/lib/types";
 
 const Metrics: React.FC<MetricsProps> = ({
   totalAttestations = 70,
   activeTokens = 14,
   socials = 3,
-  badgeRank = "diamond",
   className = "",
 }) => {
   return (
@@ -35,17 +32,6 @@ const Metrics: React.FC<MetricsProps> = ({
       <div className="flex min-w-[80px] flex-col gap-2 font-utsaha">
         <h3 className="text-2xl leading-tight text-white">Socials</h3>
         <p className="text-xl leading-relaxed text-text-grey">{socials}</p>
-      </div>
-
-      {/* Badges Earned */}
-      <div className="flex min-w-[200px] flex-col gap-3 font-utsaha">
-        <h3 className="text-2xl leading-tight text-white">Badges Earned</h3>
-        <div className="flex items-center gap-2">
-          <Badge rank={badgeRank} size={30} />
-          <p className="text-xl leading-relaxed text-text-grey">
-            {RANK_LABELS[badgeRank]}
-          </p>
-        </div>
       </div>
     </div>
   );

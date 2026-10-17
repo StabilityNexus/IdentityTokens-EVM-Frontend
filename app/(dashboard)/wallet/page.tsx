@@ -11,8 +11,11 @@ import { AttestersModal } from "@/components/attestations/AttestersModal";
 import { useWalletIdentity } from "@/hooks/useWalletIdentity";
 import { useWalletTokenList } from "@/hooks/useWalletTokenList";
 import { getContractErrorMessage } from "@/lib/errors";
-import { formatLastUpdated, truncateAddress } from "@/lib/helpers";
-import { getRankFromAttesters, getTrustScore } from "@/lib/rank";
+import {
+  formatLastUpdated,
+  getTrustScore,
+  truncateAddress,
+} from "@/lib/helpers";
 import { parseTokenId } from "@/lib/tokenId";
 
 /** Centred message used by every state this page can land in but the main one. */
@@ -168,7 +171,6 @@ export default function WalletPage() {
         totalAttestations={totalAttestations}
         activeTokens={tokens.length}
         socials={socialsCount}
-        badgeRank={getRankFromAttesters(totalAttestations)}
       />
 
       <div className="px-4 sm:px-6 md:pr-14 md:pl-10">

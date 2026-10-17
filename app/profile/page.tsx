@@ -24,7 +24,7 @@ import { ProfileLinks } from "@/components/profile/ProfileLinks";
 import { ProfileIdentity } from "@/components/profile/ProfileIdentity";
 import { linksFromChain } from "@/lib/profileData";
 import { parseTokenId, tokenTypeOf } from "@/lib/tokenId";
-import { getRankFromAttesters, getTrustScore } from "@/lib/rank";
+import { getTrustScore } from "@/lib/helpers";
 import { TOKEN_TYPE, TxStatus } from "@/lib/types";
 
 export default function ProfilePage() {
@@ -72,7 +72,6 @@ export default function ProfilePage() {
   const [notice, setNotice] = useState<string | null>(null);
 
   const totalAttestations = Number(attestationCount ?? 0n);
-  const rank = getRankFromAttesters(totalAttestations);
   const trustScore = getTrustScore(totalAttestations);
 
   const customLinks = useMemo(
@@ -189,7 +188,6 @@ export default function ProfilePage() {
         avatarId={profileData.avatarId || null}
         seed={(ownerAddress as string) ?? profileData.username}
         nationality={profileData.nationality}
-        rank={rank}
         actions={
           <ProfileActions
             profileUrl={profileUrl}
@@ -231,7 +229,6 @@ export default function ProfilePage() {
           <ProfileReputation
             trustScore={trustScore}
             totalAttestations={totalAttestations}
-            rank={rank}
             onViewAttesters={() => setIsAttestersModalOpen(true)}
           />
         </div>

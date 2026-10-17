@@ -1,15 +1,11 @@
 "use client";
 
 import React, { useId } from "react";
-import Badge from "@/components/Badge";
 import { ProfileCard } from "./ProfileCard";
-import { getNextRankProgress, RANK_LABELS } from "@/lib/rank";
-import { RankName } from "@/lib/types";
 
 interface ProfileReputationProps {
   trustScore: number;
   totalAttestations: number;
-  rank: RankName;
   /** Omit to render the headline figure as static text. */
   onViewAttesters?: () => void;
   className?: string;
@@ -21,14 +17,12 @@ const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 export function ProfileReputation({
   trustScore,
   totalAttestations,
-  rank,
   onViewAttesters,
   className,
 }: ProfileReputationProps) {
   const uid = useId().replace(/:/g, "");
   const score = Math.max(0, Math.min(100, Math.round(trustScore)));
   const dashOffset = CIRCUMFERENCE * (1 - score / 100);
-  const progress = getNextRankProgress(totalAttestations);
 
   return (
     <ProfileCard title="Reputation" className={className}>
@@ -105,34 +99,6 @@ export function ProfileReputation({
             <div className={shell}>{figure}</div>
           );
         })()}
-
-        {/* Badge + progress toward the next rank */}
-        <div className="flex w-full items-center gap-3 border-t border-profile-border pt-4">
-          <Badge rank={rank} size={44} />
-          <div className="min-w-0 flex-1">
-            <p className="font-utsaha text-sm text-white">
-              {RANK_LABELS[rank]}
-            </p>
-            {progress ? (
-              <>
-                <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-profile-border">
-                  <div
-                    className="h-full rounded-full bg-linear-to-r from-profile-accent to-profile-accent-alt transition-[width] duration-700"
-                    style={{ width: `${Math.round(progress.progress * 100)}%` }}
-                  />
-                </div>
-                <p className="mt-1.5 font-utsaha text-xs text-profile-muted">
-                  {progress.remaining} more to reach{" "}
-                  {RANK_LABELS[progress.next]}
-                </p>
-              </>
-            ) : (
-              <p className="mt-1 font-utsaha text-xs text-profile-muted">
-                Highest rank achieved.
-              </p>
-            )}
-          </div>
-        </div>
       </div>
     </ProfileCard>
   );

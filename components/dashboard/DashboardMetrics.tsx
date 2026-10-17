@@ -18,7 +18,6 @@ const DashboardMetrics: React.FC<DashboardMetricsProps> = ({
   totalAttestations,
   activeTokens,
   socials,
-  badgeRank,
   className = "",
 }) => {
   return (
@@ -54,7 +53,6 @@ const DashboardMetrics: React.FC<DashboardMetricsProps> = ({
         totalAttestations={totalAttestations}
         activeTokens={activeTokens}
         socials={socials}
-        badgeRank={badgeRank}
       />
     </div>
   );

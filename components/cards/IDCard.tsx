@@ -10,11 +10,9 @@ import {
   useSpring,
   useTransform,
 } from "framer-motion";
-import Badge from "@/components/Badge";
 import { USERNAME_PLACEHOLDER, usernameSize } from "@/lib/claim";
 import { WAVE_LINES, WAVE_VIEWBOX, wavePath } from "@/lib/cardArt";
 import { truncateAddress } from "@/lib/helpers";
-import { getRankFromAttesters } from "@/lib/rank";
 import { IDCardProps } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -236,12 +234,7 @@ export function IDCard({
                   </div>
                   {attesters !== undefined ? (
                     <div className="flex flex-col items-center">
-                      <Badge
-                        rank={getRankFromAttesters(attesters)}
-                        size="7.5cqw"
-                        className="drop-shadow-[0_3px_8px_rgb(0_0_0_/_0.25)]"
-                      />
-                      <p className="mt-[1.2cqw] font-utsaha text-[3.2cqw] leading-none font-bold">
+                      <p className="font-utsaha text-[3.2cqw] leading-none font-bold">
                         {attesters}
                       </p>
                       <p className={cn(SMALL_CAPS, "mt-[0.8cqw]")}>

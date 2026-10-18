@@ -6,7 +6,12 @@ import { ExternalLink } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { useAttestersDetailed } from "@/hooks/useIdentityReads";
 import { getEtherscanAddressUrl } from "@/lib/errors";
-import { formatExpiry, formatTimeAgo, truncateAddress } from "@/lib/helpers";
+import {
+  NO_EXPIRY_DURATION,
+  formatExpiry,
+  formatTimeAgo,
+  truncateAddress,
+} from "@/lib/helpers";
 import { AttesterView } from "@/lib/types.responses";
 import { cn } from "@/lib/utils";
 
@@ -212,7 +217,9 @@ function AttesterRow({ attester }: { attester: AttesterView }) {
           )}
           {formatTimeAgo(attestation.timestamp)}
           {status === "active" &&
-            ` · expires in ${formatExpiry(attestation.expiresAt)}`}
+            (attestation.expiresAt >= NO_EXPIRY_DURATION
+              ? " · never expires"
+              : ` · expires in ${formatExpiry(attestation.expiresAt)}`)}
         </p>
       </div>
 

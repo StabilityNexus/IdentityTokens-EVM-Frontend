@@ -7,6 +7,7 @@ import { useIdentityGate } from "@/hooks/useIdentityGate";
 import { useTokenOwner } from "@/hooks/useIdentityReads";
 import { AttestModalProps, TxStatus } from "@/lib/types";
 import { formatTokenId } from "@/lib/tokenId";
+import { NO_EXPIRY_DURATION } from "@/lib/helpers";
 import { TransactionStatus } from "@/components/ui/TransactionStatus";
 import { Modal } from "@/components/ui/Modal";
 
@@ -16,6 +17,7 @@ const DURATION_PRESETS = [
   { label: "90 Days", seconds: 90n * 24n * 60n * 60n },
   { label: "180 Days", seconds: 180n * 24n * 60n * 60n },
   { label: "1 Year", seconds: 365n * 24n * 60n * 60n },
+  { label: "No expiration", seconds: NO_EXPIRY_DURATION },
 ] as const;
 
 /** The contract has no exposed maximum, so only the lower bound is enforced. */
@@ -133,7 +135,7 @@ export function AttestModal({
                 key={preset.label}
                 type="button"
                 disabled={isSubmitting}
-                className={`rounded-lg px-3 py-2 font-utsaha text-sm transition-all ${
+                className={`rounded-lg px-3 py-2 font-utsaha text-sm transition-all last:col-span-2 ${
                   !useCustom && selectedPreset === i
                     ? "bg-brand-blue text-white"
                     : "bg-modal-inner-bg text-gray-400 hover:bg-modal-border hover:text-white"
@@ -148,6 +150,12 @@ export function AttestModal({
               </button>
             ))}
           </div>
+          {!useCustom &&
+            DURATION_PRESETS[selectedPreset].seconds === NO_EXPIRY_DURATION && (
+              <span className="font-utsaha text-xs text-gray-400">
+                Stays active until you revoke it or the token expires.
+              </span>
+            )}
         </div>
 
         {/* Custom duration */}

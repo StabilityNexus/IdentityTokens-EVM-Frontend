@@ -1,4 +1,12 @@
+import { maxUint256 } from "viem";
 import { TokenListVariant, TokenCardVariant } from "@/lib/types";
+
+/**
+ * Duration sent to `attestToken` for an attestation that never expires. The
+ * contract stores `block.timestamp + duration`, so half of uint256 can't
+ * overflow, and no real date reaches it.
+ */
+export const NO_EXPIRY_DURATION = maxUint256 / 2n;
 
 /**
  * Shorten a wallet address for display, keeping enough of each end to stay
@@ -11,7 +19,7 @@ export function truncateAddress(address: string, lead = 6, tail = 4): string {
 }
 
 export function formatExpiry(validUntil: bigint): string {
-  if (validUntil === 0n) return "Never";
+  if (validUntil === 0n || validUntil >= NO_EXPIRY_DURATION) return "Never";
   const now = Math.floor(Date.now() / 1000);
   const diff = Number(validUntil) - now;
   if (diff <= 0) return "Expired";

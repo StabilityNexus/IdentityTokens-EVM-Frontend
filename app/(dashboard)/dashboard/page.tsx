@@ -9,16 +9,15 @@ import { AttestersModal } from "@/components/attestations/AttestersModal";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
 import { useWalletTokenList } from "@/hooks/useWalletTokenList";
 import { getContractErrorMessage } from "@/lib/errors";
-import { formatLastUpdated } from "@/lib/helpers";
-import { getRankFromAttesters, getTrustScore } from "@/lib/rank";
+import { formatLastUpdated, getTrustScore } from "@/lib/helpers";
 import { parseTokenId } from "@/lib/tokenId";
 
 const DashboardPage = () => {
   const {
     isConnected,
     hasProfile,
-    profileData,
     displayName,
+    rootId,
     rootCreatedAt,
     walletTokenIds,
     isLoading,
@@ -34,6 +33,7 @@ const DashboardPage = () => {
   // Rows for every token except the ROOT, plus the totals the metrics need.
   const {
     tokens: tokenListData,
+    socialTokens,
     totalAttestations,
     attestationsExcludingProfile,
     latestCreatedAt,
@@ -41,15 +41,6 @@ const DashboardPage = () => {
 
   const name = displayName ?? "";
   const walletAddress = address || "0x0000000000000000000000000000000000000000";
-
-  const socialsCount = profileData
-    ? [
-        profileData.github,
-        profileData.discord,
-        profileData.xDotCom,
-        profileData.email,
-      ].filter(Boolean).length
-    : 0;
 
   // The profile baseline is only earned here once a profile exists.
   const trustScore = getTrustScore(totalAttestations, hasProfile ? 20 : 0);
@@ -99,7 +90,7 @@ const DashboardPage = () => {
           </p>
           <p className="mt-3 font-utsaha text-xs text-gray-500">
             If this persists, the deployed contracts may not match this build.
-            Check that your wallet is on the Sepolia network.
+            Check that your wallet is on a supported network.
           </p>
         </div>
       </div>
@@ -122,6 +113,7 @@ const DashboardPage = () => {
       <DashboardMetrics
         name={name}
         walletAddress={walletAddress as string}
+        rootId={rootId}
         attesters={attestationsExcludingProfile}
         lastUpdated={formatLastUpdated(rootCreatedAt, latestCreatedAt)}
         isOwn
@@ -130,8 +122,7 @@ const DashboardPage = () => {
         trustDescription="On-Chain Reputation"
         totalAttestations={totalAttestations}
         activeTokens={tokenListData.length}
-        socials={socialsCount}
-        badgeRank={getRankFromAttesters(totalAttestations)}
+        socials={socialTokens}
       />
 
       <div className="px-4 sm:px-6 md:pr-14 md:pl-10">

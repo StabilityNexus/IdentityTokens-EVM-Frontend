@@ -4,12 +4,14 @@ import { useEffect, useMemo, useState } from "react";
 import IDCard from "../cards/IDCard";
 import { ShareModal } from "@/components/share/ShareModal";
 import { buildIdentityShare, getWalletUrl } from "@/lib/share";
+import { formatTokenId } from "@/lib/tokenId";
 import { IDMetricsProps } from "@/lib/types";
 import { IoCopyOutline, IoShareSocialOutline } from "react-icons/io5";
 
 const IDMetrics: React.FC<IDMetricsProps> = ({
   name = "",
   walletAddress = "",
+  rootId = null,
   attesters = 0,
   lastUpdated = "—",
   isOwn = false,
@@ -61,12 +63,10 @@ const IDMetrics: React.FC<IDMetricsProps> = ({
             {/* Decentralized ID */}
             <div className="flex flex-col gap-1 md:gap-2">
               <h3 className="text-xl leading-tight text-white opacity-90 md:text-2xl">
-                Decentralized Id
+                Decentralized ID
               </h3>
               <p className="font-utsaha text-lg leading-relaxed break-all text-text-grey md:text-xl">
-                {walletAddress.length > 20
-                  ? `${walletAddress.slice(0, 8)}...${walletAddress.slice(-6)}`
-                  : walletAddress}
+                {rootId ? formatTokenId(rootId) : "—"}
               </p>
             </div>
 

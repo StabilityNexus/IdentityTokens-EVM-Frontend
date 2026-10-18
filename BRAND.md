@@ -6,7 +6,7 @@ Brand & Design System reference for the IdentityTokens EVM Frontend. This file d
 
 ## Design Principles
 
-1. **Self-Sovereign by Default** — The UI reflects the product's core promise: identity that is portable, recoverable, and fully owned by the user. Interfaces are transparent about what data is shown and what actions a user takes.
+1. **Self-Sovereign by Default** — The UI reflects the product's core promise: identity that is portable and fully owned by the user. Interfaces are transparent about what data is shown and what actions a user takes.
 2. **Dark-first, Developer-grade** — The dashboard lives on a near-black canvas (`--color-app-bg`) with high-contrast text. Light mode is reserved for landing/marketing surfaces.
 3. **Consistency over Creativity** — Always consume the existing CSS variables and typography tokens. Introduce new colors or sizes only when a semantic need cannot be met by what already exists.
 4. **Clarity of Action** — Primary actions are unmistakable (brand blue / brand green), destructive actions are unmistakable (red), everything else is muted and recedes.

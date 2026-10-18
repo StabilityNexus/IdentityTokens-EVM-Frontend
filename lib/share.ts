@@ -27,14 +27,14 @@ export function buildClaimShare(username: string, url: string): ShareContent {
     short: [
       `Just reserved “${username}” on DIT`,
       "",
-      "An identity that lives on-chain and is actually mine: portable, recoverable, self-sovereign.",
+      "An identity that lives on-chain and is actually mine: portable and self-sovereign.",
       "",
       "Here’s mine",
     ].join("\n"),
     long: [
       "I just claimed my Decentralized Identity Token on DIT, built by Stability Nexus.",
       "",
-      `It's an identity that lives on-chain instead of on a platform: portable across wallets, recoverable, and owned by me. My username is “${username}”.`,
+      `It's an identity that lives on-chain instead of on a platform: portable across wallets and owned by me. My username is “${username}”.`,
       "",
       `See my identity: ${url}`,
       `Reserve yours: ${CLAIM_URL}`,
@@ -48,8 +48,8 @@ export function buildClaimShare(username: string, url: string): ShareContent {
 export function buildIdentityShare(url: string, isOwn: boolean): ShareContent {
   return {
     short: isOwn
-      ? "Here’s my on-chain identity on DIT\n\nPortable, recoverable, self-sovereign, and owned by me."
-      : "Check out this on-chain identity on DIT\n\nPortable, recoverable and self-sovereign.",
+      ? "Here’s my on-chain identity on DIT\n\nPortable, self-sovereign, and owned by me."
+      : "Check out this on-chain identity on DIT\n\nPortable and self-sovereign.",
     long: [
       isOwn
         ? "This is my Decentralized Identity Token on DIT, built by Stability Nexus: an identity that lives on-chain instead of on a platform, portable across wallets and owned by me."

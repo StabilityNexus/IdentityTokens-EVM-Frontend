@@ -12,7 +12,7 @@ import { Providers } from "@/providers/providers";
 
 export const metadata: Metadata = {
   title: "Decentralized Identity Token",
-  description: "Portable, Recoverable and Self-Sovereign Identity",
+  description: "An on-chain identity you own",
   icons: {
     icon: "/assets/logo.svg",
   },
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: "Decentralized Identity Token",
-    description: "Portable, Recoverable and Self-Sovereign Identity",
+    description: "An on-chain identity you own",
     url: "https://dit.stability.nexus/",
     siteName: "Stability Nexus DIT",
     locale: "en_US",
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     title: "Decentralized Identity Token",
-    description: "Portable, Recoverable and Self-Sovereign Identity",
+    description: "An on-chain identity you own",
   },
 };
 

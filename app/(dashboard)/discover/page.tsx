@@ -124,17 +124,15 @@ function UsernameResult({ username }: { username: string }) {
 function RootResult({ rootId }: { rootId: bigint }) {
   const { data: root, isLoading } = useRootIdentityView(rootId);
 
-  if (isLoading) return <SearchLoading label="Loading root identity…" />;
+  if (isLoading) return <SearchLoading label="Loading identity…" />;
   if (!root || /^0x0+$/.test(root.walletAddress)) {
-    return (
-      <SearchMessage title={`No root identity ${formatTokenId(rootId)}`} />
-    );
+    return <SearchMessage title={`No identity ${formatTokenId(rootId)}`} />;
   }
 
   return (
     <ResultCard
       title={root.displayName || "Unnamed identity"}
-      subtitle={`Root identity of ${truncateAddress(root.walletAddress)} · ${root.tokenCount} tokens`}
+      subtitle={`Identity of ${truncateAddress(root.walletAddress)} · ${root.tokenCount} tokens`}
       id={formatTokenId(rootId)}
       href={`/wallet?u=${root.walletAddress}`}
       action="View wallet"
@@ -367,7 +365,7 @@ export default function DiscoverPage() {
       ) : (
         <SearchMessage
           title="Nothing matches that search"
-          hint="Search a token (tk-…), profile (pf-…), root identity (id-…) or a username."
+          hint="Search a token (tk-…), profile (pf-…), identity (id-…) or a username."
         />
       )}
 

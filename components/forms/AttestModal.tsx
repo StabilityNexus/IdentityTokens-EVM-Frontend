@@ -213,7 +213,7 @@ export function AttestModal({
         {hasNoRootIdentity && !isSelfToken && (
           <div className="flex flex-col gap-2 rounded-lg border border-blue-500/30 bg-blue-500/10 p-3 text-center font-utsaha text-sm text-blue-300">
             <p>
-              ℹ️ You need a Root Identity before you can attest tokens on-chain.
+              ℹ️ You need an identity before you can attest tokens on-chain.
             </p>
             <Link
               href="/onboarding"

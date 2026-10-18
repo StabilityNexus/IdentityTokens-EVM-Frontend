@@ -59,7 +59,7 @@ export default function Hero() {
             </div>
 
             <p className="mx-auto max-w-lg font-sans text-base leading-relaxed text-gray-600 md:mx-0 md:text-lg dark:text-gray-200">
-              The first portable, recoverable and self-sovereign identity.
+              A portable and self-sovereign identity.
               <br className="hidden md:block" />
               Carry your reputation across any wallet, anywhere
             </p>

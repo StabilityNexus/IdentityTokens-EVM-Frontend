@@ -170,7 +170,7 @@ export default function ClaimPage() {
   const isCheckingWallet = isConnected && !isRootResolved;
 
   const buttonLabel = isSwitching
-    ? `Switching to ${CLAIM_CHAIN.name}…`
+    ? "Switching network…"
     : txStatus === "pending"
       ? "Confirm in your wallet…"
       : txStatus === "confirming"
@@ -224,7 +224,7 @@ export default function ClaimPage() {
               <span className="block text-brand-blue">username.</span>
             </h1>
             <p className="mt-4 max-w-md font-utsaha text-base leading-relaxed text-gray-600 md:text-lg dark:text-gray-300">
-              Pick a unique username and claim your dit ID card before launch.
+              Reserve your unique username and claim your DIT.
             </p>
 
             <div className="mt-7 w-full max-w-md">
@@ -274,9 +274,8 @@ export default function ClaimPage() {
             </div>
 
             <p className="mt-6 max-w-sm font-utsaha text-xs leading-relaxed text-gray-500 dark:text-gray-400">
-              Reserving mints your soulbound root identity on the Sepolia
-              testnet. Your username is stored with it on-chain and can&rsquo;t
-              be changed later.{" "}
+              Reserving creates your identity on-chain, tied to this wallet.
+              Your username is stored with it and can&rsquo;t be changed later.{" "}
               <Link
                 href="/"
                 className="underline underline-offset-2 hover:text-gray-700 dark:hover:text-gray-200"

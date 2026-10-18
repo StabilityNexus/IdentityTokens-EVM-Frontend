@@ -9,29 +9,21 @@ import { AttestersModal } from "@/components/attestations/AttestersModal";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
 import { useWalletTokenList } from "@/hooks/useWalletTokenList";
 import { getContractErrorMessage } from "@/lib/errors";
-import { getRankFromAttesters } from "@/lib/rank";
 import { parseTokenId } from "@/lib/tokenId";
 
 export default function Home() {
-  const { isConnected, walletTokenIds, profileData, isLoading, error } =
-    useIdentityGate();
+  const { isConnected, walletTokenIds, isLoading, error } = useIdentityGate();
 
   const [attestersFor, setAttestersFor] = useState<{
     tokenId: bigint;
     name: string;
   } | null>(null);
 
-  const { tokens: tokenListData, totalAttestations } =
-    useWalletTokenList(walletTokenIds);
-
-  const socialsCount = profileData
-    ? [
-        profileData.github,
-        profileData.discord,
-        profileData.xDotCom,
-        profileData.email,
-      ].filter(Boolean).length
-    : 0;
+  const {
+    tokens: tokenListData,
+    socialTokens,
+    totalAttestations,
+  } = useWalletTokenList(walletTokenIds);
 
   const { openConnectModal } = useConnectModal();
 
@@ -78,7 +70,7 @@ export default function Home() {
           </p>
           <p className="mt-3 font-utsaha text-xs text-gray-500">
             If this persists, the deployed contracts may not match this build.
-            Check that your wallet is on the Sepolia network.
+            Check that your wallet is on a supported network.
           </p>
         </div>
       </div>
@@ -101,8 +93,7 @@ export default function Home() {
       <Metrics
         totalAttestations={totalAttestations}
         activeTokens={tokenListData.length}
-        socials={socialsCount}
-        badgeRank={getRankFromAttesters(totalAttestations)}
+        socials={socialTokens}
       />
 
       <TokenList

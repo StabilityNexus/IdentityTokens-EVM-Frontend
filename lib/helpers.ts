@@ -1,5 +1,6 @@
 import { maxUint256 } from "viem";
-import { TokenListVariant, TokenCardVariant } from "@/lib/types";
+import { TokenAttester, TokenListVariant, TokenCardVariant } from "@/lib/types";
+import { Attestation } from "@/lib/types.responses";
 
 /**
  * Duration sent to `attestToken` for an attestation that never expires. The
@@ -30,6 +31,43 @@ export function formatExpiry(validUntil: bigint): string {
   if (diff < 31536000) return `${months} ${months === 1 ? "month" : "months"}`;
   const years = Math.floor(diff / 31536000);
   return `${years} ${years === 1 ? "year" : "years"}`;
+}
+
+/**
+ * How long an attestation was given for, in the units the attest presets use.
+ * The contract cuts it short at the token's own expiry, so this is the real span.
+ */
+export function formatAttestationLength({
+  timestamp,
+  expiresAt,
+}: Attestation): string {
+  if (expiresAt >= NO_EXPIRY_DURATION) return "No expiration";
+  const days = Number((expiresAt - timestamp) / 86400n);
+  if (days < 1) return "< 1 day";
+  if (days < 365) return `${days} ${days === 1 ? "day" : "days"}`;
+  const years = Math.floor(days / 365);
+  return `${years} ${years === 1 ? "year" : "years"}`;
+}
+
+export type AttestationStatus = "active" | "revoked" | "expired";
+
+/** Where an attestation stands, by the viewer's clock. */
+export function attestationStatus({
+  revokedAt,
+  expiresAt,
+}: Attestation): AttestationStatus {
+  if (revokedAt > 0n) return "revoked";
+  if (expiresAt <= BigInt(Math.floor(Date.now() / 1000))) return "expired";
+  return "active";
+}
+
+/** How many different identities hold an active attestation in the list. */
+export function countActiveAttesters(attesters: TokenAttester[]): number {
+  return new Set(
+    attesters
+      .filter((a) => attestationStatus(a.attestation) === "active")
+      .map((a) => a.attestation.attesterTokenId)
+  ).size;
 }
 
 /**
@@ -85,20 +123,4 @@ export function getSectionTitle(listVariant: TokenListVariant): string {
     case "discover":
       return "Discover";
   }
-}
-
-/**
- * Trust score on a 0-100 scale: two points per attestation, on top of a
- * baseline. Callers own the baseline because they differ on when it is earned --
- * a public profile always carries it, the dashboard grants it only once a
- * profile exists.
- */
-export function getTrustScore(attestations: number, baseline = 20): number {
-  return Math.min(100, Math.floor(attestations * 2 + baseline));
-}
-
-export function getArcColor(score: number): string {
-  if (score >= 70) return "var(--color-brand-green)";
-  if (score >= 40) return "var(--color-text-warning)";
-  return "var(--color-text-error)";
 }

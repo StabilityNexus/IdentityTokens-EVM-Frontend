@@ -12,6 +12,7 @@
     "check:profile": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON node_modules/jiti/lib/jiti-cli.mjs scripts/check-profile-diff.mjs",
     "check:tokenid": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON node_modules/jiti/lib/jiti-cli.mjs scripts/check-token-id.mjs",
     "check:search": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON node_modules/jiti/lib/jiti-cli.mjs scripts/check-search.mjs",
+    "check:attestations": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON node_modules/jiti/lib/jiti-cli.mjs scripts/check-attestations.mjs",
     "prepare": "husky"
   },
   "lint-staged": {

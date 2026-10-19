@@ -2,12 +2,13 @@
 
 import { useMemo } from "react";
 import {
-  useMultipleAttestationCounts,
+  useMultipleAttesters,
   useMultipleTokenDetails,
 } from "./useIdentityReads";
-import { formatExpiry } from "@/lib/helpers";
+import { attestationStatus, formatExpiry } from "@/lib/helpers";
 import { formatTokenId, tokenTypeOf } from "@/lib/tokenId";
 import { TOKEN_TYPE, UITokenData } from "@/lib/types";
+import { AttesterView } from "@/lib/types.responses";
 
 /**
  * The `tokens` mapping getter returns a flat tuple rather than a named struct.
@@ -38,7 +39,25 @@ export function useWalletTokenList(tokenIds: readonly bigint[]) {
   const ids = tokenIds.length > 0 ? tokenIds : undefined;
 
   const { data: tokenDetails } = useMultipleTokenDetails(ids);
-  const { data: attestationCounts } = useMultipleAttestationCounts(ids);
+  // The same read "Who attested" lists, so a dashboard makes it once.
+  const { data: attesterPages } = useMultipleAttesters(ids);
+
+  /** Active attestations on each token, in `ids` order. */
+  const activeCounts = useMemo(
+    () =>
+      (ids ?? []).map((_, i) => {
+        const result = attesterPages?.[i];
+        if (result?.status !== "success") return 0;
+        const [page] = result.result as readonly [
+          readonly AttesterView[],
+          bigint,
+        ];
+        return page.filter(
+          (view) => attestationStatus(view.attestation) === "active"
+        ).length;
+      }),
+    [ids, attesterPages]
+  );
 
   const tokens = useMemo<UITokenData[]>(() => {
     if (!ids) return [];
@@ -55,30 +74,19 @@ export function useWalletTokenList(tokenIds: readonly bigint[]) {
             ? (detail.result as TokenTuple)
             : undefined;
 
-        const attestResult = attestationCounts?.[i];
-
         return {
           tokenId: formatTokenId(id),
           name: token ? token[2] || "Unnamed" : "Loading…",
           type: token ? token[3] || "Unknown" : "…",
           expiresIn: token ? formatExpiry(token[6]) : "…",
-          attestations:
-            attestResult?.status === "success"
-              ? Number(attestResult.result)
-              : 0,
+          attestations: activeCounts[i],
         };
       })
       .filter((t): t is UITokenData => t !== null);
-  }, [ids, tokenDetails, attestationCounts]);
+  }, [ids, tokenDetails, activeCounts]);
 
   /** Attestations across every token the wallet holds, ROOT included. */
-  const totalAttestations = useMemo(() => {
-    if (!attestationCounts) return 0;
-    return attestationCounts.reduce(
-      (sum, r) => (r?.status === "success" ? sum + Number(r.result) : sum),
-      0
-    );
-  }, [attestationCounts]);
+  const totalAttestations = activeCounts.reduce((sum, n) => sum + n, 0);
 
   /** When the newest of these tokens was minted, or null before any load. */
   const latestCreatedAt = useMemo(() => {
@@ -90,18 +98,6 @@ export function useWalletTokenList(tokenIds: readonly bigint[]) {
     }, null);
   }, [tokenDetails]);
 
-  /** Attestations on every token except the PROFILE one, as the ID card shows. */
-  const attestationsExcludingProfile = useMemo(() => {
-    if (!ids || !attestationCounts) return 0;
-    return attestationCounts.reduce(
-      (sum, r, i) =>
-        r?.status === "success" && tokenTypeOf(ids[i]) !== TOKEN_TYPE.PROFILE
-          ? sum + Number(r.result)
-          : sum,
-      0
-    );
-  }, [ids, attestationCounts]);
-
   /** Tokens minted with the Socials token type. */
   const socialTokens = tokens.filter(
     (t) => t.type.trim().toLowerCase() === "socials"
@@ -111,7 +107,6 @@ export function useWalletTokenList(tokenIds: readonly bigint[]) {
     tokens,
     socialTokens,
     totalAttestations,
-    attestationsExcludingProfile,
     latestCreatedAt,
   };
 }

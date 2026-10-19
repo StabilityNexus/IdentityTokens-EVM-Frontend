@@ -28,7 +28,7 @@ export const TOUR_STEPS: TourStep[] = [
     target: TOUR_TARGETS.navDashboard,
     title: "Your dashboard",
     description:
-      "Your identity at a glance — trust score, the tokens you hold and the attestations behind them.",
+      "Your identity at a glance — the tokens you hold and who attested them.",
     side: "right",
     align: "start",
     inSidebar: true,

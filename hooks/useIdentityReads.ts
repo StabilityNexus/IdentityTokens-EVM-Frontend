@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { maxUint256 } from "viem";
 import { useReadContract, useReadContracts } from "wagmi";
 import {
   IDENTITY_SYSTEM_ADDRESS,
@@ -267,6 +268,23 @@ export function useMultipleAttestationCounts(
     abi: IDENTITY_SYSTEM_ABI,
     functionName: "getActiveAttestationCount" as const,
     args: [id] as const,
+  }));
+
+  return useReadContracts({
+    contracts,
+    query: { enabled: !!tokenIds && tokenIds.length > 0 },
+  });
+}
+
+/** Batch-fetch every attestation on multiple token IDs, revoked and expired included */
+export function useMultipleAttesters(tokenIds: readonly bigint[] | undefined) {
+  // ponytail: whole history in one call; a wallet with thousands of attestations
+  // could pass the RPC's eth_call gas cap, then page per token.
+  const contracts = (tokenIds ?? []).map((id) => ({
+    address: IDENTITY_SYSTEM_ADDRESS,
+    abi: IDENTITY_SYSTEM_ABI,
+    functionName: "getAttestersDetailed" as const,
+    args: [id, false, 0n, maxUint256] as const,
   }));
 
   return useReadContracts({

@@ -1,7 +1,7 @@
 export interface Country {
   /** ISO 3166-1 alpha-2 code. */
   code: string;
-  /** English short name — this is what gets written on-chain. */
+  /** English short name. Profiles store the code, see `parseRegions`. */
   name: string;
 }
 
@@ -21,6 +21,60 @@ export function findCountryByName(name: string | null | undefined) {
   if (!name) return undefined;
   const needle = name.trim().toLowerCase();
   return COUNTRIES.find((c) => c.name.toLowerCase() === needle);
+}
+
+/** A built-in country (has a code) or a custom region the user typed. */
+export interface Region {
+  name: string;
+  code?: string;
+}
+
+export const MAX_REGIONS = 5;
+export const MAX_REGION_NAME_LENGTH = 40;
+
+// On-chain format, kept in the profile's `nationality` string: "IN|US|~Kurdistan".
+// A built-in country is its code, a custom region is "~" + its name.
+const REGION_SEPARATOR = "|";
+const CUSTOM_REGION_MARK = "~";
+
+/**
+ * Regions stored in a profile. A value saved before regions existed is a
+ * single country name or free text, and reads back as one region.
+ */
+export function parseRegions(stored: string): Region[] {
+  const value = stored.trim();
+  if (!value) return [];
+  const regions = value
+    .split(REGION_SEPARATOR)
+    .map((part) =>
+      part.startsWith(CUSTOM_REGION_MARK)
+        ? { name: part.slice(CUSTOM_REGION_MARK.length) }
+        : COUNTRIES.find((c) => c.code === part)
+    );
+  if (regions.every((region) => region?.name)) return regions as Region[];
+  return [findCountryByName(value) ?? { name: value }];
+}
+
+export function encodeRegions(regions: readonly Region[]): string {
+  return regions
+    .map((region) => region.code ?? CUSTOM_REGION_MARK + region.name)
+    .join(REGION_SEPARATOR);
+}
+
+/** Typed text as a custom region, or undefined when nothing is left of it. */
+export function customRegion(text: string): Region | undefined {
+  const name = text
+    .replaceAll(REGION_SEPARATOR, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, MAX_REGION_NAME_LENGTH)
+    .trim();
+  return name ? { name } : undefined;
+}
+
+export function isSameRegion(a: Region, b: Region): boolean {
+  if (a.code || b.code) return a.code === b.code;
+  return a.name.toLowerCase() === b.name.toLowerCase();
 }
 
 export const COUNTRIES: readonly Country[] = [

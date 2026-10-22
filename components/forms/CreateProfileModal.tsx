@@ -36,7 +36,7 @@ import {
   validateX,
 } from "@/lib/validation";
 import { AvatarPicker } from "./fields/AvatarPicker";
-import { CountrySelect } from "./fields/CountrySelect";
+import { RegionSelect } from "./fields/RegionSelect";
 import {
   CustomLinksField,
   hasCustomLinkError,
@@ -222,7 +222,8 @@ export function CreateProfileModal({
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        closeRef.current();
+        // A field that used Escape itself (e.g. to close a dropdown) wins.
+        if (!event.defaultPrevented) closeRef.current();
         return;
       }
       if (event.key !== "Tab") return;
@@ -380,10 +381,11 @@ export function CreateProfileModal({
                 }
               />
 
-              <CountrySelect
+              <RegionSelect
                 value={formData.nationality}
                 onChange={(value) => setField("nationality", value)}
                 disabled={isSubmitting}
+                className="sm:col-span-2"
               />
             </div>
           </Section>

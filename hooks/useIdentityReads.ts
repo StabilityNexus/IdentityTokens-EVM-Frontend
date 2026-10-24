@@ -221,18 +221,18 @@ export function useProfileLinks(tokenId: bigint | undefined) {
     enabled: !!client && tokenId !== undefined,
     queryFn: async () => {
       if (!client || tokenId === undefined) throw new Error("No client");
+      // Every page reads the same block, so an edit landing between calls
+      // can't mix two versions. Uncached, so a refetch after an edit sees it.
+      const blockNumber = await client.getBlockNumber({ cacheTime: 0 });
       const links: ProfileLink[] = [];
-      let expected: bigint | undefined;
       for (;;) {
         const [page, total] = await client.readContract({
           address: PROFILE_SYSTEM_ADDRESS,
           abi: PROFILE_SYSTEM_ABI,
           functionName: "getLinks",
           args: [tokenId, BigInt(links.length), LINKS_PAGE],
+          blockNumber,
         });
-        // An edit landed between pages; retry rather than mix two versions.
-        expected ??= total;
-        if (total !== expected) throw new Error("Links changed while loading");
         links.push(...page);
         if (BigInt(links.length) >= total) return links;
       }

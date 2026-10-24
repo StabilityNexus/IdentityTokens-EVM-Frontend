@@ -10,12 +10,9 @@ import { TokenList } from "@/components/dashboard/TokenList";
 import { AttestersModal } from "@/components/attestations/AttestersModal";
 import { useWalletIdentity } from "@/hooks/useWalletIdentity";
 import { useWalletTokenList } from "@/hooks/useWalletTokenList";
+import { useTokenAttesters } from "@/hooks/useTokenAttesters";
 import { getContractErrorMessage } from "@/lib/errors";
-import {
-  formatLastUpdated,
-  getTrustScore,
-  truncateAddress,
-} from "@/lib/helpers";
+import { formatLastUpdated, truncateAddress } from "@/lib/helpers";
 import { parseTokenId } from "@/lib/tokenId";
 
 /** Centred message used by every state this page can land in but the main one. */
@@ -67,20 +64,17 @@ export default function WalletPage() {
     rootId,
     displayName,
     rootCreatedAt,
-    hasProfile,
     profileData,
     walletTokenIds,
     isLoading,
     error,
   } = useWalletIdentity(walletAddress);
 
-  const {
-    tokens,
-    socialTokens,
-    totalAttestations,
-    attestationsExcludingProfile,
-    latestCreatedAt,
-  } = useWalletTokenList(walletTokenIds);
+  const { tokens, socialTokens, totalAttestations, latestCreatedAt } =
+    useWalletTokenList(walletTokenIds);
+  const whoAttested = useTokenAttesters(walletTokenIds, {
+    includeProfile: false,
+  });
 
   // Share copy speaks in the first person only on the viewer's own wallet.
   const { address: connectedAddress } = useAccount();
@@ -154,12 +148,9 @@ export default function WalletPage() {
         name={name}
         walletAddress={walletAddress}
         rootId={rootId}
-        attesters={attestationsExcludingProfile}
         lastUpdated={formatLastUpdated(rootCreatedAt, latestCreatedAt)}
         isOwn={isOwnWallet}
-        trustScore={getTrustScore(totalAttestations, hasProfile ? 20 : 0)}
-        trustFlags={totalAttestations > 0 ? "None" : "No attestations yet"}
-        trustDescription="On-Chain Reputation"
+        whoAttested={whoAttested}
         totalAttestations={totalAttestations}
         activeTokens={tokens.length}
         socials={socialTokens}

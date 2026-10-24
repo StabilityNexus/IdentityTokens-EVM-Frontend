@@ -1,4 +1,8 @@
-import type { ProfileLink, ProfileMetadata } from "./types.responses";
+import type {
+  AttesterView,
+  ProfileLink,
+  ProfileMetadata,
+} from "./types.responses";
 
 // --- Enums & Shared Types ---
 export type TokenCardVariant = "home" | "history" | "discover";
@@ -116,13 +120,6 @@ export interface AttestModalProps {
   onSuccess?: () => void;
 }
 
-export interface TrustScoreProps {
-  score?: number;
-  flags?: string;
-  description?: string;
-  className?: string;
-}
-
 export interface UITokenData {
   tokenId: string;
   name: string;
@@ -166,7 +163,7 @@ export interface IDMetricsProps {
   walletAddress?: string;
   /** The wallet's identity id, shown as id-…; null when it has none. */
   rootId?: bigint | null;
-  /** Attestations on the wallet's tokens, its profile token excluded. */
+  /** How many people hold an active attestation on the wallet's tokens. */
   attesters?: number;
   className?: string;
   lastUpdated?: string;
@@ -174,10 +171,23 @@ export interface IDMetricsProps {
   isOwn?: boolean;
 }
 
-export interface DashboardMetricsProps extends IDMetricsProps, MetricsProps {
-  trustScore?: number;
-  trustFlags?: string;
-  trustDescription?: string;
+/** One attestation on one token, any status, as "Who attested" lists it. */
+export interface TokenAttester extends AttesterView {
+  tokenId: bigint;
+  tokenName: string;
+}
+
+export interface WhoAttestedData {
+  /** Newest first, revoked and expired included. */
+  attesters: TokenAttester[];
+  isLoading: boolean;
+  isError: boolean;
+}
+
+export interface DashboardMetricsProps
+  extends Omit<IDMetricsProps, "attesters">, MetricsProps {
+  /** Also gives the ID card its attester count. */
+  whoAttested: WhoAttestedData;
 }
 
 export interface MetricsProps {

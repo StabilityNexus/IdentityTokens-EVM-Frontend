@@ -56,6 +56,7 @@ export default function ProfilePage() {
   } = useProfile(profileTokenId);
   const {
     data: profileLinks,
+    isSuccess: isLinksLoaded,
     isFetching: isFetchingLinks,
     refetch: refetchLinks,
   } = useProfileLinks(profileTokenId);
@@ -207,9 +208,10 @@ export default function ProfilePage() {
               })
             }
             // The edit diff compares against the saved links, so wait for the
-            // current list or an edit could overwrite links it never saw.
+            // current list or an edit could overwrite links it never saw. A
+            // failed refetch keeps the old data but leaves isSuccess false.
             onEdit={
-              profileLinks && !isFetchingLinks
+              isLinksLoaded && !isFetchingLinks
                 ? () => setIsEditModalOpen(true)
                 : undefined
             }

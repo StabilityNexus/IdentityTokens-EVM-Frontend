@@ -8,7 +8,6 @@ import {
 import type { TokenTuple } from "./useWalletTokenList";
 import { tokenTypeOf } from "@/lib/tokenId";
 import { TOKEN_TYPE, TokenAttester } from "@/lib/types";
-import { AttesterView } from "@/lib/types.responses";
 
 /**
  * Every attestation on the given tokens, newest first, revoked and expired
@@ -32,17 +31,12 @@ export function useTokenAttesters(
         const listed =
           type === TOKEN_TYPE.SUB ||
           (includeProfile && type === TOKEN_TYPE.PROFILE);
-        const result = pages.data[i];
-        if (!listed || result?.status !== "success") return [];
+        if (!listed) return [];
 
-        const [page] = result.result as readonly [
-          readonly AttesterView[],
-          bigint,
-        ];
         const detail = details.data?.[i];
         const tokenName =
           detail?.status === "success" ? (detail.result as TokenTuple)[2] : "";
-        return page.map((view) => ({ ...view, tokenId, tokenName }));
+        return pages.data[i].map((view) => ({ ...view, tokenId, tokenName }));
       })
       .sort((a, b) =>
         Number(b.attestation.timestamp - a.attestation.timestamp)

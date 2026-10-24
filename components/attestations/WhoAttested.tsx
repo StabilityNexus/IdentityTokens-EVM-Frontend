@@ -10,6 +10,7 @@ import {
   countActiveAttesters,
   formatAttestationLength,
   formatTimeAgo,
+  truncateAddress,
 } from "@/lib/helpers";
 import { formatTokenId, tokenTypeOf } from "@/lib/tokenId";
 import { TOKEN_TYPE, TokenAttester, WhoAttestedData } from "@/lib/types";
@@ -196,6 +197,10 @@ function AttesterRow({
 }) {
   const { attestation } = attester;
   const status = attestationStatus(attestation);
+  // Same fallback as the per-token attesters list.
+  const name =
+    attester.displayName?.trim() ||
+    truncateAddress(attestation.attesterAddress, 8, 6);
   const tokenId = formatTokenId(attester.tokenId);
   // A profile token opens the profile; any other token opens its search result.
   const tokenHref =
@@ -218,9 +223,9 @@ function AttesterRow({
             href={`/wallet?u=${attestation.attesterAddress}`}
             className="truncate font-utsaha text-sm text-white transition-colors hover:text-brand-blue hover:underline"
           >
-            {attester.displayName}
+            {name}
           </Link>
-          {status !== "active" && <StatusBadge status={status} />}
+          <StatusBadge status={status} />
         </div>
         <span className="shrink-0 font-utsaha text-xs text-gray-400">
           {formatAttestationLength(attestation)}

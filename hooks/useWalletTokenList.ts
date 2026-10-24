@@ -8,7 +8,6 @@ import {
 import { attestationStatus, formatExpiry } from "@/lib/helpers";
 import { formatTokenId, tokenTypeOf } from "@/lib/tokenId";
 import { TOKEN_TYPE, UITokenData } from "@/lib/types";
-import { AttesterView } from "@/lib/types.responses";
 
 /**
  * The `tokens` mapping getter returns a flat tuple rather than a named struct.
@@ -45,17 +44,12 @@ export function useWalletTokenList(tokenIds: readonly bigint[]) {
   /** Active attestations on each token, in `ids` order. */
   const activeCounts = useMemo(
     () =>
-      (ids ?? []).map((_, i) => {
-        const result = attesterPages?.[i];
-        if (result?.status !== "success") return 0;
-        const [page] = result.result as readonly [
-          readonly AttesterView[],
-          bigint,
-        ];
-        return page.filter(
-          (view) => attestationStatus(view.attestation) === "active"
-        ).length;
-      }),
+      (ids ?? []).map(
+        (_, i) =>
+          (attesterPages?.[i] ?? []).filter(
+            (view) => attestationStatus(view.attestation) === "active"
+          ).length
+      ),
     [ids, attesterPages]
   );
 

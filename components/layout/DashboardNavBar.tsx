@@ -26,14 +26,7 @@ export function DashboardNavbar() {
     refetchWalletTokens,
   } = useIdentityGate();
 
-  const knownRoutes = [
-    "/",
-    "/home",
-    "/dashboard",
-    "/discover",
-    "/settings",
-    "/wallet",
-  ];
+  const knownRoutes = ["/", "/home", "/dashboard", "/discover", "/wallet"];
   const firstSegment = pathname?.split("/").filter(Boolean)[0] ?? "";
   const isUserProfile =
     pathname !== "/" &&

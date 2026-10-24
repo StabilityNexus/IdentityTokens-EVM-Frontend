@@ -57,8 +57,6 @@ export interface IDCardProps {
   spinning?: boolean;
   /** Fired when the card has come to rest facing front after spinning. */
   onSpinSettled?: () => void;
-  /** Each new non-null value shakes the card once, e.g. for a taken name. */
-  shakeSignal?: string | null;
   className?: string;
 }
 

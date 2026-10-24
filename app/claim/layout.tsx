@@ -4,7 +4,7 @@ import { absoluteUrl, pageMetadata } from "@/lib/seo";
 
 const TITLE = "Claim your DIT username";
 const DESCRIPTION =
-  "Reserve a unique username for your DIT identity. Connect a wallet, choose a name, and mint a root identity token. Usernames cannot be changed after minting.";
+  "Reserve a username for your DIT identity. Connect a wallet, choose a name, and mint a root identity token. Usernames cannot be changed after minting.";
 
 export const metadata: Metadata = pageMetadata({
   title: TITLE,

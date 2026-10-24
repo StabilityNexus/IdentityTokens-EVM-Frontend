@@ -43,19 +43,18 @@ export default function Hero() {
           {/* Left Content: Text */}
           <div className="z-10 flex w-full flex-1 flex-col justify-center space-y-6 text-center md:space-y-8 md:text-left">
             <div>
-              <h1 className="font-atyp text-[32px] leading-[1.1] tracking-wide text-brand-blue md:text-[48px]">
-                TRUST AND IDENTITY <br />
-                <span className="mt-2 block text-black dark:text-white">
-                  ARE
+              <h1>
+                <span className="block font-atyp text-[32px] leading-[1.1] tracking-wide text-brand-blue md:text-[48px]">
+                  TRUST AND IDENTITY <br />
+                  <span className="mt-2 block text-black dark:text-white">
+                    ARE
+                  </span>
                 </span>
-              </h1>
-
-              <div className="mt-4 min-h-[60px] md:min-h-[80px]">
-                <p className="font-garamond text-[28px] leading-tight text-black/90 italic sm:text-4xl md:text-5xl lg:text-6xl dark:text-white/90">
+                <span className="mt-4 block min-h-[60px] font-garamond text-[28px] leading-tight text-black/90 italic sm:text-4xl md:min-h-[80px] md:text-5xl lg:text-6xl dark:text-white/90">
                   {displayedText}
                   <span className="animate-pulse font-normal">|</span>
-                </p>
-              </div>
+                </span>
+              </h1>
             </div>
 
             <p className="mx-auto max-w-lg font-sans text-base leading-relaxed text-gray-600 md:mx-0 md:text-lg dark:text-gray-200">

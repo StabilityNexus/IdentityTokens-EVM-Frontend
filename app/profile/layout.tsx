@@ -1,6 +1,17 @@
+import type { Metadata } from "next";
 import React, { Suspense } from "react";
 import { DashboardSidebar } from "@/components/layout/SideBar";
 import { DashboardNavbar } from "@/components/layout/DashboardNavBar";
+
+// Profile data is read from the chain at request time in the browser, so the
+// exported HTML is a loading shell. Keep it out of the index rather than let
+// crawlers index an empty page.
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: true,
+  },
+};
 
 export default function PublicProfileLayout({
   children,

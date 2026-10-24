@@ -1,25 +1,34 @@
 import type { Metadata } from "next";
+import { SeoJsonLd } from "@/components/SeoJsonLd";
+import { absoluteUrl, pageMetadata } from "@/lib/seo";
 
-const TITLE = "Claim your username | DIT";
+const TITLE = "Claim your DIT username";
 const DESCRIPTION =
-  "Reserve your DIT username and claim your ID card: an on-chain identity you own.";
+  "Reserve a unique username for your DIT identity. Connect a wallet, choose a name, and mint a root identity token. Usernames cannot be changed after minting.";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: TITLE,
   description: DESCRIPTION,
-  openGraph: {
-    title: TITLE,
-    description: DESCRIPTION,
-    url: "https://dit.stability.nexus/claim",
-    siteName: "Stability Nexus DIT",
-    locale: "en_US",
-    type: "website",
-  },
-  twitter: {
-    card: "summary",
-    title: TITLE,
-    description: DESCRIPTION,
-  },
+  path: "/claim",
+});
+
+const breadcrumbs = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: "Home",
+      item: absoluteUrl("/"),
+    },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: "Claim your username",
+      item: absoluteUrl("/claim"),
+    },
+  ],
 };
 
 export default function ClaimLayout({
@@ -27,5 +36,10 @@ export default function ClaimLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return children;
+  return (
+    <>
+      <SeoJsonLd data={breadcrumbs} />
+      {children}
+    </>
+  );
 }

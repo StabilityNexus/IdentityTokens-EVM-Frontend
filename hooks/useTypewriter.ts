@@ -5,7 +5,10 @@ const DELETING_SPEED = 100;
 const PAUSE_DURATION = 2000;
 
 export function useTypewriter(words: string[]) {
-  const [displayedText, setDisplayedText] = useState("");
+  // Start on the first word rather than an empty string so the prerendered
+  // HTML contains a complete sentence instead of "TRUST AND IDENTITY ARE |".
+  // The cycle below still deletes and retypes from here.
+  const [displayedText, setDisplayedText] = useState(words[0] ?? "");
   const [wordIndex, setWordIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
 

@@ -1,34 +1,39 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
+import { SeoJsonLd } from "@/components/SeoJsonLd";
+import { absoluteUrl, pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Privacy Policy | Decentralized Identity Token",
+export const metadata: Metadata = pageMetadata({
+  title: "Privacy Policy",
   description:
-    "Privacy Policy for the Decentralized Identity Token (DIT) application by Stability Nexus. Learn how DIT handles your information with a privacy-conscious, local-first approach.",
-  openGraph: {
-    title: "Privacy Policy | Decentralized Identity Token",
-    description:
-      "Privacy Policy for the Decentralized Identity Token (DIT) application. Learn how DIT handles your information with a privacy-conscious, local-first approach.",
-    url: "https://dit.stability.nexus/privacy-policy",
-    siteName: "Stability Nexus DIT",
-    locale: "en_US",
-    type: "website",
-  },
-  twitter: {
-    card: "summary",
-    title: "Privacy Policy | Decentralized Identity Token",
-    description:
-      "Privacy Policy for the Decentralized Identity Token (DIT) application by Stability Nexus.",
-  },
-  alternates: {
-    canonical: "https://dit.stability.nexus/privacy-policy",
-  },
+    "Privacy Policy for the Decentralized Identity Token (DIT) application by Stability Nexus. How DIT handles information with a privacy-conscious, local-first approach.",
+  path: "/privacy-policy",
+});
+
+const breadcrumbs = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: "Home",
+      item: absoluteUrl("/"),
+    },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: "Privacy Policy",
+      item: absoluteUrl("/privacy-policy"),
+    },
+  ],
 };
 
 export default function PrivacyPolicyPage() {
   return (
     <main className="relative min-h-screen w-full bg-landing-bg dark:bg-landing-bg-dark">
+      <SeoJsonLd data={breadcrumbs} />
       {/* Navigation Bar */}
       <nav className="sticky top-0 z-50 w-full bg-landing-bg dark:bg-landing-bg-dark">
         <div className="mx-auto flex h-16 w-full max-w-[1512px] items-center justify-between px-4 md:h-[80px] md:px-[56px]">

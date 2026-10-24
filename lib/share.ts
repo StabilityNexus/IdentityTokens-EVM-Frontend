@@ -1,4 +1,4 @@
-const SITE_URL = "https://dit.stability.nexus";
+import { SITE_URL } from "@/lib/seo";
 
 /** Always the production host, even when shared from a preview build. */
 export const CLAIM_URL = `${SITE_URL}/claim`;

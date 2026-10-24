@@ -13,7 +13,6 @@ const KNOWN_ROUTES = [
   "/home",
   "/dashboard",
   "/discover",
-  "/settings",
   "/profile",
   "/wallet",
 ];

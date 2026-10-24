@@ -6,7 +6,7 @@ export const dynamic = "force-static";
 
 /**
  * Only publicly useful pages belong here. /dashboard, /discover, /home,
- * /settings, /wallet, /profile, and /onboarding are wallet-gated and marked
+ * /wallet, /profile, and /onboarding are wallet-gated and marked
  * noindex, so listing them would send crawlers to pages excluded from search.
  *
  * There are no dynamic path segments to enumerate: profiles use `?u=` query

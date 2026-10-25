@@ -7,7 +7,9 @@ import { Modal } from "@/components/ui/Modal";
 import { useAttestersDetailed } from "@/hooks/useIdentityReads";
 import { getEtherscanAddressUrl } from "@/lib/errors";
 import {
+  AttestationStatus,
   NO_EXPIRY_DURATION,
+  attestationStatus,
   formatExpiry,
   formatTimeAgo,
   truncateAddress,
@@ -23,16 +25,7 @@ interface AttestersModalProps {
   tokenName?: string;
 }
 
-type Status = "active" | "revoked" | "expired";
-
-function statusOf({ attestation }: AttesterView): Status {
-  if (attestation.revokedAt > 0n) return "revoked";
-  if (attestation.expiresAt <= BigInt(Math.floor(Date.now() / 1000)))
-    return "expired";
-  return "active";
-}
-
-const STATUS_STYLES: Record<Status, string> = {
+const STATUS_STYLES: Record<AttestationStatus, string> = {
   active: "border-brand-green/30 bg-brand-green/10 text-brand-green",
   revoked: "border-red-400/25 bg-red-400/10 text-red-300",
   expired: "border-white/10 bg-white/5 text-gray-400",
@@ -90,29 +83,7 @@ export function AttestersModal({
             {total > attesters.length ? ` of ${total}` : ""}
           </p>
 
-          <div className="flex rounded-lg border border-white/10 p-0.5">
-            {(
-              [
-                ["Active", true],
-                ["All", false],
-              ] as const
-            ).map(([label, value]) => (
-              <button
-                key={label}
-                type="button"
-                onClick={() => resetOffset(value)}
-                aria-pressed={activeOnly === value}
-                className={cn(
-                  "rounded-md px-3 py-1 font-utsaha text-xs transition-colors",
-                  activeOnly === value
-                    ? "bg-white/10 text-white"
-                    : "text-gray-400 hover:text-white"
-                )}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+          <ActiveAllToggle activeOnly={activeOnly} onChange={resetOffset} />
         </div>
 
         <div className="flex max-h-[22rem] flex-col gap-2 overflow-y-auto">
@@ -174,7 +145,7 @@ export function AttestersModal({
 
 function AttesterRow({ attester }: { attester: AttesterView }) {
   const { attestation } = attester;
-  const status = statusOf(attester);
+  const status = attestationStatus(attestation);
   const wallet = attestation.attesterAddress;
 
   // The root identity name, not the optional profile username.
@@ -198,14 +169,7 @@ function AttesterRow({ attester }: { attester: AttesterView }) {
           >
             {name}
           </Link>
-          <span
-            className={cn(
-              "shrink-0 rounded-full border px-2 py-0.5 font-utsaha text-[10px] uppercase",
-              STATUS_STYLES[status]
-            )}
-          >
-            {status}
-          </span>
+          <StatusBadge status={status} />
         </div>
 
         <p className="truncate font-utsaha text-xs text-gray-400">
@@ -233,6 +197,54 @@ function AttesterRow({ attester }: { attester: AttesterView }) {
         <ExternalLink size={15} />
       </a>
     </div>
+  );
+}
+
+/** The Active / All switch, shared with the "Who attested" modal. */
+export function ActiveAllToggle({
+  activeOnly,
+  onChange,
+}: {
+  activeOnly: boolean;
+  onChange: (activeOnly: boolean) => void;
+}) {
+  return (
+    <div className="flex rounded-lg border border-white/10 p-0.5">
+      {(
+        [
+          ["Active", true],
+          ["All", false],
+        ] as const
+      ).map(([label, value]) => (
+        <button
+          key={label}
+          type="button"
+          onClick={() => onChange(value)}
+          aria-pressed={activeOnly === value}
+          className={cn(
+            "rounded-md px-3 py-1 font-utsaha text-xs transition-colors",
+            activeOnly === value
+              ? "bg-white/10 text-white"
+              : "text-gray-400 hover:text-white"
+          )}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+export function StatusBadge({ status }: { status: AttestationStatus }) {
+  return (
+    <span
+      className={cn(
+        "shrink-0 rounded-full border px-2 py-0.5 font-utsaha text-[10px] uppercase",
+        STATUS_STYLES[status]
+      )}
+    >
+      {status}
+    </span>
   );
 }
 

@@ -4,28 +4,27 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { UserX } from "lucide-react";
 import {
-  useActiveAttestationCount,
   useHasAttested,
   useProfile,
   useProfileLinks,
   useResolveUsername,
   useTokenOwner,
+  useWalletTokens,
 } from "@/hooks/useIdentityReads";
 import { useRevokeAttestation } from "@/hooks/useIdentityWrites";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
+import { useTokenAttesters } from "@/hooks/useTokenAttesters";
 import { AttestModal } from "@/components/forms/AttestModal";
 import { ConfirmTxModal } from "@/components/forms/ConfirmTxModal";
 import { CreateProfileModal } from "@/components/forms/CreateProfileModal";
-import { AttestersModal } from "@/components/attestations/AttestersModal";
+import { WhoAttested } from "@/components/attestations/WhoAttested";
 import { TransactionStatus } from "@/components/ui/TransactionStatus";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { ProfileActions } from "@/components/profile/ProfileActions";
-import { ProfileReputation } from "@/components/profile/ProfileReputation";
 import { ProfileLinks } from "@/components/profile/ProfileLinks";
 import { ProfileIdentity } from "@/components/profile/ProfileIdentity";
 import { linksFromChain } from "@/lib/profileData";
 import { parseTokenId, tokenTypeOf } from "@/lib/tokenId";
-import { getTrustScore } from "@/lib/helpers";
 import { TOKEN_TYPE, TxStatus } from "@/lib/types";
 
 export default function ProfilePage() {
@@ -63,8 +62,12 @@ export default function ProfilePage() {
   } = useProfileLinks(profileTokenId);
   const { data: ownerAddress } = useTokenOwner(profileTokenId);
 
-  const { data: attestationCount, refetch: refetchAttestations } =
-    useActiveAttestationCount(profileTokenId);
+  // Attesters across every token the owner holds, the profile token included.
+  const { data: ownerTokenIds } = useWalletTokens(ownerAddress);
+  const whoAttested = useTokenAttesters(ownerTokenIds, {
+    includeProfile: true,
+  });
+  const refetchAttestations = whoAttested.refetch;
 
   const { data: viewerHasAttested, refetch: refetchHasAttested } =
     useHasAttested(rootId && rootId > 0n ? rootId : undefined, profileTokenId);
@@ -72,13 +75,9 @@ export default function ProfilePage() {
   const revokeAttestation = useRevokeAttestation();
 
   const [isAttestModalOpen, setIsAttestModalOpen] = useState(false);
-  const [isAttestersModalOpen, setIsAttestersModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isRevokeConfirmOpen, setIsRevokeConfirmOpen] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
-
-  const totalAttestations = Number(attestationCount ?? 0n);
-  const trustScore = getTrustScore(totalAttestations);
 
   const customLinks = useMemo(
     () => linksFromChain(profileLinks ?? []),
@@ -231,13 +230,9 @@ export default function ProfilePage() {
       )}
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-        {/* Reputation leads on mobile, sits in the right rail on desktop. */}
+        {/* Who attested leads on mobile, sits in the right rail on desktop. */}
         <div className="lg:order-2 lg:col-span-1">
-          <ProfileReputation
-            trustScore={trustScore}
-            totalAttestations={totalAttestations}
-            onViewAttesters={() => setIsAttestersModalOpen(true)}
-          />
+          <WhoAttested variant="profile" {...whoAttested} />
         </div>
 
         <div className="flex flex-col gap-5 lg:order-1 lg:col-span-2">
@@ -257,15 +252,6 @@ export default function ProfilePage() {
           />
         </div>
       </div>
-
-      {isAttestersModalOpen && profileTokenId && (
-        <AttestersModal
-          isOpen
-          onClose={() => setIsAttestersModalOpen(false)}
-          tokenId={profileTokenId}
-          tokenName={profileData.name}
-        />
-      )}
 
       {isRevokeConfirmOpen && profileTokenId && (
         <ConfirmTxModal

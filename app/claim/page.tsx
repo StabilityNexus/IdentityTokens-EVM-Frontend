@@ -4,7 +4,6 @@ import React, { useEffect, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { ArrowUpRight, Loader2 } from "lucide-react";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
-import { useQueryClient } from "@tanstack/react-query";
 import { useAccount, useBalance, useSwitchChain } from "wagmi";
 import Navbar from "@/components/Navbar";
 import { IDCard } from "@/components/cards/IDCard";
@@ -15,7 +14,6 @@ import { TermsConsent } from "@/components/claim/TermsConsent";
 import { UsernameField } from "@/components/claim/UsernameField";
 import { useRootId, useRootIdentityView } from "@/hooks/useIdentityReads";
 import { useCreateRootIdentity } from "@/hooks/useIdentityWrites";
-import { useUsernameAvailability } from "@/hooks/useUsernameAvailability";
 import {
   CLAIM_CHAIN,
   formatCardDate,
@@ -23,12 +21,11 @@ import {
 } from "@/lib/claim";
 import { markTourPending, recordTermsAcceptance } from "@/lib/onboarding";
 import { TxStatus } from "@/lib/types";
+import { validateUsername } from "@/lib/validation";
 
 const noSubscription = () => () => {};
 
 export default function ClaimPage() {
-  const queryClient = useQueryClient();
-
   const [username, setUsername] = useState("");
   const [hasAgreed, setHasAgreed] = useState(false);
   const [termsNudge, setTermsNudge] = useState(false);
@@ -40,7 +37,7 @@ export default function ClaimPage() {
   const { openConnectModal } = useConnectModal();
   const { switchChainAsync, isPending: isSwitching } = useSwitchChain();
   const createRoot = useCreateRootIdentity({ chainId: CLAIM_CHAIN.id });
-  const availability = useUsernameAvailability(username);
+  const validation = validateUsername(username);
 
   const {
     data: rootId,
@@ -98,10 +95,6 @@ export default function ClaimPage() {
       ? formatCardDate(new Date(Number(rootView.createdAt) * 1000))
       : todayLabel;
 
-  // A new value per taken name, so each one shakes the card once.
-  const shakeSignal =
-    !isReserved && availability.status === "taken" ? `taken:${username}` : null;
-
   // Switching accounts starts the reservation over.
   useEffect(() => {
     createRoot.reset();
@@ -120,8 +113,7 @@ export default function ClaimPage() {
     if (!isConfirmed || !address) return;
     recordTermsAcceptance(address);
     markTourPending();
-    void queryClient.invalidateQueries({ queryKey: ["claim", "root-names"] });
-  }, [isConfirmed, address, queryClient]);
+  }, [isConfirmed, address]);
 
   const handleUsernameChange = (value: string) => {
     setUsername(normalizeUsernameInput(value));
@@ -136,7 +128,7 @@ export default function ClaimPage() {
 
   const handleReserve = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (availability.status !== "available" || isSubmitting) return;
+    if (validation.status !== "valid" || isSubmitting) return;
 
     if (!hasAgreed) {
       setTermsNudge(true);
@@ -175,16 +167,14 @@ export default function ClaimPage() {
       ? "Confirm in your wallet…"
       : txStatus === "confirming"
         ? `Reserving @${submittedName}…`
-        : availability.status === "checking"
-          ? "Checking…"
-          : availability.status === "available"
-            ? isCheckingWallet
-              ? "Checking your wallet…"
-              : `Reserve @${username}`
-            : "Choose your username";
+        : validation.status === "valid"
+          ? isCheckingWallet
+            ? "Checking your wallet…"
+            : `Reserve @${username}`
+          : "Choose your username";
 
   const isButtonDisabled =
-    availability.status !== "available" || isSubmitting || isCheckingWallet;
+    validation.status !== "valid" || isSubmitting || isCheckingWallet;
 
   return (
     <main className="relative min-h-screen w-full overflow-x-clip bg-landing-bg dark:bg-landing-bg-dark">
@@ -202,7 +192,6 @@ export default function ClaimPage() {
           dateLabel={cardDate}
           spinning={isSubmitting && !isConfirmed}
           onSpinSettled={handleSpinSettled}
-          shakeSignal={shakeSignal}
         />
 
         {isReserved ? (
@@ -224,14 +213,14 @@ export default function ClaimPage() {
               <span className="block text-brand-blue">username.</span>
             </h1>
             <p className="mt-4 max-w-md font-utsaha text-base leading-relaxed text-gray-600 md:text-lg dark:text-gray-300">
-              Reserve your unique username and claim your DIT.
+              Reserve your username and claim your DIT.
             </p>
 
             <div className="mt-7 w-full max-w-md">
               <UsernameField
                 value={username}
                 onChange={handleUsernameChange}
-                availability={availability}
+                validation={validation}
                 disabled={isSubmitting}
               />
             </div>
@@ -267,7 +256,7 @@ export default function ClaimPage() {
                 txStatus={txStatus}
                 txHash={createRoot.txHash}
                 txError={createRoot.error}
-                showHints={availability.status === "available" && !isSubmitting}
+                showHints={validation.status === "valid" && !isSubmitting}
                 onWrongChain={isConnected && chainId !== CLAIM_CHAIN.id}
                 needsGas={isConnected && balance?.value === 0n}
               />

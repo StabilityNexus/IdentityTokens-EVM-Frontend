@@ -10,7 +10,7 @@ import {
   PROFILE_SYSTEM_ABI,
 } from "@/lib/contracts";
 import { TOKEN_TYPE } from "@/lib/types";
-import { AttesterView } from "@/lib/types.responses";
+import type { AttesterView, ProfileLink } from "@/lib/types.responses";
 import { tokenIdFor } from "@/lib/tokenId";
 import { validateUsername } from "@/lib/validation";
 
@@ -200,14 +200,43 @@ export function useProfile(tokenId: bigint | undefined) {
   });
 }
 
-/** Get the custom-link slots of a profile (an empty url marks a free slot) */
+/** Links read per `getLinks` call. */
+const LINKS_PAGE = 50n;
+
+/**
+ * Every custom link of a profile, gaps included (an empty url), so entry i is
+ * on-chain index i. Resolves only once all pages are in: the edit diff would
+ * read a shorter list as removed links.
+ */
 export function useProfileLinks(tokenId: bigint | undefined) {
-  return useReadContract({
-    address: PROFILE_SYSTEM_ADDRESS,
-    abi: PROFILE_SYSTEM_ABI,
-    functionName: "getLinks",
-    args: tokenId !== undefined ? [tokenId] : undefined,
-    query: { enabled: tokenId !== undefined },
+  const client = usePublicClient();
+
+  return useQuery({
+    queryKey: [
+      "profile-links",
+      client?.chain.id,
+      PROFILE_SYSTEM_ADDRESS,
+      tokenId?.toString(),
+    ],
+    enabled: !!client && tokenId !== undefined,
+    queryFn: async () => {
+      if (!client || tokenId === undefined) throw new Error("No client");
+      // Every page reads the same block, so an edit landing between calls
+      // can't mix two versions. Uncached, so a refetch after an edit sees it.
+      const blockNumber = await client.getBlockNumber({ cacheTime: 0 });
+      const links: ProfileLink[] = [];
+      for (;;) {
+        const [page, total] = await client.readContract({
+          address: PROFILE_SYSTEM_ADDRESS,
+          abi: PROFILE_SYSTEM_ABI,
+          functionName: "getLinks",
+          args: [tokenId, BigInt(links.length), LINKS_PAGE],
+          blockNumber,
+        });
+        links.push(...page);
+        if (BigInt(links.length) >= total) return links;
+      }
+    },
   });
 }
 

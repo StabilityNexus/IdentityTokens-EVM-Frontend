@@ -30,9 +30,6 @@ const SETTLE_SECONDS = 3;
 
 const TILT_SPRING = { stiffness: 160, damping: 20, mass: 0.6 };
 
-/** A short side-to-side shake, in px, for a name that is already taken. */
-const SHAKE_KEYFRAMES = [0, -10, 9, -7, 5, -3, 0];
-
 const WAVE_PATHS = WAVE_LINES.map((line) => ({ line, d: wavePath(line) }));
 
 const SMALL_CAPS =
@@ -49,7 +46,6 @@ export function IDCard({
   still = false,
   spinning = false,
   onSpinSettled,
-  shakeSignal,
   className,
 }: IDCardProps) {
   const reduceMotion = useReducedMotion();
@@ -59,7 +55,6 @@ export function IDCard({
   const pointerY = useMotionValue(0);
   const hover = useMotionValue(0);
   const spin = useMotionValue(0);
-  const shakeX = useMotionValue(0);
 
   const springX = useSpring(pointerX, TILT_SPRING);
   const springY = useSpring(pointerY, TILT_SPRING);
@@ -131,16 +126,6 @@ export function IDCard({
     return () => settle.stop();
   }, [spinning, reduceMotion, spin, pointerX, pointerY, hover]);
 
-  // Every new signal is one more shake, so retyping a taken name shakes again.
-  useEffect(() => {
-    if (!shakeSignal || reduceMotion) return;
-    const shake = animate(shakeX, SHAKE_KEYFRAMES, {
-      duration: 0.45,
-      ease: "easeInOut",
-    });
-    return () => shake.stop();
-  }, [shakeSignal, reduceMotion, shakeX]);
-
   const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
     // Touch drags scroll the page; tilting under a finger would fight that.
     if (still || spinning || event.pointerType === "touch") return;
@@ -171,7 +156,6 @@ export function IDCard({
     >
       <motion.div
         aria-hidden="true"
-        style={{ x: shakeX }}
         animate={still || reduceMotion ? undefined : { y: [0, -6, 0] }}
         transition={{ duration: 6, ease: "easeInOut", repeat: Infinity }}
         className="transform-3d"

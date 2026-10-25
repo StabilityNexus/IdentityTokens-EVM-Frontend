@@ -1,8 +1,8 @@
 export const IDENTITY_SYSTEM_ADDRESS =
-  "0x7e4d3e0b03353Bc344e50FB315e3CAC56385F44C" as const;
+  "0x15253A56CD3EbC2893914C2139094dc92a42c016" as const;
 
 export const PROFILE_SYSTEM_ADDRESS =
-  "0xf5252b758f777B44fDC247ab97388bF6B1c44A7D" as const;
+  "0x17dc6AA09432d61ca630b523DAF01fB2b98Bd58D" as const;
 
 export * from "./types.responses";
 
@@ -1776,9 +1776,9 @@ export const PROFILE_SYSTEM_ABI = [
         internalType: "struct DataTypes.LinkUpdate[]",
         components: [
           {
-            name: "slot",
-            type: "uint8",
-            internalType: "uint8",
+            name: "index",
+            type: "uint32",
+            internalType: "uint32",
           },
           {
             name: "label",
@@ -1811,12 +1811,22 @@ export const PROFILE_SYSTEM_ABI = [
         type: "uint256",
         internalType: "uint256",
       },
+      {
+        name: "offset",
+        type: "uint256",
+        internalType: "uint256",
+      },
+      {
+        name: "limit",
+        type: "uint256",
+        internalType: "uint256",
+      },
     ],
     outputs: [
       {
-        name: "",
-        type: "tuple[6]",
-        internalType: "struct DataTypes.ProfileLink[6]",
+        name: "page",
+        type: "tuple[]",
+        internalType: "struct DataTypes.ProfileLink[]",
         components: [
           {
             name: "label",
@@ -1829,6 +1839,11 @@ export const PROFILE_SYSTEM_ABI = [
             internalType: "string",
           },
         ],
+      },
+      {
+        name: "total",
+        type: "uint256",
+        internalType: "uint256",
       },
     ],
     stateMutability: "view",
@@ -2032,9 +2047,9 @@ export const PROFILE_SYSTEM_ABI = [
         internalType: "struct DataTypes.LinkUpdate[]",
         components: [
           {
-            name: "slot",
-            type: "uint8",
-            internalType: "uint8",
+            name: "index",
+            type: "uint32",
+            internalType: "uint32",
           },
           {
             name: "label",
@@ -2135,7 +2150,7 @@ export const PROFILE_SYSTEM_ABI = [
   },
   {
     type: "error",
-    name: "InvalidLinkSlot",
+    name: "InvalidLinkIndex",
     inputs: [],
   },
   {

@@ -31,9 +31,9 @@ export const FeatureSection: React.FC = () => {
             <h2 className="mb-2 font-utsaha text-3xl tracking-wide text-landhead-text md:text-5xl dark:text-landhead-text-dark">
               The Architecture of
             </h2>
-            <h1 className="font-utsaha text-4xl tracking-tight text-landhead-text md:text-6xl dark:text-landhead-text-dark">
+            <p className="font-utsaha text-4xl tracking-tight text-landhead-text md:text-6xl dark:text-landhead-text-dark">
               Trust
-            </h1>
+            </p>
           </div>
 
           {/* Navigation Arrows */}

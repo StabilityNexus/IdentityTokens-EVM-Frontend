@@ -1,9 +1,20 @@
+import type { Metadata } from "next";
 import React, { Suspense } from "react";
 import { DashboardSidebar } from "@/components/layout/SideBar";
 import { DashboardNavbar } from "@/components/layout/DashboardNavBar";
 import { OnboardingGate } from "@/components/onboarding/OnboardingGate";
 import { ProductTour } from "@/components/onboarding/ProductTour";
 import { TourButton } from "@/components/onboarding/TourButton";
+
+// Wallet-gated application screens. Their content is client-rendered from
+// on-chain reads and is not useful in search results, so keep them out of the
+// index while still letting crawlers follow links out of them.
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: true,
+  },
+};
 
 export default function DashboardLayout({
   children,

@@ -8,14 +8,14 @@ import { TokenList } from "@/components/dashboard/TokenList";
 import { AttestersModal } from "@/components/attestations/AttestersModal";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
 import { useWalletTokenList } from "@/hooks/useWalletTokenList";
+import { useTokenAttesters } from "@/hooks/useTokenAttesters";
 import { getContractErrorMessage } from "@/lib/errors";
-import { formatLastUpdated, getTrustScore } from "@/lib/helpers";
+import { formatLastUpdated } from "@/lib/helpers";
 import { parseTokenId } from "@/lib/tokenId";
 
 const DashboardPage = () => {
   const {
     isConnected,
-    hasProfile,
     displayName,
     rootId,
     rootCreatedAt,
@@ -35,15 +35,14 @@ const DashboardPage = () => {
     tokens: tokenListData,
     socialTokens,
     totalAttestations,
-    attestationsExcludingProfile,
     latestCreatedAt,
   } = useWalletTokenList(walletTokenIds);
+  const whoAttested = useTokenAttesters(walletTokenIds, {
+    includeProfile: false,
+  });
 
   const name = displayName ?? "";
   const walletAddress = address || "0x0000000000000000000000000000000000000000";
-
-  // The profile baseline is only earned here once a profile exists.
-  const trustScore = getTrustScore(totalAttestations, hasProfile ? 20 : 0);
 
   const { openConnectModal } = useConnectModal();
 
@@ -114,12 +113,9 @@ const DashboardPage = () => {
         name={name}
         walletAddress={walletAddress as string}
         rootId={rootId}
-        attesters={attestationsExcludingProfile}
         lastUpdated={formatLastUpdated(rootCreatedAt, latestCreatedAt)}
         isOwn
-        trustScore={trustScore}
-        trustFlags={totalAttestations > 0 ? "None" : "No attestations yet"}
-        trustDescription="On-Chain Reputation"
+        whoAttested={whoAttested}
         totalAttestations={totalAttestations}
         activeTokens={tokenListData.length}
         socials={socialTokens}

@@ -10,7 +10,7 @@ import {
   PROFILE_SYSTEM_ABI,
 } from "@/lib/contracts";
 import { TOKEN_TYPE } from "@/lib/types";
-import type { ProfileLink } from "@/lib/types.responses";
+import type { AttesterView, ProfileLink } from "@/lib/types.responses";
 import { tokenIdFor } from "@/lib/tokenId";
 import { validateUsername } from "@/lib/validation";
 
@@ -303,6 +303,56 @@ export function useMultipleAttestationCounts(
   return useReadContracts({
     contracts,
     query: { enabled: !!tokenIds && tokenIds.length > 0 },
+  });
+}
+
+/** Attestations read per `getAttestersDetailed` call. */
+const ATTESTERS_PAGE = 50n;
+
+/**
+ * Every attestation on each token, revoked and expired included, in
+ * `tokenIds` order. Read in bounded pages so no call can pass the RPC's
+ * eth_call gas cap: each round is one multicall for every unfinished token.
+ */
+export function useMultipleAttesters(tokenIds: readonly bigint[] | undefined) {
+  const client = usePublicClient();
+
+  return useQuery({
+    queryKey: [
+      "attesters-detailed",
+      client?.chain.id,
+      IDENTITY_SYSTEM_ADDRESS,
+      tokenIds?.map(String),
+    ],
+    enabled: !!client && !!tokenIds && tokenIds.length > 0,
+    queryFn: async () => {
+      if (!client || !tokenIds) throw new Error("No client");
+      const views = tokenIds.map((): AttesterView[] => []);
+      let open = tokenIds.map((_, i) => i);
+
+      while (open.length > 0) {
+        const pages = await client.multicall({
+          allowFailure: false,
+          contracts: open.map((i) => ({
+            address: IDENTITY_SYSTEM_ADDRESS,
+            abi: IDENTITY_SYSTEM_ABI,
+            functionName: "getAttestersDetailed" as const,
+            args: [
+              tokenIds[i],
+              false,
+              BigInt(views[i].length),
+              ATTESTERS_PAGE,
+            ] as const,
+          })),
+        });
+        open = open.filter((i, k) => {
+          const [page, total] = pages[k];
+          views[i].push(...page);
+          return page.length > 0 && BigInt(views[i].length) < total;
+        });
+      }
+      return views;
+    },
   });
 }
 

@@ -53,6 +53,12 @@ const CONTRACT_ERROR_MESSAGES: Record<string, string> = {
   NotAdmin: "Only the admin can perform this action.",
   OnlyProfileSystem: "This function can only be called by the Profile System.",
   ProfileSystemAlreadySet: "The Profile System has already been configured.",
+
+  // Dev fee
+  NotDev: "Only the dev wallet can do this.",
+  NotPendingDev: "This wallet has not been proposed as the new dev.",
+  DevFeeTooHigh: "The donation can be at most 5000% of the network fee.",
+  DevFeeTransferFailed: "The donation receiver did not accept the transfer.",
 };
 
 /**

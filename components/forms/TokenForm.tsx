@@ -8,6 +8,7 @@ import { useIdentityGate } from "@/hooks/useIdentityGate";
 import { TokenFormProps, TxStatus } from "@/lib/types";
 import { formatTokenId } from "@/lib/tokenId";
 import { TransactionStatus } from "@/components/ui/TransactionStatus";
+import { DonationCheckbox } from "@/components/ui/DonationCheckbox";
 
 export function TokenForm({
   isOpen,
@@ -22,6 +23,7 @@ export function TokenForm({
   const [action, setAction] = useState<"idle" | "burning" | "transferring">(
     "idle"
   );
+  const [donate, setDonate] = useState(true);
 
   const { refetchWalletTokens } = useIdentityGate();
   const burnToken = useBurnToken();
@@ -36,6 +38,7 @@ export function TokenForm({
       setShowTransfer(false);
       setShowBurnConfirm(false);
       setAction("idle");
+      setDonate(true);
       burnToken.reset();
       transferToken.reset();
     }
@@ -66,7 +69,7 @@ export function TokenForm({
       return;
     }
     setAction("burning");
-    burnToken.write(tokenId);
+    burnToken.write(tokenId, donate);
   };
 
   const handleTransfer = (e: React.FormEvent) => {
@@ -75,7 +78,7 @@ export function TokenForm({
       return;
     }
     setAction("transferring");
-    transferToken.write(tokenId, transferAddress as `0x${string}`);
+    transferToken.write(tokenId, transferAddress as `0x${string}`, donate);
   };
 
   const getTxStatus = (): TxStatus => {
@@ -190,6 +193,12 @@ export function TokenForm({
               </form>
             )}
           </div>
+
+          <DonationCheckbox
+            checked={donate}
+            onChange={setDonate}
+            disabled={isSubmitting}
+          />
 
           {/* Transaction Status */}
           <TransactionStatus

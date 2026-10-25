@@ -1,7 +1,13 @@
 "use client";
 
-import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { toHex } from "viem";
+import { useState } from "react";
+import {
+  useAccount,
+  usePublicClient,
+  useWriteContract,
+  useWaitForTransactionReceipt,
+} from "wagmi";
+import { toHex, type ContractFunctionParameters } from "viem";
 import {
   IDENTITY_SYSTEM_ADDRESS,
   IDENTITY_SYSTEM_ABI,
@@ -9,7 +15,44 @@ import {
   PROFILE_SYSTEM_ABI,
   type ProfileMetadata,
 } from "@/lib/contracts";
+import { donationAmount } from "@/lib/devFee";
 import type { FieldUpdate, LinkUpdate } from "@/lib/profileData";
+import { useDevFee } from "@/hooks/useIdentityReads";
+
+/**
+ * The optional donation to AOSSIE for one call: its estimated gas fee times the
+ * devFee percentage. Nothing is donated when the box is unticked, when devFee
+ * has not loaded, or when the estimate fails (the wallet then reports why).
+ */
+function useDonation(chainId?: number) {
+  const publicClient = usePublicClient({ chainId });
+  const { address } = useAccount();
+  const { data: devFee } = useDevFee(chainId);
+  const [isPreparing, setIsPreparing] = useState(false);
+
+  const donationFor = async (
+    call: ContractFunctionParameters,
+    donate: boolean
+  ): Promise<bigint | undefined> => {
+    if (!donate || !devFee || !publicClient || !address) return undefined;
+
+    setIsPreparing(true);
+    try {
+      const [gas, gasPrice] = await Promise.all([
+        publicClient.estimateContractGas({ ...call, account: address }),
+        // eth_gasPrice works with and without EIP-1559 (Ethereum Classic has none)
+        publicClient.getGasPrice(),
+      ]);
+      return donationAmount(gas, gasPrice, devFee);
+    } catch {
+      return undefined;
+    } finally {
+      setIsPreparing(false);
+    }
+  };
+
+  return { donationFor, isPreparing };
+}
 
 // IdentitySystem Writes
 
@@ -22,6 +65,7 @@ export function useCreateRootIdentity({ chainId }: { chainId?: number } = {}) {
     error,
     reset,
   } = useWriteContract();
+  const { donationFor, isPreparing } = useDonation(chainId);
 
   // A reverted transaction fails here, not at send time, so this error has to
   // be surfaced too or the modal confirms forever.
@@ -31,23 +75,23 @@ export function useCreateRootIdentity({ chainId }: { chainId?: number } = {}) {
     error: receiptError,
   } = useWaitForTransactionReceipt({ hash: txHash, chainId });
 
-  const write = (displayName: string) => {
-    writeContract({
+  const write = async (displayName: string, donate: boolean) => {
+    const call = {
       address: IDENTITY_SYSTEM_ADDRESS,
       abi: IDENTITY_SYSTEM_ABI,
       functionName: "createRootIdentity",
       args: [displayName],
-      chainId,
-    });
+    } as const;
+    writeContract({ ...call, chainId, value: await donationFor(call, donate) });
   };
 
   return {
     write,
     txHash,
-    isPending,
+    isPending: isPreparing || isPending,
     isConfirming,
     isSuccess,
-    isLoading: isPending || isConfirming,
+    isLoading: isPreparing || isPending || isConfirming,
     error: error ?? receiptError,
     reset,
   };
@@ -62,19 +106,23 @@ export function useCreateToken() {
     error,
     reset,
   } = useWriteContract();
+  const { donationFor, isPreparing } = useDonation();
 
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash: txHash,
   });
 
-  const write = (params: {
-    tokenName: string;
-    tokenType: string;
-    tokenValue: string;
-    about: string;
-    validUntil: bigint;
-  }) => {
-    writeContract({
+  const write = async (
+    params: {
+      tokenName: string;
+      tokenType: string;
+      tokenValue: string;
+      about: string;
+      validUntil: bigint;
+    },
+    donate: boolean
+  ) => {
+    const call = {
       address: IDENTITY_SYSTEM_ADDRESS,
       abi: IDENTITY_SYSTEM_ABI,
       functionName: "createToken",
@@ -85,16 +133,17 @@ export function useCreateToken() {
         params.about,
         params.validUntil,
       ],
-    });
+    } as const;
+    writeContract({ ...call, value: await donationFor(call, donate) });
   };
 
   return {
     write,
     txHash,
-    isPending,
+    isPending: isPreparing || isPending,
     isConfirming,
     isSuccess,
-    isLoading: isPending || isConfirming,
+    isLoading: isPreparing || isPending || isConfirming,
     error,
     reset,
   };
@@ -109,27 +158,33 @@ export function useAttestToken() {
     error,
     reset,
   } = useWriteContract();
+  const { donationFor, isPreparing } = useDonation();
 
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash: txHash,
   });
 
-  const write = (tokenId: bigint, durationSeconds: bigint) => {
-    writeContract({
+  const write = async (
+    tokenId: bigint,
+    durationSeconds: bigint,
+    donate: boolean
+  ) => {
+    const call = {
       address: IDENTITY_SYSTEM_ADDRESS,
       abi: IDENTITY_SYSTEM_ABI,
       functionName: "attestToken",
       args: [tokenId, durationSeconds],
-    });
+    } as const;
+    writeContract({ ...call, value: await donationFor(call, donate) });
   };
 
   return {
     write,
     txHash,
-    isPending,
+    isPending: isPreparing || isPending,
     isConfirming,
     isSuccess,
-    isLoading: isPending || isConfirming,
+    isLoading: isPreparing || isPending || isConfirming,
     error,
     reset,
   };
@@ -144,27 +199,29 @@ export function useRevokeAttestation() {
     error,
     reset,
   } = useWriteContract();
+  const { donationFor, isPreparing } = useDonation();
 
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash: txHash,
   });
 
-  const write = (tokenId: bigint) => {
-    writeContract({
+  const write = async (tokenId: bigint, donate: boolean) => {
+    const call = {
       address: IDENTITY_SYSTEM_ADDRESS,
       abi: IDENTITY_SYSTEM_ABI,
       functionName: "revokeAttestation",
       args: [tokenId],
-    });
+    } as const;
+    writeContract({ ...call, value: await donationFor(call, donate) });
   };
 
   return {
     write,
     txHash,
-    isPending,
+    isPending: isPreparing || isPending,
     isConfirming,
     isSuccess,
-    isLoading: isPending || isConfirming,
+    isLoading: isPreparing || isPending || isConfirming,
     error,
     reset,
   };
@@ -179,27 +236,29 @@ export function useFlagToken() {
     error,
     reset,
   } = useWriteContract();
+  const { donationFor, isPreparing } = useDonation();
 
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash: txHash,
   });
 
-  const write = (tokenId: bigint) => {
-    writeContract({
+  const write = async (tokenId: bigint, donate: boolean) => {
+    const call = {
       address: IDENTITY_SYSTEM_ADDRESS,
       abi: IDENTITY_SYSTEM_ABI,
       functionName: "flagToken",
       args: [tokenId],
-    });
+    } as const;
+    writeContract({ ...call, value: await donationFor(call, donate) });
   };
 
   return {
     write,
     txHash,
-    isPending,
+    isPending: isPreparing || isPending,
     isConfirming,
     isSuccess,
-    isLoading: isPending || isConfirming,
+    isLoading: isPreparing || isPending || isConfirming,
     error,
     reset,
   };
@@ -214,27 +273,29 @@ export function useBurnToken() {
     error,
     reset,
   } = useWriteContract();
+  const { donationFor, isPreparing } = useDonation();
 
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash: txHash,
   });
 
-  const write = (tokenId: bigint) => {
-    writeContract({
+  const write = async (tokenId: bigint, donate: boolean) => {
+    const call = {
       address: IDENTITY_SYSTEM_ADDRESS,
       abi: IDENTITY_SYSTEM_ABI,
       functionName: "burnToken",
       args: [tokenId],
-    });
+    } as const;
+    writeContract({ ...call, value: await donationFor(call, donate) });
   };
 
   return {
     write,
     txHash,
-    isPending,
+    isPending: isPreparing || isPending,
     isConfirming,
     isSuccess,
-    isLoading: isPending || isConfirming,
+    isLoading: isPreparing || isPending || isConfirming,
     error,
     reset,
   };
@@ -249,27 +310,33 @@ export function useTransferToken() {
     error,
     reset,
   } = useWriteContract();
+  const { donationFor, isPreparing } = useDonation();
 
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash: txHash,
   });
 
-  const write = (tokenId: bigint, sendingTo: `0x${string}`) => {
-    writeContract({
+  const write = async (
+    tokenId: bigint,
+    sendingTo: `0x${string}`,
+    donate: boolean
+  ) => {
+    const call = {
       address: IDENTITY_SYSTEM_ADDRESS,
       abi: IDENTITY_SYSTEM_ABI,
       functionName: "transferToken",
       args: [tokenId, sendingTo],
-    });
+    } as const;
+    writeContract({ ...call, value: await donationFor(call, donate) });
   };
 
   return {
     write,
     txHash,
-    isPending,
+    isPending: isPreparing || isPending,
     isConfirming,
     isSuccess,
-    isLoading: isPending || isConfirming,
+    isLoading: isPreparing || isPending || isConfirming,
     error,
     reset,
   };
@@ -286,6 +353,7 @@ export function useCreateProfile() {
     error,
     reset,
   } = useWriteContract();
+  const { donationFor, isPreparing } = useDonation();
 
   // A reverted transaction fails here, not at send time, so surface it too.
   const {
@@ -294,22 +362,27 @@ export function useCreateProfile() {
     error: receiptError,
   } = useWaitForTransactionReceipt({ hash: txHash });
 
-  const write = (data: ProfileMetadata, links: LinkUpdate[]) => {
-    writeContract({
+  const write = async (
+    data: ProfileMetadata,
+    links: LinkUpdate[],
+    donate: boolean
+  ) => {
+    const call = {
       address: PROFILE_SYSTEM_ADDRESS,
       abi: PROFILE_SYSTEM_ABI,
       functionName: "createProfile",
       args: [data, links],
-    });
+    } as const;
+    writeContract({ ...call, value: await donationFor(call, donate) });
   };
 
   return {
     write,
     txHash,
-    isPending,
+    isPending: isPreparing || isPending,
     isConfirming,
     isSuccess,
-    isLoading: isPending || isConfirming,
+    isLoading: isPreparing || isPending || isConfirming,
     error: error ?? receiptError,
     reset,
   };
@@ -324,6 +397,7 @@ export function useUpdateProfile() {
     error,
     reset,
   } = useWriteContract();
+  const { donationFor, isPreparing } = useDonation();
 
   const {
     isLoading: isConfirming,
@@ -331,21 +405,72 @@ export function useUpdateProfile() {
     error: receiptError,
   } = useWaitForTransactionReceipt({ hash: txHash });
 
-  const write = (
+  const write = async (
     tokenId: bigint,
     fields: FieldUpdate[],
-    links: LinkUpdate[]
+    links: LinkUpdate[],
+    donate: boolean
   ) => {
-    writeContract({
+    const call = {
       address: PROFILE_SYSTEM_ADDRESS,
       abi: PROFILE_SYSTEM_ABI,
       functionName: "updateProfile",
       args: [tokenId, fields, links],
+    } as const;
+    writeContract({ ...call, value: await donationFor(call, donate) });
+  };
+
+  return {
+    write,
+    txHash,
+    isPending: isPreparing || isPending,
+    isConfirming,
+    isSuccess,
+    isLoading: isPreparing || isPending || isConfirming,
+    error: error ?? receiptError,
+    reset,
+  };
+}
+
+// Dev fee Writes (only the dev wallet, or the proposed dev for acceptDev)
+
+type DevFeeCall =
+  | { functionName: "withdrawDevFees" }
+  | { functionName: "setDevFee"; args: readonly [bigint] }
+  | { functionName: "setDevFeeReceiver"; args: readonly [`0x${string}`] }
+  | { functionName: "proposeDev"; args: readonly [`0x${string}`] }
+  | { functionName: "acceptDev" };
+
+/** One dev action at a time; `functionName` says which one the status is for */
+export function useDevFeeWrite() {
+  const {
+    writeContract,
+    data: txHash,
+    isPending,
+    error,
+    reset,
+    variables,
+  } = useWriteContract();
+
+  const {
+    isLoading: isConfirming,
+    isSuccess,
+    error: receiptError,
+  } = useWaitForTransactionReceipt({ hash: txHash });
+
+  const write = (call: DevFeeCall) => {
+    writeContract({
+      address: IDENTITY_SYSTEM_ADDRESS,
+      abi: IDENTITY_SYSTEM_ABI,
+      ...call,
     });
   };
 
   return {
     write,
+    functionName: variables?.functionName as
+      | DevFeeCall["functionName"]
+      | undefined,
     txHash,
     isPending,
     isConfirming,

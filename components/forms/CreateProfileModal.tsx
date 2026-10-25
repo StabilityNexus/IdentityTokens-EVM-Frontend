@@ -14,6 +14,7 @@ import { useIdentityGate } from "@/hooks/useIdentityGate";
 import { useUsernameTaken } from "@/hooks/useIdentityReads";
 import { CreateProfileModalProps, TxStatus } from "@/lib/types";
 import { TransactionStatus } from "@/components/ui/TransactionStatus";
+import { DonationCheckbox } from "@/components/ui/DonationCheckbox";
 import { DEFAULT_AVATAR_ID, getRandomAvatarId } from "@/lib/avatars";
 import {
   CustomLink,
@@ -55,6 +56,7 @@ export function CreateProfileModal({
   const [customLinks, setCustomLinks] = useState<CustomLink[]>([]);
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
   const [step, setStep] = useState<"idle" | "submitting">("idle");
+  const [donate, setDonate] = useState(true);
 
   const { address, refetchHasProfile, refetchProfileTokenId } =
     useIdentityGate();
@@ -153,6 +155,7 @@ export function CreateProfileModal({
     setCustomLinks([]);
     setHasAttemptedSubmit(false);
     setStep("idle");
+    setDonate(true);
     createProfile.reset();
     updateProfile.reset();
     onClose();
@@ -170,15 +173,16 @@ export function CreateProfileModal({
   const submitProfile = useCallback(() => {
     setStep("submitting");
     if (edit && diff) {
-      updateProfile.write(edit.tokenId, diff.fields, diff.links);
+      updateProfile.write(edit.tokenId, diff.fields, diff.links, donate);
       return;
     }
     createProfile.write(
       normalizeProfile(formData, avatarId ?? DEFAULT_AVATAR_ID),
-      diffLinks([], customLinks)
+      diffLinks([], customLinks),
+      donate
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [edit, diff, formData, avatarId, customLinks]);
+  }, [edit, diff, formData, avatarId, customLinks, donate]);
 
   // Seed the form each time the modal opens: an edit starts from what is
   // on-chain, a new profile from blank fields and a fresh random avatar. This
@@ -487,6 +491,12 @@ export function CreateProfileModal({
 
         {/* ── Footer ───────────────────────────────────────────────── */}
         <div className="shrink-0 border-t border-white/8 bg-app-bg px-6 py-4 md:px-8">
+          <DonationCheckbox
+            checked={donate}
+            onChange={setDonate}
+            disabled={isSubmitting}
+            className="mb-3"
+          />
           {txStatus !== "idle" && (
             <div className="mb-3">
               <TransactionStatus

@@ -6,13 +6,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FiMenu } from "react-icons/fi";
 import { TOUR_TARGETS, type TourTarget } from "@/lib/tour";
+import { useDevFeeConfig } from "@/hooks/useIdentityReads";
 
 interface NavItem {
   label: string;
   href: string;
   icon: string;
   /** Handle the product tour highlights this item by. */
-  tourTarget: TourTarget;
+  tourTarget?: TourTarget;
 }
 
 const navItems: NavItem[] = [
@@ -36,8 +37,17 @@ const navItems: NavItem[] = [
   },
 ];
 
+// Only the dev wallet, or the one proposed to replace it, sees this
+const devFeeItem: NavItem = {
+  label: "Dev fee",
+  href: "/dev-fee",
+  icon: "/assets/dev-fee.svg",
+};
+
 export function DashboardSidebar() {
   const pathname = usePathname();
+  const { isDev, isPendingDev } = useDevFeeConfig();
+  const items = isDev || isPendingDev ? [...navItems, devFeeItem] : navItems;
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
@@ -124,7 +134,7 @@ export function DashboardSidebar() {
 
         {/* ─── Navigation links ─── */}
         <nav className="no-scrollbar flex flex-1 flex-col gap-1 overflow-x-hidden overflow-y-auto px-3 py-6">
-          {navItems.map((item) => {
+          {items.map((item) => {
             const active = isActive(item.href);
             return (
               <Link

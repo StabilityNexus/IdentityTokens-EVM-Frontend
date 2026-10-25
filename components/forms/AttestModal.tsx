@@ -9,6 +9,7 @@ import { AttestModalProps, TxStatus } from "@/lib/types";
 import { formatTokenId } from "@/lib/tokenId";
 import { NO_EXPIRY_DURATION } from "@/lib/helpers";
 import { TransactionStatus } from "@/components/ui/TransactionStatus";
+import { DonationCheckbox } from "@/components/ui/DonationCheckbox";
 import { Modal } from "@/components/ui/Modal";
 
 /** Duration presets in seconds */
@@ -33,6 +34,7 @@ export function AttestModal({
   const [selectedPreset, setSelectedPreset] = useState<number>(1); // default: 90 days
   const [customDays, setCustomDays] = useState("");
   const [useCustom, setUseCustom] = useState(false);
+  const [donate, setDonate] = useState(true);
 
   const { address, rootId } = useIdentityGate();
   const { data: ownerAddress } = useTokenOwner(tokenId);
@@ -90,7 +92,7 @@ export function AttestModal({
     e.preventDefault();
     // Previously a custom value of 0 or below fell through to a silent return.
     if (durationError) return;
-    attestToken.write(tokenId, getDurationSeconds());
+    attestToken.write(tokenId, getDurationSeconds(), donate);
   };
 
   const getTxStatus = (): TxStatus => {
@@ -231,6 +233,12 @@ export function AttestModal({
             </Link>
           </div>
         )}
+
+        <DonationCheckbox
+          checked={donate}
+          onChange={setDonate}
+          disabled={isSubmitting}
+        />
 
         {/* Transaction Status */}
         <TransactionStatus

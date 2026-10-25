@@ -11,6 +11,7 @@ import { ReserveStatus } from "@/components/claim/ReserveStatus";
 import { ReservedView } from "@/components/claim/ReservedView";
 import { ShareCardModal } from "@/components/claim/ShareCardModal";
 import { TermsConsent } from "@/components/claim/TermsConsent";
+import { DonationCheckbox } from "@/components/ui/DonationCheckbox";
 import { UsernameField } from "@/components/claim/UsernameField";
 import { useRootId, useRootIdentityView } from "@/hooks/useIdentityReads";
 import { useCreateRootIdentity } from "@/hooks/useIdentityWrites";
@@ -28,6 +29,7 @@ const noSubscription = () => () => {};
 export default function ClaimPage() {
   const [username, setUsername] = useState("");
   const [hasAgreed, setHasAgreed] = useState(false);
+  const [donate, setDonate] = useState(true);
   const [termsNudge, setTermsNudge] = useState(false);
   const [submittedName, setSubmittedName] = useState<string | null>(null);
   const [switchError, setSwitchError] = useState<unknown>(null);
@@ -152,7 +154,7 @@ export default function ClaimPage() {
     }
 
     setSubmittedName(username);
-    createRoot.write(username);
+    createRoot.write(username, donate);
   };
 
   const handleSpinSettled = () => {
@@ -231,6 +233,14 @@ export default function ClaimPage() {
                 onAgreedChange={handleAgreedChange}
                 showNudge={termsNudge}
                 disabled={isSubmitting}
+              />
+              <DonationCheckbox
+                checked={donate}
+                onChange={setDonate}
+                disabled={isSubmitting}
+                chainId={CLAIM_CHAIN.id}
+                variant="page"
+                className="mt-3 text-left"
               />
             </div>
 

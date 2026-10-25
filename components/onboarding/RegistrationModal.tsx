@@ -7,6 +7,7 @@ import { ShieldCheck } from "lucide-react";
 import { useCreateRootIdentity } from "@/hooks/useIdentityWrites";
 import { useOnboardingStatus } from "@/hooks/useOnboardingStatus";
 import { TransactionStatus } from "@/components/ui/TransactionStatus";
+import { DonationCheckbox } from "@/components/ui/DonationCheckbox";
 import { TextField } from "@/components/forms/fields/TextField";
 import { TERMS_SUMMARY } from "@/lib/constants";
 import { RegistrationModalProps, TxStatus } from "@/lib/types";
@@ -18,6 +19,7 @@ import { truncateAddress } from "@/lib/helpers";
 export function RegistrationModal({ onSubmitted }: RegistrationModalProps) {
   const [displayName, setDisplayName] = useState("");
   const [hasAgreed, setHasAgreed] = useState(false);
+  const [donate, setDonate] = useState(true);
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
 
   const { address, hasRootIdentity, refetchRootId } = useOnboardingStatus();
@@ -51,12 +53,13 @@ export function RegistrationModal({ onSubmitted }: RegistrationModalProps) {
       if (isNameMissing || nameResult.status === "invalid") return;
       if (!hasAgreed || !address || isSubmitting || isDone) return;
 
-      createRoot.write(displayName.trim());
+      createRoot.write(displayName.trim(), donate);
     },
     [
       address,
       createRoot,
       displayName,
+      donate,
       hasAgreed,
       isDone,
       isNameMissing,
@@ -194,6 +197,12 @@ export function RegistrationModal({ onSubmitted }: RegistrationModalProps) {
             </p>
           )}
         </div>
+
+        <DonationCheckbox
+          checked={donate}
+          onChange={setDonate}
+          disabled={isSubmitting || isDone}
+        />
 
         {txStatus !== "idle" && (
           <TransactionStatus

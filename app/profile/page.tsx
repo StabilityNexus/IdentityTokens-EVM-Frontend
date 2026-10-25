@@ -14,6 +14,7 @@ import {
 import { useRevokeAttestation } from "@/hooks/useIdentityWrites";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
 import { AttestModal } from "@/components/forms/AttestModal";
+import { ConfirmTxModal } from "@/components/forms/ConfirmTxModal";
 import { CreateProfileModal } from "@/components/forms/CreateProfileModal";
 import { AttestersModal } from "@/components/attestations/AttestersModal";
 import { TransactionStatus } from "@/components/ui/TransactionStatus";
@@ -73,6 +74,7 @@ export default function ProfilePage() {
   const [isAttestModalOpen, setIsAttestModalOpen] = useState(false);
   const [isAttestersModalOpen, setIsAttestersModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isRevokeConfirmOpen, setIsRevokeConfirmOpen] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
   const totalAttestations = Number(attestationCount ?? 0n);
@@ -200,11 +202,7 @@ export default function ProfilePage() {
             hasAttested={!!viewerHasAttested}
             isRevoking={revokeAttestation.isLoading}
             onAttest={() => requireWallet(() => setIsAttestModalOpen(true))}
-            onRevoke={() =>
-              requireWallet(() => {
-                if (profileTokenId) revokeAttestation.write(profileTokenId);
-              })
-            }
+            onRevoke={() => requireWallet(() => setIsRevokeConfirmOpen(true))}
             // The edit diff compares against the saved links, so wait for the
             // current list or an edit could overwrite links it never saw. A
             // failed refetch keeps the old data but leaves isSuccess false.
@@ -266,6 +264,19 @@ export default function ProfilePage() {
           onClose={() => setIsAttestersModalOpen(false)}
           tokenId={profileTokenId}
           tokenName={profileData.name}
+        />
+      )}
+
+      {isRevokeConfirmOpen && profileTokenId && (
+        <ConfirmTxModal
+          title="Revoke attestation"
+          description={`Withdraw your attestation of ${profileData.name}. It stops counting toward this profile’s trust.`}
+          confirmLabel="Revoke"
+          tone="red"
+          onConfirm={(donate) =>
+            revokeAttestation.write(profileTokenId, donate)
+          }
+          onClose={() => setIsRevokeConfirmOpen(false)}
         />
       )}
 

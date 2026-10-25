@@ -9,6 +9,7 @@ import { useCreateToken } from "@/hooks/useIdentityWrites";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
 import { CreateTokenModalProps, TxStatus } from "@/lib/types";
 import { TransactionStatus } from "@/components/ui/TransactionStatus";
+import { DonationCheckbox } from "@/components/ui/DonationCheckbox";
 
 export const tokenSchema = z.object({
   name: z.string().min(1, "Token Name is required"),
@@ -47,6 +48,7 @@ export function CreateTokenModal({
   const createToken = useCreateToken();
 
   const [step, setStep] = useState<"idle" | "creating-token">("idle");
+  const [donate, setDonate] = useState(true);
 
   // Declared ahead of the effects below, which call them from their timers.
   const handleClose = useCallback(() => {
@@ -54,6 +56,7 @@ export function CreateTokenModal({
     setErrors({});
     setIsCustomType(false);
     setStep("idle");
+    setDonate(true);
     createToken.reset();
     onClose();
   }, [onClose, createToken]);
@@ -67,14 +70,17 @@ export function CreateTokenModal({
     }
 
     setStep("creating-token");
-    createToken.write({
-      tokenName: tokenState.name,
-      tokenType: tokenState.type.trim(),
-      tokenValue: tokenState.value,
-      about: tokenState.about || "",
-      validUntil: validUntilTimestamp,
-    });
-  }, [tokenState, createToken]);
+    createToken.write(
+      {
+        tokenName: tokenState.name,
+        tokenType: tokenState.type.trim(),
+        tokenValue: tokenState.value,
+        about: tokenState.about || "",
+        validUntil: validUntilTimestamp,
+      },
+      donate
+    );
+  }, [tokenState, createToken, donate]);
 
   // After token creation succeeds, clean up
   useEffect(() => {
@@ -337,6 +343,12 @@ export function CreateTokenModal({
               <span className="text-xs text-red-500">{errors.validUntil}</span>
             )}
           </div>
+
+          <DonationCheckbox
+            checked={donate}
+            onChange={setDonate}
+            disabled={isSubmitting}
+          />
 
           {/* Transaction Status */}
           <TransactionStatus

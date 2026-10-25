@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { AttestModal } from "@/components/forms/AttestModal";
+import { ConfirmTxModal } from "@/components/forms/ConfirmTxModal";
 import { useHasAttested, useRootId } from "@/hooks/useIdentityReads";
 import { useFlagToken, useRevokeAttestation } from "@/hooks/useIdentityWrites";
 import { useSearchIndex } from "@/hooks/useSearchIndex";
@@ -286,6 +287,7 @@ function MatchActions({
   const revoke = useRevokeAttestation();
   const flag = useFlagToken();
   const [isAttestOpen, setIsAttestOpen] = useState(false);
+  const [confirming, setConfirming] = useState<"revoke" | "flag" | null>(null);
 
   useEffect(() => {
     if (!revoke.isSuccess) return;
@@ -319,7 +321,8 @@ function MatchActions({
           disabled={busy}
           onClick={() => {
             flag.reset();
-            revoke.write(tokenId);
+            revoke.reset();
+            setConfirming("revoke");
           }}
           className="rounded-lg border border-red-500/20 bg-red-500/10 px-2 py-1.5 font-utsaha text-xs text-red-500 transition-colors hover:bg-red-500/20 disabled:opacity-50 sm:px-3 sm:text-sm"
         >
@@ -358,7 +361,8 @@ function MatchActions({
             disabled={busy || flag.isSuccess}
             onClick={() => {
               revoke.reset();
-              flag.write(tokenId);
+              flag.reset();
+              setConfirming("flag");
             }}
             className="cursor-pointer gap-2 text-yellow-400 hover:bg-white/10 focus:bg-white/5 focus:text-yellow-400"
           >
@@ -383,6 +387,28 @@ function MatchActions({
           tokenId={tokenId}
           tokenName={name}
           onSuccess={() => refetchAttested()}
+        />
+      )}
+
+      {confirming === "revoke" && (
+        <ConfirmTxModal
+          title="Revoke attestation"
+          description={`Withdraw your attestation of “${name}”. It stops counting toward this token’s trust.`}
+          confirmLabel="Revoke"
+          tone="red"
+          onConfirm={(donate) => revoke.write(tokenId, donate)}
+          onClose={() => setConfirming(null)}
+        />
+      )}
+
+      {confirming === "flag" && (
+        <ConfirmTxModal
+          title="Flag / Report"
+          description={`Report “${name}” as untrustworthy. Flags are public and can’t be undone.`}
+          confirmLabel="Flag"
+          tone="yellow"
+          onConfirm={(donate) => flag.write(tokenId, donate)}
+          onClose={() => setConfirming(null)}
         />
       )}
     </>

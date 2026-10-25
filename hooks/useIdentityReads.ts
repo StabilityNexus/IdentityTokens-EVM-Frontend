@@ -2,7 +2,14 @@
 
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { usePublicClient, useReadContract, useReadContracts } from "wagmi";
+import {
+  useAccount,
+  useBalance,
+  usePublicClient,
+  useReadContract,
+  useReadContracts,
+} from "wagmi";
+import { isAddressEqual, zeroAddress } from "viem";
 import {
   IDENTITY_SYSTEM_ADDRESS,
   IDENTITY_SYSTEM_ABI,
@@ -174,6 +181,74 @@ export function useTokenOwner(tokenId: bigint | undefined) {
     args: tokenId !== undefined ? [tokenId] : undefined,
     query: { enabled: tokenId !== undefined },
   });
+}
+
+/** The donation as a percentage of a transaction's gas fee (100 = equal to it) */
+export function useDevFee(chainId?: number) {
+  return useReadContract({
+    address: IDENTITY_SYSTEM_ADDRESS,
+    abi: IDENTITY_SYSTEM_ABI,
+    functionName: "devFee",
+    chainId,
+  });
+}
+
+/** Dev-fee settings, and whether the connected wallet is the dev or the proposed one */
+export function useDevFeeConfig() {
+  const { address } = useAccount();
+  const contract = {
+    address: IDENTITY_SYSTEM_ADDRESS,
+    abi: IDENTITY_SYSTEM_ABI,
+  } as const;
+
+  const { data, isLoading, refetch } = useReadContracts({
+    contracts: [
+      { ...contract, functionName: "dev" },
+      { ...contract, functionName: "pendingDev" },
+      { ...contract, functionName: "devFeeReceiver" },
+      { ...contract, functionName: "devFee" },
+      { ...contract, functionName: "MAX_DEV_FEE" },
+    ],
+  });
+
+  const [dev, pending, devFeeReceiver, devFee, maxDevFee] = (data ?? []).map(
+    (read) => read.result
+  );
+  // The contract reports "no proposal" as the zero address
+  const pendingDev =
+    pending && pending !== zeroAddress ? (pending as `0x${string}`) : undefined;
+  const isWallet = (role: unknown) =>
+    !!address && !!role && isAddressEqual(address, role as `0x${string}`);
+
+  return {
+    dev: dev as `0x${string}` | undefined,
+    pendingDev,
+    devFeeReceiver: devFeeReceiver as `0x${string}` | undefined,
+    devFee: devFee as bigint | undefined,
+    maxDevFee: maxDevFee as bigint | undefined,
+    isDev: isWallet(dev),
+    isPendingDev: isWallet(pendingDev),
+    isLoading,
+    refetch,
+  };
+}
+
+/** Donations waiting in both contracts, which one withdrawal sends on */
+export function useDevFeesWaiting() {
+  const identity = useBalance({ address: IDENTITY_SYSTEM_ADDRESS });
+  const profile = useBalance({ address: PROFILE_SYSTEM_ADDRESS });
+
+  return {
+    value:
+      identity.data && profile.data
+        ? identity.data.value + profile.data.value
+        : undefined,
+    symbol: identity.data?.symbol,
+    refetch: () => {
+      identity.refetch();
+      profile.refetch();
+    },
+  };
 }
 
 // ProfileSystem Reads

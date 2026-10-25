@@ -11,7 +11,43 @@ export * from "./types.responses";
 export const IDENTITY_SYSTEM_ABI = [
   {
     type: "constructor",
+    inputs: [
+      {
+        name: "_dev",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "_devFeeReceiver",
+        type: "address",
+        internalType: "address",
+      },
+      {
+        name: "_devFee",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "MAX_DEV_FEE",
     inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "acceptDev",
+    inputs: [],
+    outputs: [],
     stateMutability: "nonpayable",
   },
   {
@@ -61,7 +97,7 @@ export const IDENTITY_SYSTEM_ABI = [
       },
     ],
     outputs: [],
-    stateMutability: "nonpayable",
+    stateMutability: "payable",
   },
   {
     type: "function",
@@ -93,7 +129,7 @@ export const IDENTITY_SYSTEM_ABI = [
       },
     ],
     outputs: [],
-    stateMutability: "nonpayable",
+    stateMutability: "payable",
   },
   {
     type: "function",
@@ -112,7 +148,7 @@ export const IDENTITY_SYSTEM_ABI = [
         internalType: "uint256",
       },
     ],
-    stateMutability: "nonpayable",
+    stateMutability: "payable",
   },
   {
     type: "function",
@@ -151,7 +187,46 @@ export const IDENTITY_SYSTEM_ABI = [
         internalType: "uint256",
       },
     ],
-    stateMutability: "nonpayable",
+    stateMutability: "payable",
+  },
+  {
+    type: "function",
+    name: "dev",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "devFee",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "devFeeReceiver",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    stateMutability: "view",
   },
   {
     type: "function",
@@ -164,7 +239,7 @@ export const IDENTITY_SYSTEM_ABI = [
       },
     ],
     outputs: [],
-    stateMutability: "nonpayable",
+    stateMutability: "payable",
   },
   {
     type: "function",
@@ -758,6 +833,19 @@ export const IDENTITY_SYSTEM_ABI = [
   },
   {
     type: "function",
+    name: "pendingDev",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
     name: "profileSystem",
     inputs: [],
     outputs: [
@@ -771,6 +859,19 @@ export const IDENTITY_SYSTEM_ABI = [
   },
   {
     type: "function",
+    name: "proposeDev",
+    inputs: [
+      {
+        name: "newDev",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
     name: "revokeAttestation",
     inputs: [
       {
@@ -780,7 +881,7 @@ export const IDENTITY_SYSTEM_ABI = [
       },
     ],
     outputs: [],
-    stateMutability: "nonpayable",
+    stateMutability: "payable",
   },
   {
     type: "function",
@@ -909,6 +1010,32 @@ export const IDENTITY_SYSTEM_ABI = [
         name: "approved",
         type: "bool",
         internalType: "bool",
+      },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "setDevFee",
+    inputs: [
+      {
+        name: "newDevFee",
+        type: "uint256",
+        internalType: "uint256",
+      },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "setDevFeeReceiver",
+    inputs: [
+      {
+        name: "receiver",
+        type: "address",
+        internalType: "address",
       },
     ],
     outputs: [],
@@ -1139,7 +1266,7 @@ export const IDENTITY_SYSTEM_ABI = [
       },
     ],
     outputs: [],
-    stateMutability: "nonpayable",
+    stateMutability: "payable",
   },
   {
     type: "function",
@@ -1164,6 +1291,13 @@ export const IDENTITY_SYSTEM_ABI = [
       },
     ],
     stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "withdrawDevFees",
+    inputs: [],
+    outputs: [],
+    stateMutability: "nonpayable",
   },
   {
     type: "event",
@@ -1261,6 +1395,89 @@ export const IDENTITY_SYSTEM_ABI = [
         type: "uint256",
         indexed: false,
         internalType: "uint256",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "DevFeeReceiverSet",
+    inputs: [
+      {
+        name: "receiver",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "DevFeeSet",
+    inputs: [
+      {
+        name: "devFee",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "DevFeesWithdrawn",
+    inputs: [
+      {
+        name: "receiver",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      {
+        name: "amount",
+        type: "uint256",
+        indexed: false,
+        internalType: "uint256",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "DevTransferProposed",
+    inputs: [
+      {
+        name: "dev",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      {
+        name: "pendingDev",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: "event",
+    name: "DevTransferred",
+    inputs: [
+      {
+        name: "previousDev",
+        type: "address",
+        indexed: true,
+        internalType: "address",
+      },
+      {
+        name: "newDev",
+        type: "address",
+        indexed: true,
+        internalType: "address",
       },
     ],
     anonymous: false,
@@ -1489,6 +1706,16 @@ export const IDENTITY_SYSTEM_ABI = [
   },
   {
     type: "error",
+    name: "DevFeeTooHigh",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "DevFeeTransferFailed",
+    inputs: [],
+  },
+  {
+    type: "error",
     name: "ERC721IncorrectOwner",
     inputs: [
       {
@@ -1622,7 +1849,17 @@ export const IDENTITY_SYSTEM_ABI = [
   },
   {
     type: "error",
+    name: "NotDev",
+    inputs: [],
+  },
+  {
+    type: "error",
     name: "NotHolder",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "NotPendingDev",
     inputs: [],
   },
   {
@@ -1800,7 +2037,7 @@ export const PROFILE_SYSTEM_ABI = [
         internalType: "uint256",
       },
     ],
-    stateMutability: "nonpayable",
+    stateMutability: "payable",
   },
   {
     type: "function",
@@ -2017,6 +2254,19 @@ export const PROFILE_SYSTEM_ABI = [
   },
   {
     type: "function",
+    name: "sweepDevFees",
+    inputs: [
+      {
+        name: "to",
+        type: "address",
+        internalType: "address",
+      },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
     name: "updateProfile",
     inputs: [
       {
@@ -2065,7 +2315,7 @@ export const PROFILE_SYSTEM_ABI = [
       },
     ],
     outputs: [],
-    stateMutability: "nonpayable",
+    stateMutability: "payable",
   },
   {
     type: "function",
@@ -2146,6 +2396,11 @@ export const PROFILE_SYSTEM_ABI = [
   {
     type: "error",
     name: "AlreadyMintedProfile",
+    inputs: [],
+  },
+  {
+    type: "error",
+    name: "DevFeeTransferFailed",
     inputs: [],
   },
   {

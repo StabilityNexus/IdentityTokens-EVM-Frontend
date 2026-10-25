@@ -26,7 +26,14 @@ export function DashboardNavbar() {
     refetchWalletTokens,
   } = useIdentityGate();
 
-  const knownRoutes = ["/", "/home", "/dashboard", "/discover", "/wallet"];
+  const knownRoutes = [
+    "/",
+    "/home",
+    "/dashboard",
+    "/discover",
+    "/dev-fee",
+    "/wallet",
+  ];
   const firstSegment = pathname?.split("/").filter(Boolean)[0] ?? "";
   const isUserProfile =
     pathname !== "/" &&
@@ -44,7 +51,8 @@ export function DashboardNavbar() {
     if (!pathname || pathname === "/") return "Home";
     const segments = pathname.split("/").filter(Boolean);
     const route = segments[segments.length - 1] || "Home";
-    return route.charAt(0).toUpperCase() + route.slice(1);
+    // "dev-fee" reads as "Dev fee"
+    return (route.charAt(0).toUpperCase() + route.slice(1)).replace(/-/g, " ");
   };
 
   const handleButtonClick = () => {

@@ -77,12 +77,12 @@ Decentralized Identity Tokens let anyone create and own a digital identity on th
 
 ## 📜 Deployed Smart Contracts
 
-The official smart contracts for Decentralized Identity Tokens are deployed on **Ethereum Sepolia (v0.0.3)**:
+The official smart contracts for Decentralized Identity Tokens are deployed on **Ethereum Sepolia (v0.0.6)**:
 
 | Contract           | Address                                      | Explorer Link                                                                                        |
 | :----------------- | :------------------------------------------- | :--------------------------------------------------------------------------------------------------- |
-| **IdentitySystem** | `0x82b049805626202D04c7450b386732B34180D634` | [View on Etherscan](https://sepolia.etherscan.io/address/0x82b049805626202D04c7450b386732B34180D634) |
-| **ProfileSystem**  | `0x34bC039aD24cd2c13b093847612180FdbEAdC78a` | [View on Etherscan](https://sepolia.etherscan.io/address/0x34bC039aD24cd2c13b093847612180FdbEAdC78a) |
+| **IdentitySystem** | `0x15253A56CD3EbC2893914C2139094dc92a42c016` | [View on Etherscan](https://sepolia.etherscan.io/address/0x15253A56CD3EbC2893914C2139094dc92a42c016) |
+| **ProfileSystem**  | `0x17dc6AA09432d61ca630b523DAF01fB2b98Bd58D` | [View on Etherscan](https://sepolia.etherscan.io/address/0x17dc6AA09432d61ca630b523DAF01fB2b98Bd58D) |
 
 ---
 
@@ -159,9 +159,9 @@ npm install
    # WalletConnect / Reown Project ID (free from https://cloud.reown.com/)
    NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=YOUR_PROJECT_ID
 
-   # Contract Addresses (Defaults to Sepolia v0.0.3)
-   NEXT_PUBLIC_IDENTITY_SYSTEM_ADDRESS=0x82b049805626202D04c7450b386732B34180D634
-   NEXT_PUBLIC_PROFILE_SYSTEM_ADDRESS=0x34bC039aD24cd2c13b093847612180FdbEAdC78a
+   # Contract Addresses (Defaults to Sepolia v0.0.6)
+   NEXT_PUBLIC_IDENTITY_SYSTEM_ADDRESS=0x15253A56CD3EbC2893914C2139094dc92a42c016
+   NEXT_PUBLIC_PROFILE_SYSTEM_ADDRESS=0x17dc6AA09432d61ca630b523DAF01fB2b98Bd58D
    ```
 
 ---

@@ -315,7 +315,7 @@ export function useCreateProfile() {
   };
 }
 
-/** Edit a profile — only the given fields and link slots are written */
+/** Edit a profile — only the given fields and links are written */
 export function useUpdateProfile() {
   const {
     writeContract,

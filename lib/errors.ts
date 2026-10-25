@@ -26,7 +26,8 @@ const CONTRACT_ERROR_MESSAGES: Record<string, string> = {
     "Username can only contain lowercase letters, numbers, dots (.) and underscores (_).",
   NotProfileOwner: "Only the owner of this profile can edit it.",
   ProfileNotFound: "This profile does not exist or has been burned.",
-  InvalidLinkSlot: "A profile can have at most 6 custom links.",
+  InvalidLinkIndex:
+    "Your links changed since this page loaded. Reload and try again.",
 
   // Token
   NotToken: "This is not a valid token for this operation.",

@@ -1,8 +1,19 @@
+import { foundry, sepolia } from "wagmi/chains";
+
 export const IDENTITY_SYSTEM_ADDRESS =
   "0x15253A56CD3EbC2893914C2139094dc92a42c016" as const;
 
 export const PROFILE_SYSTEM_ADDRESS =
   "0x17dc6AA09432d61ca630b523DAF01fB2b98Bd58D" as const;
+
+/**
+ * Block IdentitySystem was deployed in, per chain; update it together with the
+ * addresses. Notifications only scan the chains listed here.
+ */
+export const DEPLOY_BLOCKS: Partial<Record<number, bigint>> = {
+  [foundry.id]: 0n,
+  [sepolia.id]: 11_934_008n,
+};
 
 export * from "./types.responses";
 

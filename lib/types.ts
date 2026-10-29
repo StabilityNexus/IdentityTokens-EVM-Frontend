@@ -110,6 +110,8 @@ export interface TokenFormProps {
   tokenName?: string;
   tokenId?: bigint;
   onSuccess?: () => void;
+  /** Open with the transfer section expanded */
+  openTransfer?: boolean;
 }
 
 export interface AttestModalProps {

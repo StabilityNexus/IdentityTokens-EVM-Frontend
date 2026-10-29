@@ -16,9 +16,10 @@ export function TokenForm({
   tokenName = "Token Name",
   tokenId,
   onSuccess,
+  openTransfer = false,
 }: TokenFormProps) {
   const [transferAddress, setTransferAddress] = useState("");
-  const [showTransfer, setShowTransfer] = useState(false);
+  const [showTransfer, setShowTransfer] = useState(openTransfer);
   const [showBurnConfirm, setShowBurnConfirm] = useState(false);
   const [action, setAction] = useState<"idle" | "burning" | "transferring">(
     "idle"

@@ -3,20 +3,10 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAccount } from "wagmi";
-import { Fingerprint, Flag, Hash, MoreVertical, UserRound } from "lucide-react";
+import { Fingerprint, Hash, UserRound } from "lucide-react";
 import { SearchBar } from "./SearchBar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { AttestModal } from "@/components/forms/AttestModal";
-import { ConfirmTxModal } from "@/components/forms/ConfirmTxModal";
-import { useHasAttested, useRootId } from "@/hooks/useIdentityReads";
-import { useFlagToken, useRevokeAttestation } from "@/hooks/useIdentityWrites";
+import { TokenActions } from "@/components/cards/TokenActions";
 import { useSearchIndex } from "@/hooks/useSearchIndex";
-import { getContractErrorMessage } from "@/lib/errors";
 import { truncateAddress } from "@/lib/helpers";
 import { searchEntries, type SearchEntry, type SearchType } from "@/lib/search";
 import { formatTokenId } from "@/lib/tokenId";
@@ -217,7 +207,7 @@ function EntryRow({
       }
       onView={view}
     >
-      <MatchActions tokenId={entry.id} name={entry.title} owner={entry.owner} />
+      <TokenActions tokenId={entry.id} name={entry.title} owner={entry.owner} />
     </Row>
   );
 }
@@ -265,152 +255,5 @@ function Row({
         {children}
       </div>
     </div>
-  );
-}
-
-// Attest, or Revoke while the viewer's attestation is live, plus ⋮ → Flag / Report
-function MatchActions({
-  tokenId,
-  name,
-  owner,
-}: {
-  tokenId: bigint;
-  name: string;
-  owner?: string;
-}) {
-  const { address, isConnected } = useAccount();
-  const { data: rootId } = useRootId(address);
-  const { data: hasAttested, refetch: refetchAttested } = useHasAttested(
-    rootId ? rootId : undefined,
-    tokenId
-  );
-  const revoke = useRevokeAttestation();
-  const flag = useFlagToken();
-  const [isAttestOpen, setIsAttestOpen] = useState(false);
-  const [confirming, setConfirming] = useState<"revoke" | "flag" | null>(null);
-
-  useEffect(() => {
-    if (!revoke.isSuccess) return;
-    refetchAttested();
-  }, [revoke.isSuccess, refetchAttested]);
-
-  if (!isConnected) return null;
-  if (address && owner && address.toLowerCase() === owner.toLowerCase()) {
-    return <span className="font-utsaha text-xs text-gray-500">Yours</span>;
-  }
-
-  const busy = revoke.isLoading || flag.isLoading;
-  const error = revoke.error ?? flag.error;
-  const status = error
-    ? getContractErrorMessage(error)
-    : revoke.isLoading
-      ? "Revoking…"
-      : flag.isLoading
-        ? "Flagging…"
-        : revoke.isSuccess
-          ? "Attestation revoked"
-          : flag.isSuccess
-            ? "Flagged"
-            : null;
-
-  return (
-    <>
-      {hasAttested ? (
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => {
-            flag.reset();
-            revoke.reset();
-            setConfirming("revoke");
-          }}
-          className="rounded-lg border border-red-500/20 bg-red-500/10 px-2 py-1.5 font-utsaha text-xs text-red-500 transition-colors hover:bg-red-500/20 disabled:opacity-50 sm:px-3 sm:text-sm"
-        >
-          Revoke
-        </button>
-      ) : (
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => {
-            revoke.reset();
-            flag.reset();
-            setIsAttestOpen(true);
-          }}
-          className="rounded-lg bg-brand-blue px-2 py-1.5 font-utsaha text-xs text-white transition-all hover:scale-[1.02] hover:bg-blue-700 active:scale-[0.98] disabled:opacity-50 sm:px-3 sm:text-sm"
-        >
-          Attest
-        </button>
-      )}
-
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button
-            type="button"
-            aria-label="More actions"
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-500 transition-colors outline-none hover:bg-white/5 hover:text-white"
-          >
-            <MoreVertical size={18} />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
-          align="end"
-          className="w-48 border-card-inner-bg bg-app-bg font-utsaha text-white"
-        >
-          <DropdownMenuItem
-            disabled={busy || flag.isSuccess}
-            onClick={() => {
-              revoke.reset();
-              flag.reset();
-              setConfirming("flag");
-            }}
-            className="cursor-pointer gap-2 text-yellow-400 hover:bg-white/10 focus:bg-white/5 focus:text-yellow-400"
-          >
-            <Flag size={16} />
-            <span>Flag / Report</span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      {status && (
-        <span
-          className={`w-full font-utsaha text-xs sm:w-auto ${error ? "text-red-400" : "text-gray-400"}`}
-        >
-          {status}
-        </span>
-      )}
-
-      {isAttestOpen && (
-        <AttestModal
-          isOpen
-          onClose={() => setIsAttestOpen(false)}
-          tokenId={tokenId}
-          tokenName={name}
-          onSuccess={() => refetchAttested()}
-        />
-      )}
-
-      {confirming === "revoke" && (
-        <ConfirmTxModal
-          title="Revoke attestation"
-          description={`Withdraw your attestation of “${name}”. It stops counting toward this token’s trust.`}
-          confirmLabel="Revoke"
-          tone="red"
-          onConfirm={(donate) => revoke.write(tokenId, donate)}
-          onClose={() => setConfirming(null)}
-        />
-      )}
-
-      {confirming === "flag" && (
-        <ConfirmTxModal
-          title="Flag / Report"
-          description={`Report “${name}” as untrustworthy. Flags are public and can’t be undone.`}
-          confirmLabel="Flag"
-          tone="yellow"
-          onConfirm={(donate) => flag.write(tokenId, donate)}
-          onClose={() => setConfirming(null)}
-        />
-      )}
-    </>
   );
 }

@@ -10,8 +10,6 @@ export function TokenList({
   tokens,
   className = "",
   title,
-  onRevoke,
-  onAttest,
   onViewAll,
   readOnly = false,
   emptyMessage = "No tokens found.",
@@ -44,10 +42,6 @@ export function TokenList({
               type={token.type}
               expiresIn={token.expiresIn}
               attestations={token.attestations}
-              historyAction={token.historyAction}
-              actionWalletId={token.actionWalletId}
-              onRevoke={onRevoke ? () => onRevoke(token.tokenId) : undefined}
-              onAttest={onAttest ? () => onAttest(token.tokenId) : undefined}
               onViewAll={onViewAll ? () => onViewAll(token.tokenId) : undefined}
               readOnly={readOnly}
               owner={token.owner}

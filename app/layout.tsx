@@ -63,8 +63,6 @@ export const metadata: Metadata = {
   },
 };
 
-const cfBeaconToken = process.env.NEXT_PUBLIC_CF_BEACON_TOKEN;
-
 export default function RootLayout({
   children,
 }: {
@@ -77,14 +75,6 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <Providers>{children}</Providers>
-        {cfBeaconToken && (
-          <script
-            async
-            type="module"
-            src="https://static.cloudflareinsights.com/beacon.min.js"
-            data-cf-beacon={JSON.stringify({ token: cfBeaconToken })}
-          />
-        )}
       </body>
     </html>
   );

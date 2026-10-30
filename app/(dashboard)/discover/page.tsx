@@ -4,7 +4,6 @@ import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { TokenList } from "@/components/dashboard/TokenList";
-import { AttestModal } from "@/components/forms/AttestModal";
 import { AttestersModal } from "@/components/attestations/AttestersModal";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
 import type { TokenTuple } from "@/hooks/useWalletTokenList";
@@ -142,13 +141,9 @@ function RootResult({ rootId }: { rootId: bigint }) {
 
 function SearchedToken({
   tokenId,
-  onAttest,
-  onRevoke,
   onViewAttesters,
 }: {
   tokenId: bigint;
-  onAttest: (tokenId: bigint, tokenName: string) => void;
-  onRevoke: (tokenId: string) => void;
   onViewAttesters: (tokenId: bigint, tokenName: string) => void;
 }) {
   const { data: token } = useTokenDetail(tokenId);
@@ -189,20 +184,14 @@ function SearchedToken({
     <TokenList
       variant="discover"
       tokens={tokenData}
-      onAttest={() => onAttest(tokenId, tokenName)}
-      onRevoke={(id) => onRevoke(id)}
       onViewAll={() => onViewAttesters(tokenId, tokenName)}
     />
   );
 }
 
 function RecentTokensFeed({
-  onAttest,
-  onRevoke,
   onViewAttesters,
 }: {
-  onAttest: (tokenId: bigint, tokenName: string) => void;
-  onRevoke: (tokenId: string) => void;
   onViewAttesters: (tokenId: bigint, tokenName: string) => void;
 }) {
   const { data: recentIds, isLoading: isIdsLoading } = useRecentTokens();
@@ -271,11 +260,6 @@ function RecentTokensFeed({
     <TokenList
       variant="discover"
       tokens={tokenData}
-      onAttest={(id) => {
-        const token = tokenData.find((t) => t.tokenId === id);
-        onAttest(parseTokenId(id)!, token?.name || "");
-      }}
-      onRevoke={(id) => onRevoke(id)}
       onViewAll={(id) => {
         const token = tokenData.find((t) => t.tokenId === id);
         onViewAttesters(parseTokenId(id)!, token?.name || "");
@@ -297,11 +281,6 @@ export default function DiscoverPage() {
   const isUsername =
     searchedId === undefined && validateUsername(username).status === "valid";
 
-  const [attestTarget, setAttestTarget] = useState<{
-    tokenId: bigint;
-    tokenName: string;
-  } | null>(null);
-
   // Anyone may inspect a token's attesters, connected or not.
   const [attestersTarget, setAttestersTarget] = useState<{
     tokenId: bigint;
@@ -309,19 +288,6 @@ export default function DiscoverPage() {
   } | null>(null);
 
   const { isConnected } = useIdentityGate();
-
-  // A "connect your wallet" notice already renders inline below, so a
-  // disconnected wallet just makes these no-ops rather than firing a blocking
-  // alert().
-  const handleAttest = (tokenId: bigint, tokenName: string) => {
-    if (!isConnected) return;
-    setAttestTarget({ tokenId, tokenName });
-  };
-
-  const handleRevoke = (tokenIdStr: string) => {
-    if (!isConnected) return;
-    console.log("Revoking attestation for:", tokenIdStr);
-  };
 
   return (
     <main className="flex flex-col gap-6 px-4 pt-9 pb-12 sm:px-6 md:pr-14 md:pl-10">
@@ -336,8 +302,6 @@ export default function DiscoverPage() {
       {/* Search Results or Recent Feed */}
       {!query ? (
         <RecentTokensFeed
-          onAttest={handleAttest}
-          onRevoke={handleRevoke}
           onViewAttesters={(tokenId, tokenName) =>
             setAttestersTarget({ tokenId, tokenName })
           }
@@ -345,8 +309,6 @@ export default function DiscoverPage() {
       ) : searchedId !== undefined && searchedType === TOKEN_TYPE.SUB ? (
         <SearchedToken
           tokenId={searchedId}
-          onAttest={handleAttest}
-          onRevoke={handleRevoke}
           onViewAttesters={(tokenId, tokenName) =>
             setAttestersTarget({ tokenId, tokenName })
           }
@@ -375,16 +337,6 @@ export default function DiscoverPage() {
           onClose={() => setAttestersTarget(null)}
           tokenId={attestersTarget.tokenId}
           tokenName={attestersTarget.tokenName}
-        />
-      )}
-
-      {/* Attest Modal */}
-      {attestTarget && (
-        <AttestModal
-          isOpen={true}
-          onClose={() => setAttestTarget(null)}
-          tokenId={attestTarget.tokenId}
-          tokenName={attestTarget.tokenName}
         />
       )}
     </main>

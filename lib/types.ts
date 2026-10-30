@@ -5,8 +5,8 @@ import type {
 } from "./types.responses";
 
 // --- Enums & Shared Types ---
-export type TokenCardVariant = "home" | "history" | "discover";
-export type TokenListVariant = "tokens" | "history" | "discover";
+export type TokenCardVariant = "home" | "discover";
+export type TokenListVariant = "tokens" | "discover";
 export type TxStatus = "idle" | "pending" | "confirming" | "success" | "error";
 
 /**
@@ -31,10 +31,6 @@ export interface TokenCardProps {
   type: string;
   expiresIn: string;
   attestations?: number;
-  historyAction?: "attested" | "revoked" | "flagged";
-  actionWalletId?: string;
-  onRevoke?: () => void;
-  onAttest?: () => void;
   onViewAll?: () => void;
   /** Hide owner-only actions when showing someone else's token. */
   readOnly?: boolean;
@@ -110,6 +106,8 @@ export interface TokenFormProps {
   tokenName?: string;
   tokenId?: bigint;
   onSuccess?: () => void;
+  /** Open with the transfer section expanded */
+  openTransfer?: boolean;
 }
 
 export interface AttestModalProps {
@@ -126,8 +124,6 @@ export interface UITokenData {
   type: string;
   expiresIn: string;
   attestations?: number;
-  historyAction?: "attested" | "revoked" | "flagged";
-  actionWalletId?: string;
   owner?: string;
 }
 
@@ -146,8 +142,6 @@ export interface TokenListProps {
   tokens: UITokenData[];
   className?: string;
   title?: string;
-  onRevoke?: (tokenId: string) => void;
-  onAttest?: (tokenId: string) => void;
   onViewAll?: (tokenId: string) => void;
   readOnly?: boolean;
   emptyMessage?: string;

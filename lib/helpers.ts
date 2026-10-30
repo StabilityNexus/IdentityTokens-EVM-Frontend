@@ -107,8 +107,6 @@ export function getCardVariant(
   switch (listVariant) {
     case "tokens":
       return "home";
-    case "history":
-      return "history";
     case "discover":
       return "discover";
   }
@@ -118,8 +116,6 @@ export function getSectionTitle(listVariant: TokenListVariant): string {
   switch (listVariant) {
     case "tokens":
       return "Your Tokens";
-    case "history":
-      return "Recents";
     case "discover":
       return "Discover";
   }

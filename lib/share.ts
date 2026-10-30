@@ -8,6 +8,11 @@ export function getWalletUrl(address: string): string {
   return `${SITE_URL}/wallet?u=${address}`;
 }
 
+/** Discover opens a searched token id straight on that token. */
+export function getTokenUrl(tokenId: string): string {
+  return `${SITE_URL}/discover?q=${tokenId}`;
+}
+
 /** Everything a share target needs to prefill its composer. */
 export interface ShareContent {
   /** For X, Threads, Bluesky, Farcaster and messengers. */
@@ -40,6 +45,44 @@ export function buildClaimShare(username: string, url: string): ShareContent {
       `Reserve yours: ${CLAIM_URL}`,
     ].join("\n"),
     title: `I just reserved “${username}” on DIT, a self-sovereign identity by Stability Nexus`,
+    url,
+  };
+}
+
+/** A token, asking whoever opens the link to attest it and join DIT. */
+export function buildTokenShare(token: {
+  id: string;
+  name: string;
+  type?: string;
+  attestations?: number;
+}): ShareContent {
+  const url = getTokenUrl(token.id);
+  const count = token.attestations;
+  const facts = [
+    token.id,
+    token.type,
+    !!count && `${count} attestation${count === 1 ? "" : "s"}`,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
+  return {
+    short: [
+      `Attest “${token.name}” on DIT`,
+      "",
+      facts,
+      "",
+      "Vouch for it on-chain, or join DIT and claim your own identity.",
+    ].join("\n"),
+    long: [
+      `Attest “${token.name}” on DIT, the on-chain identity app by Stability Nexus.`,
+      "",
+      facts,
+      "",
+      `Open the token and attest it: ${url}`,
+      `New to DIT? Claim your identity: ${CLAIM_URL}`,
+    ].join("\n"),
+    title: `Attest “${token.name}” (${token.id}) on DIT`,
     url,
   };
 }

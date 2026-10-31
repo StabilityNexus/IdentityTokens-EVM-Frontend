@@ -10,7 +10,7 @@ import { IDCard } from "@/components/cards/IDCard";
 import { ReserveStatus } from "@/components/claim/ReserveStatus";
 import { ReservedView } from "@/components/claim/ReservedView";
 import { ShareCardModal } from "@/components/claim/ShareCardModal";
-import { TermsConsent } from "@/components/claim/TermsConsent";
+import { TermsConsent } from "@/components/terms/TermsConsent";
 import { DonationCheckbox } from "@/components/ui/DonationCheckbox";
 import { UsernameField } from "@/components/claim/UsernameField";
 import { useRootId, useRootIdentityView } from "@/hooks/useIdentityReads";
@@ -231,8 +231,13 @@ export default function ClaimPage() {
               <TermsConsent
                 agreed={hasAgreed}
                 onAgreedChange={handleAgreedChange}
-                showNudge={termsNudge}
+                error={
+                  termsNudge
+                    ? "Accept the Terms of Use to reserve your username."
+                    : undefined
+                }
                 disabled={isSubmitting}
+                variant="page"
               />
               <DonationCheckbox
                 checked={donate}

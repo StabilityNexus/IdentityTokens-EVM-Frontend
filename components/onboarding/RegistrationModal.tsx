@@ -1,15 +1,13 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { motion } from "framer-motion";
-import { ShieldCheck } from "lucide-react";
 import { useCreateRootIdentity } from "@/hooks/useIdentityWrites";
 import { useOnboardingStatus } from "@/hooks/useOnboardingStatus";
 import { TransactionStatus } from "@/components/ui/TransactionStatus";
 import { DonationCheckbox } from "@/components/ui/DonationCheckbox";
 import { TextField } from "@/components/forms/fields/TextField";
-import { TERMS_SUMMARY } from "@/lib/constants";
+import { TermsConsent } from "@/components/terms/TermsConsent";
 import { RegistrationModalProps, TxStatus } from "@/lib/types";
 import { validateName } from "@/lib/validation";
 import { truncateAddress } from "@/lib/helpers";
@@ -152,51 +150,16 @@ export function RegistrationModal({ onSubmitted }: RegistrationModalProps) {
           hint="Stored on-chain with your identity. You can add a full public profile later."
         />
 
-        {/* Terms, shown rather than linked away to. */}
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2">
-            <ShieldCheck size={15} className="text-profile-accent-soft" />
-            <h3 className="font-utsaha text-sm text-gray-300">
-              Terms &amp; Conditions
-            </h3>
-          </div>
-
-          <ul className="no-scrollbar max-h-40 list-disc space-y-2 overflow-y-auto rounded-xl border border-white/8 bg-modal-inner-bg px-6 py-3.5 font-utsaha text-xs leading-relaxed text-gray-400">
-            {TERMS_SUMMARY.map((term) => (
-              <li key={term}>{term}</li>
-            ))}
-          </ul>
-
-          <label className="flex cursor-pointer items-start gap-2.5 font-utsaha text-sm text-gray-300">
-            <input
-              type="checkbox"
-              checked={hasAgreed}
-              onChange={(event) => setHasAgreed(event.target.checked)}
-              disabled={isSubmitting || isDone}
-              required
-              aria-describedby="terms-error"
-              className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-brand-green"
-            />
-            <span>
-              I have read and agree to the Terms &amp; Conditions above and the{" "}
-              <Link
-                href="/privacy-policy"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-brand-blue-link underline underline-offset-2 hover:opacity-80"
-              >
-                Privacy Policy
-              </Link>
-              .
-            </span>
-          </label>
-
-          {hasAttemptedSubmit && !hasAgreed && (
-            <p id="terms-error" className="font-utsaha text-xs text-red-400">
-              You need to accept the terms before creating your identity.
-            </p>
-          )}
-        </div>
+        <TermsConsent
+          agreed={hasAgreed}
+          onAgreedChange={setHasAgreed}
+          error={
+            hasAttemptedSubmit
+              ? "Accept the Terms of Use before creating your identity."
+              : undefined
+          }
+          disabled={isSubmitting || isDone}
+        />
 
         <DonationCheckbox
           checked={donate}

@@ -1,3 +1,5 @@
+import { readKey, removeKey, writeKey } from "./storage";
+
 /** Bump when the terms text changes so previous acceptances are re-asked. */
 export const TERMS_VERSION = "2.0";
 
@@ -7,34 +9,6 @@ export const TOUR_VERSION = "1";
 const TERMS_KEY_PREFIX = "dit:terms:";
 const TOUR_DONE_KEY = `dit:tour:v${TOUR_VERSION}:done`;
 const TOUR_PENDING_KEY = `dit:tour:v${TOUR_VERSION}:pending`;
-
-// localStorage throws in private windows, and losing it is never fatal here.
-function readKey(key: string): string | null {
-  if (typeof window === "undefined") return null;
-  try {
-    return window.localStorage.getItem(key);
-  } catch {
-    return null;
-  }
-}
-
-function writeKey(key: string, value: string): void {
-  if (typeof window === "undefined") return;
-  try {
-    window.localStorage.setItem(key, value);
-  } catch {
-    // Ignored: the on-chain root identity stays the source of truth.
-  }
-}
-
-function removeKey(key: string): void {
-  if (typeof window === "undefined") return;
-  try {
-    window.localStorage.removeItem(key);
-  } catch {
-    // Ignored, as above.
-  }
-}
 
 const termsKey = (address: string) =>
   `${TERMS_KEY_PREFIX}v${TERMS_VERSION}:${address.toLowerCase()}`;

@@ -3,11 +3,12 @@
 import React, { useState } from "react";
 import { usePathname } from "next/navigation";
 import { Button } from "../ui/Button";
-import { FiBell, FiPlus } from "react-icons/fi";
+import { FiPlus } from "react-icons/fi";
 import { WalletCenter } from "../ui/WalletCenter";
 import { CreateTokenModal } from "../forms/CreateTokenModal";
 import { CreateProfileModal } from "../forms/CreateProfileModal";
 import { GlobalSearch } from "../dashboard/GlobalSearch";
+import { NotificationBell } from "../notifications/NotificationBell";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
 import { TOUR_TARGETS } from "@/lib/tour";
 
@@ -94,14 +95,7 @@ export function DashboardNavbar() {
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3 md:gap-5">
-          {/* Notification bell */}
-          <button
-            className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white/60 transition-all duration-200 hover:bg-white/5 hover:text-white sm:h-10 sm:w-10"
-            aria-label="Notifications"
-          >
-            <FiBell size={18} className="sm:hidden" />
-            <FiBell size={22} className="hidden sm:block" />
-          </button>
+          <NotificationBell />
 
           {/* Create Profile / New Token / icon-only on /discover */}
           {!isUserProfile && (

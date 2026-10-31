@@ -1,5 +1,5 @@
 /** Bump when the terms text changes so previous acceptances are re-asked. */
-export const TERMS_VERSION = "1.0";
+export const TERMS_VERSION = "2.0";
 
 /** Bump alongside the tour steps to re-run the tour for returning users. */
 export const TOUR_VERSION = "1";

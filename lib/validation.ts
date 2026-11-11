@@ -205,7 +205,7 @@ export function validateEns(value: string): FieldResult {
     return invalid("ENS names look like yourname.eth.");
   }
   if (name !== trimmed) {
-    return warn("ENS names are lowercase.", name);
+    return warn("ENS writes this name differently.", name);
   }
   return OK;
 }

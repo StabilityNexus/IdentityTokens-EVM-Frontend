@@ -279,4 +279,4 @@ Thanks a lot for spending your time helping Decentralized Identity Tokens grow. 
 
 [![Contributors](https://contrib.rocks/image?repo=StabilityNexus/IdentityTokens-EVM-Frontend)](https://github.com/StabilityNexus/IdentityTokens-EVM-Frontend/graphs/contributors)
 
-© 2025 Stable-Order
+© 2026 Stable-Order

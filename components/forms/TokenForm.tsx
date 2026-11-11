@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { X, ChevronDown } from "lucide-react";
+import { useAccount } from "wagmi";
+import { isAddress, isAddressEqual } from "viem";
 import { useBurnToken, useTransferToken } from "@/hooks/useIdentityWrites";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
 import { TokenFormProps, TxStatus } from "@/lib/types";
@@ -25,7 +27,9 @@ export function TokenForm({
     "idle"
   );
   const [donate, setDonate] = useState(true);
+  const [transferError, setTransferError] = useState<string | null>(null);
 
+  const { address } = useAccount();
   const { refetchWalletTokens } = useIdentityGate();
   const burnToken = useBurnToken();
   const transferToken = useTransferToken();
@@ -40,6 +44,7 @@ export function TokenForm({
       setShowBurnConfirm(false);
       setAction("idle");
       setDonate(true);
+      setTransferError(null);
       burnToken.reset();
       transferToken.reset();
     }
@@ -75,11 +80,18 @@ export function TokenForm({
 
   const handleTransfer = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!transferAddress.startsWith("0x") || transferAddress.length !== 42) {
+    const recipient = transferAddress.trim();
+    if (!isAddress(recipient)) {
+      setTransferError("Enter a valid wallet address.");
       return;
     }
+    if (address && isAddressEqual(recipient, address)) {
+      setTransferError("You cannot transfer a token to yourself.");
+      return;
+    }
+    setTransferError(null);
     setAction("transferring");
-    transferToken.write(tokenId, transferAddress as `0x${string}`, donate);
+    transferToken.write(tokenId, recipient, donate);
   };
 
   const getTxStatus = (): TxStatus => {
@@ -168,7 +180,10 @@ export function TokenForm({
                   <input
                     type="text"
                     value={transferAddress}
-                    onChange={(e) => setTransferAddress(e.target.value)}
+                    onChange={(e) => {
+                      setTransferAddress(e.target.value);
+                      setTransferError(null);
+                    }}
                     placeholder="0x..."
                     disabled={isSubmitting}
                     className="w-full rounded-lg px-4 py-2 font-utsaha text-white placeholder-gray-500 transition-all focus:ring-1 focus:ring-brand-blue focus:outline-none disabled:opacity-50"
@@ -177,14 +192,18 @@ export function TokenForm({
                       border: "1px solid rgba(255,255,255,0.08)",
                     }}
                   />
+                  {transferError && (
+                    <p
+                      role="alert"
+                      className="font-utsaha text-xs text-red-400"
+                    >
+                      {transferError}
+                    </p>
+                  )}
                 </div>
                 <button
                   type="submit"
-                  disabled={
-                    isSubmitting ||
-                    !transferAddress.startsWith("0x") ||
-                    transferAddress.length !== 42
-                  }
+                  disabled={isSubmitting || !isAddress(transferAddress.trim())}
                   className="w-full rounded-lg bg-brand-blue py-2 font-utsaha text-white transition-all hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {action === "transferring" && isSubmitting

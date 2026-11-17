@@ -108,7 +108,6 @@ export function useCreateToken() {
   } = useWriteContract();
   const { donationFor, isPreparing } = useDonation();
 
-  // A reverted transaction fails here, not at send time, so surface it too.
   const {
     isLoading: isConfirming,
     isSuccess,
@@ -163,7 +162,6 @@ export function useAttestToken() {
   } = useWriteContract();
   const { donationFor, isPreparing } = useDonation();
 
-  // A reverted transaction fails here, not at send time, so surface it too.
   const {
     isLoading: isConfirming,
     isSuccess,
@@ -207,7 +205,6 @@ export function useRevokeAttestation() {
   } = useWriteContract();
   const { donationFor, isPreparing } = useDonation();
 
-  // A reverted transaction fails here, not at send time, so surface it too.
   const {
     isLoading: isConfirming,
     isSuccess,
@@ -247,7 +244,6 @@ export function useFlagToken() {
   } = useWriteContract();
   const { donationFor, isPreparing } = useDonation();
 
-  // A reverted transaction fails here, not at send time, so surface it too.
   const {
     isLoading: isConfirming,
     isSuccess,
@@ -287,7 +283,6 @@ export function useBurnToken() {
   } = useWriteContract();
   const { donationFor, isPreparing } = useDonation();
 
-  // A reverted transaction fails here, not at send time, so surface it too.
   const {
     isLoading: isConfirming,
     isSuccess,
@@ -327,7 +322,6 @@ export function useTransferToken() {
   } = useWriteContract();
   const { donationFor, isPreparing } = useDonation();
 
-  // A reverted transaction fails here, not at send time, so surface it too.
   const {
     isLoading: isConfirming,
     isSuccess,
@@ -373,7 +367,6 @@ export function useCreateProfile() {
   } = useWriteContract();
   const { donationFor, isPreparing } = useDonation();
 
-  // A reverted transaction fails here, not at send time, so surface it too.
   const {
     isLoading: isConfirming,
     isSuccess,

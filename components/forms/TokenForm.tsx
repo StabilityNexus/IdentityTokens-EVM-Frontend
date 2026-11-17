@@ -27,7 +27,6 @@ export function TokenForm({
     "idle"
   );
   const [donate, setDonate] = useState(true);
-  const [transferError, setTransferError] = useState<string | null>(null);
 
   const { address } = useAccount();
   const { refetchWalletTokens } = useIdentityGate();
@@ -44,7 +43,6 @@ export function TokenForm({
       setShowBurnConfirm(false);
       setAction("idle");
       setDonate(true);
-      setTransferError(null);
       burnToken.reset();
       transferToken.reset();
     }
@@ -78,18 +76,13 @@ export function TokenForm({
     burnToken.write(tokenId, donate);
   };
 
+  const recipient = transferAddress.trim();
+  const isSelf =
+    !!address && isAddress(recipient) && isAddressEqual(recipient, address);
+
   const handleTransfer = (e: React.FormEvent) => {
     e.preventDefault();
-    const recipient = transferAddress.trim();
-    if (!isAddress(recipient)) {
-      setTransferError("Enter a valid wallet address.");
-      return;
-    }
-    if (address && isAddressEqual(recipient, address)) {
-      setTransferError("You cannot transfer a token to yourself.");
-      return;
-    }
-    setTransferError(null);
+    if (!isAddress(recipient) || isSelf) return;
     setAction("transferring");
     transferToken.write(tokenId, recipient, donate);
   };
@@ -180,10 +173,7 @@ export function TokenForm({
                   <input
                     type="text"
                     value={transferAddress}
-                    onChange={(e) => {
-                      setTransferAddress(e.target.value);
-                      setTransferError(null);
-                    }}
+                    onChange={(e) => setTransferAddress(e.target.value)}
                     placeholder="0x..."
                     disabled={isSubmitting}
                     className="w-full rounded-lg px-4 py-2 font-utsaha text-white placeholder-gray-500 transition-all focus:ring-1 focus:ring-brand-blue focus:outline-none disabled:opacity-50"
@@ -192,18 +182,18 @@ export function TokenForm({
                       border: "1px solid rgba(255,255,255,0.08)",
                     }}
                   />
-                  {transferError && (
+                  {isSelf && (
                     <p
                       role="alert"
                       className="font-utsaha text-xs text-red-400"
                     >
-                      {transferError}
+                      You cannot transfer a token to yourself.
                     </p>
                   )}
                 </div>
                 <button
                   type="submit"
-                  disabled={isSubmitting || !isAddress(transferAddress.trim())}
+                  disabled={isSubmitting || !isAddress(recipient) || isSelf}
                   className="w-full rounded-lg bg-brand-blue py-2 font-utsaha text-white transition-all hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {action === "transferring" && isSubmitting

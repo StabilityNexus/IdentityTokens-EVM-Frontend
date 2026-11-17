@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { X, ChevronDown } from "lucide-react";
+import { useAccount } from "wagmi";
+import { isAddress, isAddressEqual } from "viem";
 import { useBurnToken, useTransferToken } from "@/hooks/useIdentityWrites";
 import { useIdentityGate } from "@/hooks/useIdentityGate";
 import { TokenFormProps, TxStatus } from "@/lib/types";
@@ -26,6 +28,7 @@ export function TokenForm({
   );
   const [donate, setDonate] = useState(true);
 
+  const { address } = useAccount();
   const { refetchWalletTokens } = useIdentityGate();
   const burnToken = useBurnToken();
   const transferToken = useTransferToken();
@@ -73,13 +76,15 @@ export function TokenForm({
     burnToken.write(tokenId, donate);
   };
 
+  const recipient = transferAddress.trim();
+  const isSelf =
+    !!address && isAddress(recipient) && isAddressEqual(recipient, address);
+
   const handleTransfer = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!transferAddress.startsWith("0x") || transferAddress.length !== 42) {
-      return;
-    }
+    if (!isAddress(recipient) || isSelf) return;
     setAction("transferring");
-    transferToken.write(tokenId, transferAddress as `0x${string}`, donate);
+    transferToken.write(tokenId, recipient, donate);
   };
 
   const getTxStatus = (): TxStatus => {
@@ -177,14 +182,18 @@ export function TokenForm({
                       border: "1px solid rgba(255,255,255,0.08)",
                     }}
                   />
+                  {isSelf && (
+                    <p
+                      role="alert"
+                      className="font-utsaha text-xs text-red-400"
+                    >
+                      You cannot transfer a token to yourself.
+                    </p>
+                  )}
                 </div>
                 <button
                   type="submit"
-                  disabled={
-                    isSubmitting ||
-                    !transferAddress.startsWith("0x") ||
-                    transferAddress.length !== 42
-                  }
+                  disabled={isSubmitting || !isAddress(recipient) || isSelf}
                   className="w-full rounded-lg bg-brand-blue py-2 font-utsaha text-white transition-all hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {action === "transferring" && isSubmitting

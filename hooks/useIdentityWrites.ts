@@ -24,10 +24,10 @@ import { useDevFee } from "@/hooks/useIdentityReads";
  * devFee percentage. Nothing is donated when the box is unticked, when devFee
  * has not loaded, or when the estimate fails (the wallet then reports why).
  */
-function useDonation(chainId?: number) {
+function useDonation(chainId?: number, contractAddress?: `0x${string}`) {
   const publicClient = usePublicClient({ chainId });
   const { address } = useAccount();
-  const { data: devFee } = useDevFee(chainId);
+  const { data: devFee } = useDevFee(chainId, contractAddress);
   const [isPreparing, setIsPreparing] = useState(false);
 
   const donationFor = async (
@@ -57,7 +57,13 @@ function useDonation(chainId?: number) {
 // IdentitySystem Writes
 
 /** Create a root identity (auto-called before first action if needed) */
-export function useCreateRootIdentity({ chainId }: { chainId?: number } = {}) {
+export function useCreateRootIdentity({
+  chainId,
+  contractAddress = IDENTITY_SYSTEM_ADDRESS,
+}: {
+  chainId?: number;
+  contractAddress?: `0x${string}`;
+} = {}) {
   const {
     writeContract,
     data: txHash,
@@ -65,7 +71,7 @@ export function useCreateRootIdentity({ chainId }: { chainId?: number } = {}) {
     error,
     reset,
   } = useWriteContract();
-  const { donationFor, isPreparing } = useDonation(chainId);
+  const { donationFor, isPreparing } = useDonation(chainId, contractAddress);
 
   // A reverted transaction fails here, not at send time, so this error has to
   // be surfaced too or the modal confirms forever.
@@ -77,7 +83,7 @@ export function useCreateRootIdentity({ chainId }: { chainId?: number } = {}) {
 
   const write = async (displayName: string, donate: boolean) => {
     const call = {
-      address: IDENTITY_SYSTEM_ADDRESS,
+      address: contractAddress,
       abi: IDENTITY_SYSTEM_ABI,
       functionName: "createRootIdentity",
       args: [displayName],

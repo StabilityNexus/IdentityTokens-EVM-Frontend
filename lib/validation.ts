@@ -195,17 +195,17 @@ export function validateWebsite(value: string): FieldResult {
 export function validateEns(value: string): FieldResult {
   const trimmed = value.trim();
   if (!trimmed) return IDLE;
-  let name = "";
+  let name: string;
   try {
     name = normalize(trimmed);
   } catch {
-    // normalize throws on anything ENS doesn't allow; caught as invalid below.
+    return invalid("ENS names look like yourname.eth.");
   }
   if (!name.includes(".")) {
     return invalid("ENS names look like yourname.eth.");
   }
   if (name !== trimmed) {
-    return warn("ENS writes this name differently.", name);
+    return warn("ENS uses this form.", name);
   }
   return OK;
 }

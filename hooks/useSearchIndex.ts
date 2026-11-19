@@ -20,10 +20,12 @@ const TYPES: TokenTypeNum[] = [0, 1, 2];
 
 const digitsOf = (id: bigint) => formatTokenId(id).slice(3);
 
-// Every live root, token and profile, so search can match partial ids and names
-// in the browser. It reads the whole supply, so swap in an indexer once that grows.
 export function useSearchIndex(enabled: boolean) {
-  const { data: counts, isLoading: isCounting } = useReadContracts({
+  const {
+    data: counts,
+    isLoading: isCounting,
+    isError: countsError,
+  } = useReadContracts({
     contracts: TYPES.map((t) => ({
       address: IDENTITY_SYSTEM_ADDRESS,
       abi: IDENTITY_SYSTEM_ABI,
@@ -32,21 +34,37 @@ export function useSearchIndex(enabled: boolean) {
     })),
     query: { enabled },
   });
+  const countsReady =
+    !!counts &&
+    counts.length === TYPES.length &&
+    counts.every((read) => read.status === "success");
 
   const [rootIds, tokenIds, profileIds] = useMemo(
     () =>
       TYPES.map((t) => {
         const r = counts?.[t];
-        const minted = r?.status === "success" ? Number(r.result) : 0;
+
+        if (r?.status !== "success") {
+          return [];
+        }
+
+        const minted = Number(r.result);
+
         return Array.from({ length: minted }, (_, i) =>
           tokenIdFor(t, BigInt(i + 1))
         );
       }),
     [counts]
   );
-  const on = (ids: bigint[]) => (enabled && ids.length > 0 ? ids : undefined);
 
-  const { data: roots } = useReadContracts({
+  const on = (ids: bigint[]) =>
+    enabled && countsReady && ids.length > 0 ? ids : undefined;
+
+  const {
+    data: roots,
+    isLoading: isLoadingRoots,
+    isError: rootsError,
+  } = useReadContracts({
     contracts: rootIds.map((id) => ({
       address: IDENTITY_SYSTEM_ADDRESS,
       abi: IDENTITY_SYSTEM_ABI,
@@ -55,7 +73,12 @@ export function useSearchIndex(enabled: boolean) {
     })),
     query: { enabled: !!on(rootIds) },
   });
-  const { data: profiles } = useReadContracts({
+
+  const {
+    data: profiles,
+    isLoading: isLoadingProfiles,
+    isError: profilesError,
+  } = useReadContracts({
     contracts: profileIds.map((id) => ({
       address: PROFILE_SYSTEM_ADDRESS,
       abi: PROFILE_SYSTEM_ABI,
@@ -64,9 +87,14 @@ export function useSearchIndex(enabled: boolean) {
     })),
     query: { enabled: !!on(profileIds) },
   });
-  const { data: profileOwners } = useMultipleTokenOwners(on(profileIds));
-  const { data: tokens } = useMultipleTokenDetails(on(tokenIds));
-  const { data: tokenOwners } = useMultipleTokenOwners(on(tokenIds));
+
+  const profileOwnersQuery = useMultipleTokenOwners(on(profileIds));
+  const tokensQuery = useMultipleTokenDetails(on(tokenIds));
+  const tokenOwnersQuery = useMultipleTokenOwners(on(tokenIds));
+
+  const profileOwners = profileOwnersQuery.data;
+  const tokens = tokensQuery.data;
+  const tokenOwners = tokenOwnersQuery.data;
 
   const entries = useMemo<SearchEntry[]>(() => {
     const out: SearchEntry[] = [];
@@ -84,9 +112,9 @@ export function useSearchIndex(enabled: boolean) {
         owner: root[0],
       });
     });
+
     profileIds.forEach((id, i) => {
       const profile = ok<{ name: string; username: string }>(profiles?.[i]);
-      // Burned profiles read back with an empty username
       if (!profile?.username) return;
       out.push({
         kind: "profile",
@@ -97,9 +125,9 @@ export function useSearchIndex(enabled: boolean) {
         owner: ok<string>(profileOwners?.[i]),
       });
     });
+
     tokenIds.forEach((id, i) => {
       const token = ok<TokenTuple>(tokens?.[i]);
-      // Burned tokens read back zeroed
       if (!token || token[7] === 0n) return;
       out.push({
         kind: "token",
@@ -109,6 +137,7 @@ export function useSearchIndex(enabled: boolean) {
         owner: ok<string>(tokenOwners?.[i]),
       });
     });
+
     return out;
   }, [
     rootIds,
@@ -121,11 +150,39 @@ export function useSearchIndex(enabled: boolean) {
     tokenOwners,
   ]);
 
+  const failed = (reads?: readonly { status: string }[]) =>
+    reads?.some((read) => read.status === "failure") ?? false;
+
+  const allCountsFailed =
+    !!counts &&
+    counts.length === TYPES.length &&
+    counts.every((read) => read.status === "failure");
+
+  const hasError =
+    countsError ||
+    allCountsFailed ||
+    rootsError ||
+    profilesError ||
+    profileOwnersQuery.isError ||
+    tokensQuery.isError ||
+    tokenOwnersQuery.isError ||
+    failed(counts) ||
+    failed(roots) ||
+    failed(profiles) ||
+    failed(profileOwners) ||
+    failed(tokens) ||
+    failed(tokenOwners);
+
   const isLoading =
     isCounting ||
+    isLoadingRoots ||
+    isLoadingProfiles ||
+    profileOwnersQuery.isLoading ||
+    tokensQuery.isLoading ||
+    tokenOwnersQuery.isLoading ||
     (!!on(rootIds) && !roots) ||
     (!!on(profileIds) && !profiles) ||
     (!!on(tokenIds) && !tokens);
 
-  return { entries, isLoading };
+  return { entries, isLoading, hasError };
 }

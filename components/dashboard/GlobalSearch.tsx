@@ -73,7 +73,7 @@ export function GlobalSearch() {
   }, [isOpen]);
 
   const { isConnected } = useAccount();
-  const { entries, isLoading } = useSearchIndex(isOpen);
+  const { entries, isLoading, hasError } = useSearchIndex(isOpen);
   const results = useMemo(
     () => searchEntries(entries, type, settled),
     [entries, type, settled]
@@ -153,11 +153,26 @@ export function GlobalSearch() {
                   ))}
                 </ul>
               ) : null}
-              {results.length > 0 && !isConnected ? (
-                <Note>Connect a wallet to attest, revoke or flag.</Note>
-              ) : results.length === 0 ? (
-                <Note>{isLoading ? "Searching…" : "No matches"}</Note>
-              ) : null}
+              {results.length > 0 ? (
+                <>
+                  {!isConnected && (
+                    <Note>Connect a wallet to attest, revoke or flag.</Note>
+                  )}
+                  {hasError && (
+                    <Note>
+                      Some data could not be loaded. Results may be incomplete.
+                    </Note>
+                  )}
+                </>
+              ) : (
+                <Note>
+                  {isLoading
+                    ? "Searching…"
+                    : hasError
+                      ? "Unable to load search data. Please check your RPC connection."
+                      : "No matches"}
+                </Note>
+              )}
             </div>
           )}
         </div>

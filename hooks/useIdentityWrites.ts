@@ -9,15 +9,17 @@ import {
 } from "wagmi";
 import { toHex, type ContractFunctionParameters } from "viem";
 import {
-  IDENTITY_SYSTEM_ADDRESS,
   IDENTITY_SYSTEM_ABI,
-  PROFILE_SYSTEM_ADDRESS,
   PROFILE_SYSTEM_ABI,
   type ProfileMetadata,
 } from "@/lib/contracts";
 import { donationAmount } from "@/lib/devFee";
 import type { FieldUpdate, LinkUpdate } from "@/lib/profileData";
 import { useDevFee } from "@/hooks/useIdentityReads";
+import {
+  useIdentitySystemAddress,
+  useProfileSystemAddress,
+} from "@/hooks/useSystemAddresses";
 
 /**
  * The optional donation to AOSSIE for one call: its estimated gas fee times the
@@ -65,6 +67,7 @@ export function useCreateRootIdentity({ chainId }: { chainId?: number } = {}) {
     error,
     reset,
   } = useWriteContract();
+  const identity = useIdentitySystemAddress(chainId);
   const { donationFor, isPreparing } = useDonation(chainId);
 
   // A reverted transaction fails here, not at send time, so this error has to
@@ -76,8 +79,11 @@ export function useCreateRootIdentity({ chainId }: { chainId?: number } = {}) {
   } = useWaitForTransactionReceipt({ hash: txHash, chainId });
 
   const write = async (displayName: string, donate: boolean) => {
+    if (!identity) {
+      throw new Error("IdentitySystem is not deployed on this chain");
+    }
     const call = {
-      address: IDENTITY_SYSTEM_ADDRESS,
+      address: identity,
       abi: IDENTITY_SYSTEM_ABI,
       functionName: "createRootIdentity",
       args: [displayName],
@@ -106,6 +112,7 @@ export function useCreateToken() {
     error,
     reset,
   } = useWriteContract();
+  const identity = useIdentitySystemAddress();
   const { donationFor, isPreparing } = useDonation();
 
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
@@ -122,8 +129,11 @@ export function useCreateToken() {
     },
     donate: boolean
   ) => {
+    if (!identity) {
+      throw new Error("IdentitySystem is not deployed on this chain");
+    }
     const call = {
-      address: IDENTITY_SYSTEM_ADDRESS,
+      address: identity,
       abi: IDENTITY_SYSTEM_ABI,
       functionName: "createToken",
       args: [
@@ -158,6 +168,7 @@ export function useAttestToken() {
     error,
     reset,
   } = useWriteContract();
+  const identity = useIdentitySystemAddress();
   const { donationFor, isPreparing } = useDonation();
 
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
@@ -169,8 +180,11 @@ export function useAttestToken() {
     durationSeconds: bigint,
     donate: boolean
   ) => {
+    if (!identity) {
+      throw new Error("IdentitySystem is not deployed on this chain");
+    }
     const call = {
-      address: IDENTITY_SYSTEM_ADDRESS,
+      address: identity,
       abi: IDENTITY_SYSTEM_ABI,
       functionName: "attestToken",
       args: [tokenId, durationSeconds],
@@ -199,6 +213,7 @@ export function useRevokeAttestation() {
     error,
     reset,
   } = useWriteContract();
+  const identity = useIdentitySystemAddress();
   const { donationFor, isPreparing } = useDonation();
 
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
@@ -206,8 +221,11 @@ export function useRevokeAttestation() {
   });
 
   const write = async (tokenId: bigint, donate: boolean) => {
+    if (!identity) {
+      throw new Error("IdentitySystem is not deployed on this chain");
+    }
     const call = {
-      address: IDENTITY_SYSTEM_ADDRESS,
+      address: identity,
       abi: IDENTITY_SYSTEM_ABI,
       functionName: "revokeAttestation",
       args: [tokenId],
@@ -236,6 +254,7 @@ export function useFlagToken() {
     error,
     reset,
   } = useWriteContract();
+  const identity = useIdentitySystemAddress();
   const { donationFor, isPreparing } = useDonation();
 
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
@@ -243,8 +262,11 @@ export function useFlagToken() {
   });
 
   const write = async (tokenId: bigint, donate: boolean) => {
+    if (!identity) {
+      throw new Error("IdentitySystem is not deployed on this chain");
+    }
     const call = {
-      address: IDENTITY_SYSTEM_ADDRESS,
+      address: identity,
       abi: IDENTITY_SYSTEM_ABI,
       functionName: "flagToken",
       args: [tokenId],
@@ -273,6 +295,7 @@ export function useBurnToken() {
     error,
     reset,
   } = useWriteContract();
+  const identity = useIdentitySystemAddress();
   const { donationFor, isPreparing } = useDonation();
 
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
@@ -280,8 +303,11 @@ export function useBurnToken() {
   });
 
   const write = async (tokenId: bigint, donate: boolean) => {
+    if (!identity) {
+      throw new Error("IdentitySystem is not deployed on this chain");
+    }
     const call = {
-      address: IDENTITY_SYSTEM_ADDRESS,
+      address: identity,
       abi: IDENTITY_SYSTEM_ABI,
       functionName: "burnToken",
       args: [tokenId],
@@ -310,6 +336,7 @@ export function useTransferToken() {
     error,
     reset,
   } = useWriteContract();
+  const identity = useIdentitySystemAddress();
   const { donationFor, isPreparing } = useDonation();
 
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
@@ -321,8 +348,11 @@ export function useTransferToken() {
     sendingTo: `0x${string}`,
     donate: boolean
   ) => {
+    if (!identity) {
+      throw new Error("IdentitySystem is not deployed on this chain");
+    }
     const call = {
-      address: IDENTITY_SYSTEM_ADDRESS,
+      address: identity,
       abi: IDENTITY_SYSTEM_ABI,
       functionName: "transferToken",
       args: [tokenId, sendingTo],
@@ -353,6 +383,7 @@ export function useCreateProfile() {
     error,
     reset,
   } = useWriteContract();
+  const profile = useProfileSystemAddress();
   const { donationFor, isPreparing } = useDonation();
 
   // A reverted transaction fails here, not at send time, so surface it too.
@@ -367,8 +398,11 @@ export function useCreateProfile() {
     links: LinkUpdate[],
     donate: boolean
   ) => {
+    if (!profile) {
+      throw new Error("ProfileSystem is not deployed on this chain");
+    }
     const call = {
-      address: PROFILE_SYSTEM_ADDRESS,
+      address: profile,
       abi: PROFILE_SYSTEM_ABI,
       functionName: "createProfile",
       args: [data, links],
@@ -397,6 +431,7 @@ export function useUpdateProfile() {
     error,
     reset,
   } = useWriteContract();
+  const profile = useProfileSystemAddress();
   const { donationFor, isPreparing } = useDonation();
 
   const {
@@ -411,8 +446,11 @@ export function useUpdateProfile() {
     links: LinkUpdate[],
     donate: boolean
   ) => {
+    if (!profile) {
+      throw new Error("ProfileSystem is not deployed on this chain");
+    }
     const call = {
-      address: PROFILE_SYSTEM_ADDRESS,
+      address: profile,
       abi: PROFILE_SYSTEM_ABI,
       functionName: "updateProfile",
       args: [tokenId, fields, links],
@@ -458,9 +496,14 @@ export function useDevFeeWrite() {
     error: receiptError,
   } = useWaitForTransactionReceipt({ hash: txHash });
 
+  const identity = useIdentitySystemAddress();
+
   const write = (call: DevFeeCall) => {
+    if (!identity) {
+      throw new Error("IdentitySystem is not deployed on this chain");
+    }
     writeContract({
-      address: IDENTITY_SYSTEM_ADDRESS,
+      address: identity,
       abi: IDENTITY_SYSTEM_ABI,
       ...call,
     });

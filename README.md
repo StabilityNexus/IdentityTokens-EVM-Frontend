@@ -159,7 +159,8 @@ npm install
    # WalletConnect / Reown Project ID (free from https://cloud.reown.com/)
    NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=YOUR_PROJECT_ID
 
-   # Contract Addresses (Defaults to Sepolia v0.0.6)
+   # Contract Addresses for the local Foundry/Anvil chain (31337)
+   # Sepolia always uses the official v0.0.6 deployment
    NEXT_PUBLIC_IDENTITY_SYSTEM_ADDRESS=0x15253A56CD3EbC2893914C2139094dc92a42c016
    NEXT_PUBLIC_PROFILE_SYSTEM_ADDRESS=0x17dc6AA09432d61ca630b523DAF01fB2b98Bd58D
    ```
@@ -198,6 +199,8 @@ Running a local Anvil node allows you to test transactions instantly with 10,000
    NEXT_PUBLIC_PROFILE_SYSTEM_ADDRESS=0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512
    ```
 
+   _These overrides apply to the Foundry chain. `/claim` keeps using the official Sepolia deployment, so both can run in the same session._
+
 4. **Configure MetaMask for Anvil**:
    - **Add Network Manually**:
      - Network Name: `Anvil Localhost`
@@ -222,7 +225,7 @@ To interact with already minted tokens and state on Sepolia without paying testn
 anvil --fork-url https://ethereum-sepolia-rpc.publicnode.com
 ```
 
-Keep the default Sepolia contract addresses in `.env.local`, and point MetaMask to `http://127.0.0.1:8545` (Chain ID `31337`).
+Keep the default Sepolia contract addresses in `.env.local`, and point MetaMask to `http://127.0.0.1:8545` (Chain ID `31337`). The env overrides apply to the Foundry chain, so the fork uses Sepolia state while `/claim` still targets the official Sepolia deployment.
 
 ---
 

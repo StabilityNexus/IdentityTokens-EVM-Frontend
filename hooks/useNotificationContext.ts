@@ -3,9 +3,10 @@
 import { useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useReadContract } from "wagmi";
-import { IDENTITY_SYSTEM_ABI, IDENTITY_SYSTEM_ADDRESS } from "@/lib/contracts";
+import { IDENTITY_SYSTEM_ABI } from "@/lib/contracts";
 import type { WalletContext } from "@/lib/notifications";
 import { useRootId, useWalletTokens } from "./useIdentityReads";
+import { useIdentitySystemAddress } from "./useSystemAddresses";
 
 /**
  * The tokens a wallet holds and the tokens its identity currently attests,
@@ -18,15 +19,16 @@ export function useNotificationContext(address: `0x${string}` | undefined) {
 
   const walletTokens = useWalletTokens(address);
   const root = useRootId(address);
+  const identity = useIdentitySystemAddress();
   const rootId = root.data && root.data > 0n ? root.data : undefined;
 
   // Live attestations only: the contract leaves out revoked, expired and burned.
   const attested = useReadContract({
-    address: IDENTITY_SYSTEM_ADDRESS,
+    address: identity,
     abi: IDENTITY_SYSTEM_ABI,
     functionName: "getAttestationsByAttester",
     args: rootId ? [rootId] : undefined,
-    query: { enabled: !!rootId },
+    query: { enabled: !!rootId && !!identity },
   });
 
   const context = useMemo<WalletContext>(

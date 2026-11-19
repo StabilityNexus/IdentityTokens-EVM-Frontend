@@ -1,5 +1,5 @@
 import { foundry, sepolia } from "wagmi/chains";
-import { getAddress, isAddress, type Address } from "viem";
+import { isAddress, type Address } from "viem";
 
 /** The official v0.0.6 deployment on Sepolia, used when no override is set. */
 export const SEPOLIA_IDENTITY_SYSTEM_ADDRESS =
@@ -9,14 +9,19 @@ export const SEPOLIA_PROFILE_SYSTEM_ADDRESS =
   "0x17dc6AA09432d61ca630b523DAF01fB2b98Bd58D" as const;
 
 /**
- * Resolve a configured address, falling back when it is missing or invalid.
+ * Resolve a configured address, falling back only when it is missing. An
+ * invalid value throws, so a typo cannot silently target Sepolia.
  * Exported so the contract-address self-check can exercise it.
  */
 export function deploymentAddress(
   value: string | undefined,
   fallback: Address
 ): Address {
-  return value && isAddress(value) ? getAddress(value) : fallback;
+  if (!value) return fallback;
+  if (!isAddress(value)) {
+    throw new Error(`Invalid contract address in .env: ${value}`);
+  }
+  return value;
 }
 
 /**

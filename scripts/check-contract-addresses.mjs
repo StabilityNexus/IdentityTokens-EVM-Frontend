@@ -13,21 +13,26 @@ process.env.NEXT_PUBLIC_PROFILE_SYSTEM_ADDRESS = ANVIL_PROFILE;
 const { IDENTITY_SYSTEM_ADDRESS, PROFILE_SYSTEM_ADDRESS, deploymentAddress } =
   await import("../lib/contracts.ts");
 
-// Configured deployments are used, normalised to their checksummed form.
+// Configured deployments are used as given.
 assert.equal(IDENTITY_SYSTEM_ADDRESS, ANVIL_IDENTITY);
 assert.equal(PROFILE_SYSTEM_ADDRESS, ANVIL_PROFILE);
 assert.equal(
   deploymentAddress(ANVIL_IDENTITY.toLowerCase(), SEPOLIA_IDENTITY),
-  ANVIL_IDENTITY
+  ANVIL_IDENTITY.toLowerCase()
 );
 
-// Missing or invalid values keep the official Sepolia deployment.
+// Missing values keep the official Sepolia deployment.
 assert.equal(deploymentAddress(undefined, SEPOLIA_IDENTITY), SEPOLIA_IDENTITY);
 assert.equal(deploymentAddress("", SEPOLIA_IDENTITY), SEPOLIA_IDENTITY);
-assert.equal(
-  deploymentAddress("not-an-address", SEPOLIA_IDENTITY),
-  SEPOLIA_IDENTITY
+
+// Invalid values throw instead of silently falling back.
+assert.throws(
+  () => deploymentAddress("not-an-address", SEPOLIA_IDENTITY),
+  /Invalid contract address in \.env/
 );
-assert.equal(deploymentAddress("0x123", SEPOLIA_PROFILE), SEPOLIA_PROFILE);
+assert.throws(
+  () => deploymentAddress("0x123", SEPOLIA_PROFILE),
+  /Invalid contract address in \.env/
+);
 
 console.log("Contract address overrides OK");

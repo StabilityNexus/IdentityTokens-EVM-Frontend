@@ -26,10 +26,11 @@ import { validateUsername } from "@/lib/validation";
 /** Get the root identity ID for a wallet address */
 export function useRootId(
   address: `0x${string}` | undefined,
-  chainId?: number
+  chainId?: number,
+  contractAddress: `0x${string}` = IDENTITY_SYSTEM_ADDRESS
 ) {
   return useReadContract({
-    address: IDENTITY_SYSTEM_ADDRESS,
+    address: contractAddress,
     abi: IDENTITY_SYSTEM_ABI,
     functionName: "ownerToRootId",
     args: address ? [address] : undefined,
@@ -41,10 +42,11 @@ export function useRootId(
 /** Get the full root identity view for a root ID */
 export function useRootIdentityView(
   rootId: bigint | undefined,
-  chainId?: number
+  chainId?: number,
+  contractAddress: `0x${string}` = IDENTITY_SYSTEM_ADDRESS
 ) {
   return useReadContract({
-    address: IDENTITY_SYSTEM_ADDRESS,
+    address: contractAddress,
     abi: IDENTITY_SYSTEM_ABI,
     functionName: "getRootIdentityView",
     args: rootId ? [rootId] : undefined,
@@ -184,9 +186,12 @@ export function useTokenOwner(tokenId: bigint | undefined) {
 }
 
 /** The donation as a percentage of a transaction's gas fee (100 = equal to it) */
-export function useDevFee(chainId?: number) {
+export function useDevFee(
+  chainId?: number,
+  contractAddress: `0x${string}` = IDENTITY_SYSTEM_ADDRESS
+) {
   return useReadContract({
-    address: IDENTITY_SYSTEM_ADDRESS,
+    address: contractAddress,
     abi: IDENTITY_SYSTEM_ABI,
     functionName: "devFee",
     chainId,

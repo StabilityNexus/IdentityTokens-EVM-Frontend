@@ -42,8 +42,12 @@ export default function ProfilePage() {
       ? parsedTokenId
       : undefined;
 
-  const { data: resolvedTokenId, isLoading: isResolvingUsername } =
-    useResolveUsername(username);
+  const {
+    data: resolvedTokenId,
+    isLoading: isResolvingUsername,
+    isError: isUsernameError,
+    refetch: refetchUsername,
+  } = useResolveUsername(username);
 
   const profileTokenId =
     idTokenId ??
@@ -52,6 +56,7 @@ export default function ProfilePage() {
   const {
     data: profileData,
     isLoading: isProfileLoading,
+    isError: isProfileError,
     refetch: refetchProfile,
   } = useProfile(profileTokenId);
   const {
@@ -138,10 +143,7 @@ export default function ProfilePage() {
 
   // First load only: a background refetch (e.g. after an edit) must not swap
   // the page for a spinner, which would also unmount the open edit modal.
-  const isLoading =
-    isResolvingUsername ||
-    isProfileLoading ||
-    (profileTokenId !== undefined && profileData === undefined);
+  const isLoading = isResolvingUsername || isProfileLoading;
 
   if (isLoading) {
     return (
@@ -149,6 +151,32 @@ export default function ProfilePage() {
         <div className="text-center">
           <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-profile-accent border-t-transparent" />
           <p className="font-utsaha text-profile-muted">Loading profile…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if ((isUsernameError || isProfileError) && !profileData) {
+    return (
+      <div className="flex min-h-[calc(100vh-72px)] items-center justify-center px-4">
+        <div className="max-w-sm text-center">
+          <h1 className="font-utsaha text-2xl text-white">
+            Unable to load profile
+          </h1>
+          <p className="mt-2 font-utsaha text-sm text-profile-muted">
+            A network or RPC error occurred. Please check your connection and
+            try again.
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              if (isUsernameError) void refetchUsername();
+              if (isProfileError) void refetchProfile();
+            }}
+            className="mt-5 rounded-lg bg-profile-accent px-5 py-2 font-utsaha text-white"
+          >
+            Retry
+          </button>
         </div>
       </div>
     );

@@ -17,7 +17,6 @@ import { useRootId, useRootIdentityView } from "@/hooks/useIdentityReads";
 import { useCreateRootIdentity } from "@/hooks/useIdentityWrites";
 import {
   CLAIM_CHAIN,
-  CLAIM_IDENTITY_SYSTEM_ADDRESS,
   formatCardDate,
   normalizeUsernameInput,
 } from "@/lib/claim";
@@ -41,7 +40,6 @@ export default function ClaimPage() {
   const { switchChainAsync, isPending: isSwitching } = useSwitchChain();
   const createRoot = useCreateRootIdentity({
     chainId: CLAIM_CHAIN.id,
-    contractAddress: CLAIM_IDENTITY_SYSTEM_ADDRESS,
   });
   const validation = validateUsername(username);
 
@@ -50,14 +48,13 @@ export default function ClaimPage() {
     isSuccess: isRootLoaded,
     isError: isRootError,
     refetch: refetchRootId,
-  } = useRootId(address, CLAIM_CHAIN.id, CLAIM_IDENTITY_SYSTEM_ADDRESS);
+  } = useRootId(address, CLAIM_CHAIN.id);
   // Proceed on a failed read: the contract rejects a second root anyway.
   const isRootResolved = isRootLoaded || isRootError;
   const hasRoot = !!rootId && rootId > 0n;
   const { data: rootView } = useRootIdentityView(
     hasRoot ? rootId : undefined,
-    CLAIM_CHAIN.id,
-    CLAIM_IDENTITY_SYSTEM_ADDRESS
+    CLAIM_CHAIN.id
   );
   const { data: balance } = useBalance({
     address,
@@ -249,7 +246,6 @@ export default function ClaimPage() {
                 onChange={setDonate}
                 disabled={isSubmitting}
                 chainId={CLAIM_CHAIN.id}
-                contractAddress={CLAIM_IDENTITY_SYSTEM_ADDRESS}
                 variant="page"
                 className="mt-3 text-left"
               />

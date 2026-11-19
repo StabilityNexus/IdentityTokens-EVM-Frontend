@@ -10,92 +10,96 @@ import {
   useReadContracts,
 } from "wagmi";
 import { isAddressEqual, zeroAddress } from "viem";
-import {
-  IDENTITY_SYSTEM_ADDRESS,
-  IDENTITY_SYSTEM_ABI,
-  PROFILE_SYSTEM_ADDRESS,
-  PROFILE_SYSTEM_ABI,
-} from "@/lib/contracts";
+import { IDENTITY_SYSTEM_ABI, PROFILE_SYSTEM_ABI } from "@/lib/contracts";
 import { TOKEN_TYPE } from "@/lib/types";
 import type { AttesterView, ProfileLink } from "@/lib/types.responses";
 import { tokenIdFor } from "@/lib/tokenId";
 import { validateUsername } from "@/lib/validation";
+import {
+  useIdentitySystemAddress,
+  useProfileSystemAddress,
+  useSystemAddresses,
+} from "./useSystemAddresses";
 
 // IdentitySystem Reads
 
 /** Get the root identity ID for a wallet address */
 export function useRootId(
   address: `0x${string}` | undefined,
-  chainId?: number,
-  contractAddress: `0x${string}` = IDENTITY_SYSTEM_ADDRESS
+  chainId?: number
 ) {
+  const identity = useIdentitySystemAddress(chainId);
   return useReadContract({
-    address: contractAddress,
+    address: identity,
     abi: IDENTITY_SYSTEM_ABI,
     functionName: "ownerToRootId",
     args: address ? [address] : undefined,
     chainId,
-    query: { enabled: !!address },
+    query: { enabled: !!address && !!identity },
   });
 }
 
 /** Get the full root identity view for a root ID */
 export function useRootIdentityView(
   rootId: bigint | undefined,
-  chainId?: number,
-  contractAddress: `0x${string}` = IDENTITY_SYSTEM_ADDRESS
+  chainId?: number
 ) {
+  const identity = useIdentitySystemAddress(chainId);
   return useReadContract({
-    address: contractAddress,
+    address: identity,
     abi: IDENTITY_SYSTEM_ABI,
     functionName: "getRootIdentityView",
     args: rootId ? [rootId] : undefined,
     chainId,
-    query: { enabled: !!rootId && rootId > 0n },
+    query: { enabled: !!rootId && rootId > 0n && !!identity },
   });
 }
 
 /** Get all token IDs owned by a wallet */
 export function useWalletTokens(address: `0x${string}` | undefined) {
+  const identity = useIdentitySystemAddress();
   return useReadContract({
-    address: IDENTITY_SYSTEM_ADDRESS,
+    address: identity,
     abi: IDENTITY_SYSTEM_ABI,
     functionName: "getWalletTokens",
     args: address ? [address] : undefined,
-    query: { enabled: !!address },
+    query: { enabled: !!address && !!identity },
   });
 }
 
 /** Get full token data for a specific token ID */
 export function useTokenDetail(tokenId: bigint | undefined) {
+  const identity = useIdentitySystemAddress();
   return useReadContract({
-    address: IDENTITY_SYSTEM_ADDRESS,
+    address: identity,
     abi: IDENTITY_SYSTEM_ABI,
     functionName: "tokens",
     args: tokenId !== undefined ? [tokenId] : undefined,
-    query: { enabled: tokenId !== undefined },
+    query: { enabled: tokenId !== undefined && !!identity },
   });
 }
 
 /** Get all token IDs under a root identity */
 export function useTokensForRoot(rootId: bigint | undefined) {
+  const identity = useIdentitySystemAddress();
   return useReadContract({
-    address: IDENTITY_SYSTEM_ADDRESS,
+    address: identity,
     abi: IDENTITY_SYSTEM_ABI,
     functionName: "getTokensForRoot",
     args: rootId ? [rootId] : undefined,
-    query: { enabled: !!rootId && rootId > 0n },
+    query: { enabled: !!rootId && rootId > 0n && !!identity },
   });
 }
 
 /** Get active attestation count for a token */
 export function useActiveAttestationCount(tokenId: bigint | undefined) {
+  const identity = useIdentitySystemAddress();
   return useReadContract({
-    address: IDENTITY_SYSTEM_ADDRESS,
+    address: identity,
     abi: IDENTITY_SYSTEM_ABI,
     functionName: "getActiveAttestationCount",
     args: tokenId !== undefined ? [tokenId] : undefined,
-    query: { enabled: tokenId !== undefined },
+    query: { enabled: tokenId !== undefined && !!identity },
   });
 }
 
@@ -112,35 +116,38 @@ export function useAttestersDetailed(
   offset = 0n,
   limit = 50n
 ) {
+  const identity = useIdentitySystemAddress();
   return useReadContract({
-    address: IDENTITY_SYSTEM_ADDRESS,
+    address: identity,
     abi: IDENTITY_SYSTEM_ABI,
     functionName: "getAttestersDetailed",
     args:
       tokenId !== undefined ? [tokenId, activeOnly, offset, limit] : undefined,
-    query: { enabled: tokenId !== undefined },
+    query: { enabled: tokenId !== undefined && !!identity },
   });
 }
 
 /** Get the PROFILE token id held by a wallet, or 0n if it holds none */
 export function useProfileTokenId(address: `0x${string}` | undefined) {
+  const identity = useIdentitySystemAddress();
   return useReadContract({
-    address: IDENTITY_SYSTEM_ADDRESS,
+    address: identity,
     abi: IDENTITY_SYSTEM_ABI,
     functionName: "getProfileTokenId",
     args: address ? [address] : undefined,
-    query: { enabled: !!address },
+    query: { enabled: !!address && !!identity },
   });
 }
 
 /** Get transfer history for a token */
 export function useTransferHistory(tokenId: bigint | undefined) {
+  const identity = useIdentitySystemAddress();
   return useReadContract({
-    address: IDENTITY_SYSTEM_ADDRESS,
+    address: identity,
     abi: IDENTITY_SYSTEM_ABI,
     functionName: "getTransferHistory",
     args: tokenId !== undefined ? [tokenId] : undefined,
-    query: { enabled: tokenId !== undefined },
+    query: { enabled: tokenId !== undefined && !!identity },
   });
 }
 
@@ -149,8 +156,9 @@ export function useHasAttested(
   attesterRootId: bigint | undefined,
   tokenId: bigint | undefined
 ) {
+  const identity = useIdentitySystemAddress();
   return useReadContract({
-    address: IDENTITY_SYSTEM_ADDRESS,
+    address: identity,
     abi: IDENTITY_SYSTEM_ABI,
     functionName: "hasAttested",
     args:
@@ -158,62 +166,67 @@ export function useHasAttested(
         ? [attesterRootId, tokenId]
         : undefined,
     query: {
-      enabled: attesterRootId !== undefined && tokenId !== undefined,
+      enabled:
+        attesterRootId !== undefined && tokenId !== undefined && !!identity,
     },
   });
 }
 
 /** Check if a wallet has a profile token (on IdentitySystem) */
 export function useHasProfile(address: `0x${string}` | undefined) {
+  const identity = useIdentitySystemAddress();
   return useReadContract({
-    address: IDENTITY_SYSTEM_ADDRESS,
+    address: identity,
     abi: IDENTITY_SYSTEM_ABI,
     functionName: "hasProfile",
     args: address ? [address] : undefined,
-    query: { enabled: !!address },
+    query: { enabled: !!address && !!identity },
   });
 }
 
 /** Get the owner of a specific token */
 export function useTokenOwner(tokenId: bigint | undefined) {
+  const identity = useIdentitySystemAddress();
   return useReadContract({
-    address: IDENTITY_SYSTEM_ADDRESS,
+    address: identity,
     abi: IDENTITY_SYSTEM_ABI,
     functionName: "ownerOf",
     args: tokenId !== undefined ? [tokenId] : undefined,
-    query: { enabled: tokenId !== undefined },
+    query: { enabled: tokenId !== undefined && !!identity },
   });
 }
 
 /** The donation as a percentage of a transaction's gas fee (100 = equal to it) */
-export function useDevFee(
-  chainId?: number,
-  contractAddress: `0x${string}` = IDENTITY_SYSTEM_ADDRESS
-) {
+export function useDevFee(chainId?: number) {
+  const identity = useIdentitySystemAddress(chainId);
   return useReadContract({
-    address: contractAddress,
+    address: identity,
     abi: IDENTITY_SYSTEM_ABI,
     functionName: "devFee",
     chainId,
+    query: { enabled: !!identity },
   });
 }
 
 /** Dev-fee settings, and whether the connected wallet is the dev or the proposed one */
 export function useDevFeeConfig() {
   const { address } = useAccount();
-  const contract = {
-    address: IDENTITY_SYSTEM_ADDRESS,
-    abi: IDENTITY_SYSTEM_ABI,
-  } as const;
+  const identity = useIdentitySystemAddress();
+  const contract = identity
+    ? ({ address: identity, abi: IDENTITY_SYSTEM_ABI } as const)
+    : undefined;
 
   const { data, isLoading, refetch } = useReadContracts({
-    contracts: [
-      { ...contract, functionName: "dev" },
-      { ...contract, functionName: "pendingDev" },
-      { ...contract, functionName: "devFeeReceiver" },
-      { ...contract, functionName: "devFee" },
-      { ...contract, functionName: "MAX_DEV_FEE" },
-    ],
+    contracts: contract
+      ? [
+          { ...contract, functionName: "dev" },
+          { ...contract, functionName: "pendingDev" },
+          { ...contract, functionName: "devFeeReceiver" },
+          { ...contract, functionName: "devFee" },
+          { ...contract, functionName: "MAX_DEV_FEE" },
+        ]
+      : [],
+    query: { enabled: !!contract },
   });
 
   const [dev, pending, devFeeReceiver, devFee, maxDevFee] = (data ?? []).map(
@@ -240,8 +253,15 @@ export function useDevFeeConfig() {
 
 /** Donations waiting in both contracts, which one withdrawal sends on */
 export function useDevFeesWaiting() {
-  const identity = useBalance({ address: IDENTITY_SYSTEM_ADDRESS });
-  const profile = useBalance({ address: PROFILE_SYSTEM_ADDRESS });
+  const addresses = useSystemAddresses();
+  const identity = useBalance({
+    address: addresses?.identity,
+    query: { enabled: !!addresses?.identity },
+  });
+  const profile = useBalance({
+    address: addresses?.profile,
+    query: { enabled: !!addresses?.profile },
+  });
 
   return {
     value:
@@ -260,23 +280,25 @@ export function useDevFeesWaiting() {
 
 /** Check if a wallet has minted a profile (on ProfileSystem) */
 export function useHasMintedProfile(address: `0x${string}` | undefined) {
+  const profile = useProfileSystemAddress();
   return useReadContract({
-    address: PROFILE_SYSTEM_ADDRESS,
+    address: profile,
     abi: PROFILE_SYSTEM_ABI,
     functionName: "hasMintedProfile",
     args: address ? [address] : undefined,
-    query: { enabled: !!address },
+    query: { enabled: !!address && !!profile },
   });
 }
 
 /** Get profile metadata for a profile token ID */
 export function useProfile(tokenId: bigint | undefined) {
+  const profile = useProfileSystemAddress();
   return useReadContract({
-    address: PROFILE_SYSTEM_ADDRESS,
+    address: profile,
     abi: PROFILE_SYSTEM_ABI,
     functionName: "getProfile",
     args: tokenId !== undefined ? [tokenId] : undefined,
-    query: { enabled: tokenId !== undefined },
+    query: { enabled: tokenId !== undefined && !!profile },
   });
 }
 
@@ -290,24 +312,22 @@ const LINKS_PAGE = 50n;
  */
 export function useProfileLinks(tokenId: bigint | undefined) {
   const client = usePublicClient();
+  const profile = useProfileSystemAddress();
 
   return useQuery({
-    queryKey: [
-      "profile-links",
-      client?.chain.id,
-      PROFILE_SYSTEM_ADDRESS,
-      tokenId?.toString(),
-    ],
-    enabled: !!client && tokenId !== undefined,
+    queryKey: ["profile-links", client?.chain.id, profile, tokenId?.toString()],
+    enabled: !!client && tokenId !== undefined && !!profile,
     queryFn: async () => {
-      if (!client || tokenId === undefined) throw new Error("No client");
+      if (!client || tokenId === undefined || !profile) {
+        throw new Error("No ProfileSystem contract on this chain");
+      }
       // Every page reads the same block, so an edit landing between calls
       // can't mix two versions. Uncached, so a refetch after an edit sees it.
       const blockNumber = await client.getBlockNumber({ cacheTime: 0 });
       const links: ProfileLink[] = [];
       for (;;) {
         const [page, total] = await client.readContract({
-          address: PROFILE_SYSTEM_ADDRESS,
+          address: profile,
           abi: PROFILE_SYSTEM_ABI,
           functionName: "getLinks",
           args: [tokenId, BigInt(links.length), LINKS_PAGE],
@@ -325,13 +345,16 @@ export function useUsernameTaken(
   username: string | undefined,
   chainId?: number
 ) {
+  const profile = useProfileSystemAddress(chainId);
   return useReadContract({
-    address: PROFILE_SYSTEM_ADDRESS,
+    address: profile,
     abi: PROFILE_SYSTEM_ABI,
     functionName: "usernameTaken",
     args: username ? [username] : undefined,
     chainId,
-    query: { enabled: !!username && username.length >= 3 },
+    query: {
+      enabled: !!username && username.length >= 3 && !!profile,
+    },
   });
 }
 
@@ -340,13 +363,14 @@ export function useResolveUsername(username: string | undefined) {
   // Usernames can't contain "-", so token ids like "pf-…" never reach this
   const isValidUsername =
     !!username && validateUsername(username).status === "valid";
+  const profile = useProfileSystemAddress();
 
   return useReadContract({
-    address: PROFILE_SYSTEM_ADDRESS,
+    address: profile,
     abi: PROFILE_SYSTEM_ABI,
     functionName: "usernameToProfileTokenId",
     args: isValidUsername ? [username] : undefined,
-    query: { enabled: isValidUsername },
+    query: { enabled: isValidUsername && !!profile },
   });
 }
 
@@ -356,16 +380,21 @@ export function useResolveUsername(username: string | undefined) {
 export function useMultipleTokenDetails(
   tokenIds: readonly bigint[] | undefined
 ) {
-  const contracts = (tokenIds ?? []).map((id) => ({
-    address: IDENTITY_SYSTEM_ADDRESS,
-    abi: IDENTITY_SYSTEM_ABI,
-    functionName: "tokens" as const,
-    args: [id] as const,
-  }));
+  const identity = useIdentitySystemAddress();
+  const contracts = identity
+    ? (tokenIds ?? []).map((id) => ({
+        address: identity,
+        abi: IDENTITY_SYSTEM_ABI,
+        functionName: "tokens" as const,
+        args: [id] as const,
+      }))
+    : [];
 
   return useReadContracts({
     contracts,
-    query: { enabled: !!tokenIds && tokenIds.length > 0 },
+    query: {
+      enabled: !!identity && !!tokenIds && tokenIds.length > 0,
+    },
   });
 }
 
@@ -373,16 +402,21 @@ export function useMultipleTokenDetails(
 export function useMultipleAttestationCounts(
   tokenIds: readonly bigint[] | undefined
 ) {
-  const contracts = (tokenIds ?? []).map((id) => ({
-    address: IDENTITY_SYSTEM_ADDRESS,
-    abi: IDENTITY_SYSTEM_ABI,
-    functionName: "getActiveAttestationCount" as const,
-    args: [id] as const,
-  }));
+  const identity = useIdentitySystemAddress();
+  const contracts = identity
+    ? (tokenIds ?? []).map((id) => ({
+        address: identity,
+        abi: IDENTITY_SYSTEM_ABI,
+        functionName: "getActiveAttestationCount" as const,
+        args: [id] as const,
+      }))
+    : [];
 
   return useReadContracts({
     contracts,
-    query: { enabled: !!tokenIds && tokenIds.length > 0 },
+    query: {
+      enabled: !!identity && !!tokenIds && tokenIds.length > 0,
+    },
   });
 }
 
@@ -396,17 +430,20 @@ const ATTESTERS_PAGE = 50n;
  */
 export function useMultipleAttesters(tokenIds: readonly bigint[] | undefined) {
   const client = usePublicClient();
+  const identity = useIdentitySystemAddress();
 
   return useQuery({
     queryKey: [
       "attesters-detailed",
       client?.chain.id,
-      IDENTITY_SYSTEM_ADDRESS,
+      identity,
       tokenIds?.map(String),
     ],
-    enabled: !!client && !!tokenIds && tokenIds.length > 0,
+    enabled: !!client && !!identity && !!tokenIds && tokenIds.length > 0,
     queryFn: async () => {
-      if (!client || !tokenIds) throw new Error("No client");
+      if (!client || !identity || !tokenIds) {
+        throw new Error("No IdentitySystem contract on this chain");
+      }
       const views = tokenIds.map((): AttesterView[] => []);
       let open = tokenIds.map((_, i) => i);
 
@@ -414,7 +451,7 @@ export function useMultipleAttesters(tokenIds: readonly bigint[] | undefined) {
         const pages = await client.multicall({
           allowFailure: false,
           contracts: open.map((i) => ({
-            address: IDENTITY_SYSTEM_ADDRESS,
+            address: identity,
             abi: IDENTITY_SYSTEM_ABI,
             functionName: "getAttestersDetailed" as const,
             args: [
@@ -440,16 +477,21 @@ export function useMultipleAttesters(tokenIds: readonly bigint[] | undefined) {
 export function useMultipleTokenOwners(
   tokenIds: readonly bigint[] | undefined
 ) {
-  const contracts = (tokenIds ?? []).map((id) => ({
-    address: IDENTITY_SYSTEM_ADDRESS,
-    abi: IDENTITY_SYSTEM_ABI,
-    functionName: "ownerOf" as const,
-    args: [id] as const,
-  }));
+  const identity = useIdentitySystemAddress();
+  const contracts = identity
+    ? (tokenIds ?? []).map((id) => ({
+        address: identity,
+        abi: IDENTITY_SYSTEM_ABI,
+        functionName: "ownerOf" as const,
+        args: [id] as const,
+      }))
+    : [];
 
   return useReadContracts({
     contracts,
-    query: { enabled: !!tokenIds && tokenIds.length > 0 },
+    query: {
+      enabled: !!identity && !!tokenIds && tokenIds.length > 0,
+    },
   });
 }
 
@@ -458,13 +500,17 @@ const RECENT_PER_TYPE = 20n;
 
 // Newest ids per type from the minted counters; burned ids included, callers drop them
 export function useRecentTokens() {
+  const identity = useIdentitySystemAddress();
   const { data: counts, isLoading } = useReadContracts({
-    contracts: RECENT_TYPES.map((type) => ({
-      address: IDENTITY_SYSTEM_ADDRESS,
-      abi: IDENTITY_SYSTEM_ABI,
-      functionName: "minted" as const,
-      args: [BigInt(type)] as const,
-    })),
+    contracts: identity
+      ? RECENT_TYPES.map((type) => ({
+          address: identity,
+          abi: IDENTITY_SYSTEM_ABI,
+          functionName: "minted" as const,
+          args: [BigInt(type)] as const,
+        }))
+      : [],
+    query: { enabled: !!identity },
   });
 
   const tokenIds = useMemo(() => {

@@ -1,11 +1,7 @@
 import { sepolia } from "wagmi/chains";
-import { SEPOLIA_IDENTITY_SYSTEM_ADDRESS } from "./contracts";
 
 /** Chain every /claim read and reservation is pinned to. */
 export const CLAIM_CHAIN = sepolia;
-
-/** /claim always uses the official Sepolia deployment, even if .env.local points the app at Anvil. */
-export const CLAIM_IDENTITY_SYSTEM_ADDRESS = SEPOLIA_IDENTITY_SYSTEM_ADDRESS;
 
 /** Shown on the card until the visitor types something. */
 export const USERNAME_PLACEHOLDER = "yourname";

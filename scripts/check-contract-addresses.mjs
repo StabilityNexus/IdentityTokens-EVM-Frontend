@@ -2,6 +2,7 @@
 // Like the other checks it goes through jiti; plain node cannot resolve the
 // extensionless imports in lib/contracts.ts.
 import assert from "node:assert/strict";
+import { foundry, sepolia } from "wagmi/chains";
 
 const SEPOLIA_IDENTITY = "0x15253A56CD3EbC2893914C2139094dc92a42c016";
 const SEPOLIA_PROFILE = "0x17dc6AA09432d61ca630b523DAF01fB2b98Bd58D";
@@ -12,32 +13,39 @@ const ANVIL_PROFILE = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
 process.env.NEXT_PUBLIC_IDENTITY_SYSTEM_ADDRESS = ANVIL_IDENTITY;
 process.env.NEXT_PUBLIC_PROFILE_SYSTEM_ADDRESS = ANVIL_PROFILE;
 
-const { IDENTITY_SYSTEM_ADDRESS, PROFILE_SYSTEM_ADDRESS, deploymentAddress } =
+const { SYSTEM_ADDRESSES, deploymentAddress } =
   await import("../lib/contracts.ts");
 
-// Configured deployments are used as written, without checksumming.
-assert.equal(IDENTITY_SYSTEM_ADDRESS, ANVIL_IDENTITY);
-assert.equal(PROFILE_SYSTEM_ADDRESS, ANVIL_PROFILE);
+// Configured deployments are used for the local Foundry chain.
+assert.deepEqual(SYSTEM_ADDRESSES[foundry.id], {
+  identity: ANVIL_IDENTITY,
+  profile: ANVIL_PROFILE,
+});
+
+// Sepolia keeps the official deployment even when the env points at Anvil.
+assert.deepEqual(SYSTEM_ADDRESSES[sepolia.id], {
+  identity: SEPOLIA_IDENTITY,
+  profile: SEPOLIA_PROFILE,
+});
+
+// Chains without a deployment have no entry.
+assert.equal(SYSTEM_ADDRESSES[1], undefined);
+
+// Missing values fall back; valid values are kept as written (no checksumming).
+assert.equal(deploymentAddress(undefined, ANVIL_IDENTITY), ANVIL_IDENTITY);
+assert.equal(deploymentAddress("", ANVIL_IDENTITY), ANVIL_IDENTITY);
 assert.equal(
-  deploymentAddress(ANVIL_IDENTITY.toLowerCase(), SEPOLIA_IDENTITY),
+  deploymentAddress(ANVIL_IDENTITY.toLowerCase(), ANVIL_IDENTITY),
   ANVIL_IDENTITY.toLowerCase()
 );
 
-// /claim stays on the official Sepolia deployment even with Anvil overrides.
-const { CLAIM_IDENTITY_SYSTEM_ADDRESS } = await import("../lib/claim.ts");
-assert.equal(CLAIM_IDENTITY_SYSTEM_ADDRESS, SEPOLIA_IDENTITY);
-
-// Missing values keep the official Sepolia deployment.
-assert.equal(deploymentAddress(undefined, SEPOLIA_IDENTITY), SEPOLIA_IDENTITY);
-assert.equal(deploymentAddress("", SEPOLIA_IDENTITY), SEPOLIA_IDENTITY);
-
-// Invalid values throw instead of silently falling back.
+// Invalid values throw.
 assert.throws(
-  () => deploymentAddress("not-an-address", SEPOLIA_IDENTITY),
+  () => deploymentAddress("not-an-address", ANVIL_IDENTITY),
   /Invalid contract address in \.env/
 );
 assert.throws(
-  () => deploymentAddress("0x123", SEPOLIA_PROFILE),
+  () => deploymentAddress("0x123", ANVIL_PROFILE),
   /Invalid contract address in \.env/
 );
 

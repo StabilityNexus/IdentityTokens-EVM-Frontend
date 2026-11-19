@@ -9,8 +9,6 @@ interface DonationCheckboxProps {
   onChange: (checked: boolean) => void;
   disabled?: boolean;
   chainId?: number;
-  /** Contract to read the dev fee from; defaults to the app-wide deployment. */
-  contractAddress?: `0x${string}`;
   /** "modal" for the dark dialogs, "page" for light-or-dark pages like /claim */
   variant?: "modal" | "page";
   className?: string;
@@ -22,11 +20,10 @@ export function DonationCheckbox({
   onChange,
   disabled = false,
   chainId,
-  contractAddress,
   variant = "modal",
   className = "",
 }: DonationCheckboxProps) {
-  const { data: devFee } = useDevFee(chainId, contractAddress);
+  const { data: devFee } = useDevFee(chainId);
   if (!devFee) return null;
 
   return (

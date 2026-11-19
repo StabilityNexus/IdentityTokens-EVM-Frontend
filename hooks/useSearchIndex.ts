@@ -2,12 +2,7 @@
 
 import { useMemo } from "react";
 import { useReadContracts } from "wagmi";
-import {
-  IDENTITY_SYSTEM_ABI,
-  IDENTITY_SYSTEM_ADDRESS,
-  PROFILE_SYSTEM_ABI,
-  PROFILE_SYSTEM_ADDRESS,
-} from "@/lib/contracts";
+import { IDENTITY_SYSTEM_ABI, PROFILE_SYSTEM_ABI } from "@/lib/contracts";
 import { formatTokenId, tokenIdFor, type TokenTypeNum } from "@/lib/tokenId";
 import type { SearchEntry } from "@/lib/search";
 import type { TokenTuple } from "./useWalletTokenList";
@@ -15,6 +10,10 @@ import {
   useMultipleTokenDetails,
   useMultipleTokenOwners,
 } from "./useIdentityReads";
+import {
+  useIdentitySystemAddress,
+  useProfileSystemAddress,
+} from "./useSystemAddresses";
 
 const TYPES: TokenTypeNum[] = [0, 1, 2];
 
@@ -23,14 +22,19 @@ const digitsOf = (id: bigint) => formatTokenId(id).slice(3);
 // Every live root, token and profile, so search can match partial ids and names
 // in the browser. It reads the whole supply, so swap in an indexer once that grows.
 export function useSearchIndex(enabled: boolean) {
+  const identity = useIdentitySystemAddress();
+  const profile = useProfileSystemAddress();
+
   const { data: counts, isLoading: isCounting } = useReadContracts({
-    contracts: TYPES.map((t) => ({
-      address: IDENTITY_SYSTEM_ADDRESS,
-      abi: IDENTITY_SYSTEM_ABI,
-      functionName: "minted" as const,
-      args: [BigInt(t)] as const,
-    })),
-    query: { enabled },
+    contracts: identity
+      ? TYPES.map((t) => ({
+          address: identity,
+          abi: IDENTITY_SYSTEM_ABI,
+          functionName: "minted" as const,
+          args: [BigInt(t)] as const,
+        }))
+      : [],
+    query: { enabled: enabled && !!identity },
   });
 
   const [rootIds, tokenIds, profileIds] = useMemo(
@@ -47,22 +51,26 @@ export function useSearchIndex(enabled: boolean) {
   const on = (ids: bigint[]) => (enabled && ids.length > 0 ? ids : undefined);
 
   const { data: roots } = useReadContracts({
-    contracts: rootIds.map((id) => ({
-      address: IDENTITY_SYSTEM_ADDRESS,
-      abi: IDENTITY_SYSTEM_ABI,
-      functionName: "rootIdentities" as const,
-      args: [id] as const,
-    })),
-    query: { enabled: !!on(rootIds) },
+    contracts: identity
+      ? rootIds.map((id) => ({
+          address: identity,
+          abi: IDENTITY_SYSTEM_ABI,
+          functionName: "rootIdentities" as const,
+          args: [id] as const,
+        }))
+      : [],
+    query: { enabled: !!on(rootIds) && !!identity },
   });
   const { data: profiles } = useReadContracts({
-    contracts: profileIds.map((id) => ({
-      address: PROFILE_SYSTEM_ADDRESS,
-      abi: PROFILE_SYSTEM_ABI,
-      functionName: "getProfile" as const,
-      args: [id] as const,
-    })),
-    query: { enabled: !!on(profileIds) },
+    contracts: profile
+      ? profileIds.map((id) => ({
+          address: profile,
+          abi: PROFILE_SYSTEM_ABI,
+          functionName: "getProfile" as const,
+          args: [id] as const,
+        }))
+      : [],
+    query: { enabled: !!on(profileIds) && !!profile },
   });
   const { data: profileOwners } = useMultipleTokenOwners(on(profileIds));
   const { data: tokens } = useMultipleTokenDetails(on(tokenIds));

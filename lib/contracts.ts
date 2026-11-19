@@ -1,12 +1,19 @@
 import { foundry, sepolia } from "wagmi/chains";
 import { isAddress, type Address } from "viem";
 
-/** The official v0.0.6 deployment on Sepolia, used when no override is set. */
+/** The official v0.0.6 deployment on Sepolia. */
 export const SEPOLIA_IDENTITY_SYSTEM_ADDRESS =
   "0x15253A56CD3EbC2893914C2139094dc92a42c016" as const;
 
 export const SEPOLIA_PROFILE_SYSTEM_ADDRESS =
   "0x17dc6AA09432d61ca630b523DAF01fB2b98Bd58D" as const;
+
+/** Deterministic addresses from the first two deployments in `make deploy-anvil`. */
+const ANVIL_IDENTITY_SYSTEM_ADDRESS =
+  "0x5FbDB2315678afecb367f032d93F642f64180aa3" as const;
+
+const ANVIL_PROFILE_SYSTEM_ADDRESS =
+  "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512" as const;
 
 /**
  * Resolve a configured address, falling back only when it is missing. An
@@ -24,20 +31,32 @@ export function deploymentAddress(
   return value;
 }
 
-/**
- * The deployment the app should talk to. Set the
- * `NEXT_PUBLIC_*_SYSTEM_ADDRESS` variables in `.env.local` to point the app at
- * another deployment, such as the deterministic Anvil addresses.
- */
-export const IDENTITY_SYSTEM_ADDRESS = deploymentAddress(
-  process.env.NEXT_PUBLIC_IDENTITY_SYSTEM_ADDRESS,
-  SEPOLIA_IDENTITY_SYSTEM_ADDRESS
-);
+export interface SystemAddresses {
+  identity: Address;
+  profile: Address;
+}
 
-export const PROFILE_SYSTEM_ADDRESS = deploymentAddress(
-  process.env.NEXT_PUBLIC_PROFILE_SYSTEM_ADDRESS,
-  SEPOLIA_PROFILE_SYSTEM_ADDRESS
-);
+/**
+ * Contract addresses per chain. The env overrides target the local Foundry
+ * chain, so `/claim` can stay on the official Sepolia deployment while the
+ * rest of the app talks to Anvil in the same session.
+ */
+export const SYSTEM_ADDRESSES: Partial<Record<number, SystemAddresses>> = {
+  [foundry.id]: {
+    identity: deploymentAddress(
+      process.env.NEXT_PUBLIC_IDENTITY_SYSTEM_ADDRESS,
+      ANVIL_IDENTITY_SYSTEM_ADDRESS
+    ),
+    profile: deploymentAddress(
+      process.env.NEXT_PUBLIC_PROFILE_SYSTEM_ADDRESS,
+      ANVIL_PROFILE_SYSTEM_ADDRESS
+    ),
+  },
+  [sepolia.id]: {
+    identity: SEPOLIA_IDENTITY_SYSTEM_ADDRESS,
+    profile: SEPOLIA_PROFILE_SYSTEM_ADDRESS,
+  },
+};
 
 /**
  * Block IdentitySystem was deployed in, per chain; update it together with the

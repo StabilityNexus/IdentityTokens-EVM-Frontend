@@ -63,6 +63,7 @@ export function TokenMenu({
             <MoreVertical size={18} />
           </button>
         </DropdownMenuTrigger>
+
         <DropdownMenuContent
           align="end"
           className="w-48 border-card-inner-bg bg-app-bg font-utsaha text-white"
@@ -74,6 +75,7 @@ export function TokenMenu({
             <Share2 size={16} />
             <span>Share Token</span>
           </DropdownMenuItem>
+
           <DropdownMenuItem
             className={ITEM}
             onSelect={(e) => {
@@ -92,6 +94,7 @@ export function TokenMenu({
             )}
             <span aria-live="polite">{copied ? "Copied" : "Copy ID"}</span>
           </DropdownMenuItem>
+
           {isOwner && (
             <>
               <DropdownMenuItem
@@ -101,6 +104,7 @@ export function TokenMenu({
                 <Send size={16} />
                 <span>Transfer Token</span>
               </DropdownMenuItem>
+
               <DropdownMenuItem
                 className={`${ITEM} text-red-400 focus:text-red-400`}
                 onClick={() => setForm("burn")}
@@ -110,6 +114,7 @@ export function TokenMenu({
               </DropdownMenuItem>
             </>
           )}
+
           {onFlag && (
             <DropdownMenuItem
               disabled={flagDisabled}
@@ -131,15 +136,13 @@ export function TokenMenu({
         subtitle={[name, id, type].filter(Boolean).join(" · ")}
       />
 
-      {form && (
-        <TokenForm
-          isOpen
-          onClose={() => setForm(null)}
-          tokenName={name}
-          tokenId={tokenId}
-          openTransfer={form === "transfer"}
-        />
-      )}
+      <TokenForm
+        isOpen={form !== null}
+        onClose={() => setForm(null)}
+        tokenName={name}
+        tokenId={tokenId}
+        openTransfer={form === "transfer"}
+      />
     </>
   );
 }

@@ -52,12 +52,24 @@ export function CreateTokenModal({
 
   // Declared ahead of the effects below, which call them from their timers.
   const handleClose = useCallback(() => {
-    setTokenState({ name: "", type: "", value: "", about: "", validUntil: "" });
-    setErrors({});
-    setIsCustomType(false);
-    setStep("idle");
-    setDonate(true);
-    createToken.reset();
+    const transactionInProgress =
+      createToken.isPending || createToken.isConfirming;
+
+    if (!transactionInProgress) {
+      setTokenState({
+        name: "",
+        type: "",
+        value: "",
+        about: "",
+        validUntil: "",
+      });
+      setErrors({});
+      setIsCustomType(false);
+      setStep("idle");
+      setDonate(true);
+      createToken.reset();
+    }
+
     onClose();
   }, [onClose, createToken]);
 

@@ -30,33 +30,59 @@ export function TokenForm({
   const burnToken = useBurnToken();
   const transferToken = useTransferToken();
 
-  // Reset on close. Clearing this from an effect is the trade-off for the
-  // parent owning `isOpen`; the effect-free fix is to remount the modal on
-  // close (a `key`, or an inner component) rather than gate it on a prop.
+  const transactionInProgress =
+    burnToken.isPending ||
+    burnToken.isConfirming ||
+    transferToken.isPending ||
+    transferToken.isConfirming;
+
+  // Reset old form state when opening a new session.
+  // Never reset while a transaction is still being processed.
   useEffect(() => {
-    if (!isOpen) {
+    if (!isOpen && !transactionInProgress) {
       setTransferAddress("");
-      setShowTransfer(false);
+      setShowTransfer(openTransfer);
       setShowBurnConfirm(false);
       setAction("idle");
       setDonate(true);
       burnToken.reset();
       transferToken.reset();
     }
+    // This effect intentionally runs only when the modal opens.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
-  // Auto-close on success
+  // Handle Escape dismissal.
+  // Closing the modal does not reset transaction state.
+  useEffect(() => {
+    if (!isOpen || tokenId === undefined) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen, tokenId, onClose]);
+
+  // Refresh wallet tokens after success, even if the modal was dismissed.
   useEffect(() => {
     if (
       (action === "burning" && burnToken.isSuccess) ||
       (action === "transferring" && transferToken.isSuccess)
     ) {
       refetchWalletTokens();
+
       const timer = setTimeout(() => {
         onSuccess?.();
         onClose();
       }, 2000);
+
       return () => clearTimeout(timer);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -69,15 +95,18 @@ export function TokenForm({
       setShowBurnConfirm(true);
       return;
     }
+
     setAction("burning");
     burnToken.write(tokenId, donate);
   };
 
-  const handleTransfer = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleTransfer = (event: React.FormEvent) => {
+    event.preventDefault();
+
     if (!transferAddress.startsWith("0x") || transferAddress.length !== 42) {
       return;
     }
+
     setAction("transferring");
     transferToken.write(tokenId, transferAddress as `0x${string}`, donate);
   };
@@ -89,19 +118,23 @@ export function TokenForm({
       if (burnToken.isSuccess) return "success";
       if (burnToken.error) return "error";
     }
+
     if (action === "transferring") {
       if (transferToken.isPending) return "pending";
       if (transferToken.isConfirming) return "confirming";
       if (transferToken.isSuccess) return "success";
       if (transferToken.error) return "error";
     }
+
     return "idle";
   };
 
   const txStatus = getTxStatus();
   const isSubmitting = txStatus === "pending" || txStatus === "confirming";
+
   const currentError =
     action === "burning" ? burnToken.error : transferToken.error;
+
   const currentTxHash =
     action === "burning" ? burnToken.txHash : transferToken.txHash;
 
@@ -116,11 +149,10 @@ export function TokenForm({
           backgroundColor: "var(--color-app-bg)",
           border: "1px solid rgba(255,255,255,0.06)",
         }}
-        onClick={(e) => e.stopPropagation()}
+        onClick={(event) => event.stopPropagation()}
       >
-        {/* ── Header ── */}
+        {/* Header */}
         <div className="flex items-center justify-between border-b border-white/5 px-6 pt-6 pb-5">
-          {/* Title + dropdown */}
           <button
             type="button"
             className="flex min-w-0 cursor-pointer items-center gap-2 font-utsaha text-lg leading-tight text-white transition-opacity hover:opacity-80"
@@ -131,21 +163,23 @@ export function TokenForm({
                 {formatTokenId(tokenId)}
               </span>
             </span>
+
             <ChevronDown size={20} className="shrink-0 text-gray-400" />
           </button>
 
-          {/* Close */}
           <button
+            type="button"
             onClick={onClose}
+            aria-label="Close"
             className="ml-4 shrink-0 rounded-full p-2 text-gray-400 transition-colors hover:bg-white/10 hover:text-white"
           >
             <X size={20} />
           </button>
         </div>
 
-        {/* ── Body ── */}
+        {/* Body */}
         <div className="flex flex-col gap-4 px-6 py-5">
-          {/* Transfer section (collapsible) */}
+          {/* Transfer section */}
           <div>
             <button
               type="button"
@@ -165,10 +199,11 @@ export function TokenForm({
                   <label className="font-utsaha text-sm text-gray-300">
                     Recipient Address
                   </label>
+
                   <input
                     type="text"
                     value={transferAddress}
-                    onChange={(e) => setTransferAddress(e.target.value)}
+                    onChange={(event) => setTransferAddress(event.target.value)}
                     placeholder="0x..."
                     disabled={isSubmitting}
                     className="w-full rounded-lg px-4 py-2 font-utsaha text-white placeholder-gray-500 transition-all focus:ring-1 focus:ring-brand-blue focus:outline-none disabled:opacity-50"
@@ -178,6 +213,7 @@ export function TokenForm({
                     }}
                   />
                 </div>
+
                 <button
                   type="submit"
                   disabled={
@@ -201,7 +237,7 @@ export function TokenForm({
             disabled={isSubmitting}
           />
 
-          {/* Transaction Status */}
+          {/* Transaction status */}
           <TransactionStatus
             status={txStatus}
             txHash={currentTxHash}
@@ -213,9 +249,8 @@ export function TokenForm({
             }
           />
 
-          {/* ── Action buttons ── */}
+          {/* Burn action */}
           <div className="mt-2 flex items-center gap-3">
-            {/* Burn */}
             <button
               type="button"
               onClick={handleBurn}
@@ -233,6 +268,7 @@ export function TokenForm({
                 width={20}
                 height={20}
               />
+
               {showBurnConfirm
                 ? action === "burning" && isSubmitting
                   ? "Burning…"

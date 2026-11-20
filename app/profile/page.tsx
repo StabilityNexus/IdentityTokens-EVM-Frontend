@@ -54,15 +54,17 @@ export default function ProfilePage() {
     isLoading: isProfileLoading,
     refetch: refetchProfile,
   } = useProfile(profileTokenId);
+
   const {
     data: profileLinks,
     isSuccess: isLinksLoaded,
     isFetching: isFetchingLinks,
     refetch: refetchLinks,
   } = useProfileLinks(profileTokenId);
+
   const { data: ownerAddress } = useTokenOwner(profileTokenId);
 
-  // Attesters across every token the owner holds, the profile token included.
+  // Attesters across every token the owner holds, including the profile token.
   const { data: ownerTokenIds } = useWalletTokens(ownerAddress);
   const whoAttested = useTokenAttesters(ownerTokenIds, {
     includeProfile: true,
@@ -96,16 +98,19 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!revokeAttestation.isSuccess) return;
+
     refetchAttestations();
     refetchHasAttested();
-    // Clear the write result, or isSuccess stays true and the success banner
-    // sticks for the life of the page.
+
+    // Clear the write result so the success state does not persist.
     revokeAttestation.reset();
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [revokeAttestation.isSuccess, refetchAttestations, refetchHasAttested]);
 
   useEffect(() => {
     if (!notice) return;
+
     const timer = setTimeout(() => setNotice(null), 4000);
     return () => clearTimeout(timer);
   }, [notice]);
@@ -115,6 +120,7 @@ export default function ProfilePage() {
       setNotice("Connect your wallet to attest or revoke.");
       return;
     }
+
     action();
   };
 
@@ -125,9 +131,11 @@ export default function ProfilePage() {
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-profile-border bg-profile-surface">
             <UserX size={24} className="text-profile-muted" />
           </div>
+
           <h1 className="font-utsaha text-2xl text-white">
             No profile specified
           </h1>
+
           <p className="mt-2 font-utsaha text-sm text-profile-muted">
             Please provide a username or profile id (pf-…) in the URL.
           </p>
@@ -136,8 +144,7 @@ export default function ProfilePage() {
     );
   }
 
-  // First load only: a background refetch (e.g. after an edit) must not swap
-  // the page for a spinner, which would also unmount the open edit modal.
+  // A background refetch must not unmount the edit modal.
   const isLoading =
     isResolvingUsername ||
     isProfileLoading ||
@@ -161,11 +168,14 @@ export default function ProfilePage() {
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-profile-border bg-profile-surface">
             <UserX size={24} className="text-profile-muted" />
           </div>
+
           <h1 className="font-utsaha text-2xl text-white">Profile not found</h1>
+
           <p className="mt-2 font-utsaha text-sm text-profile-muted">
             No profile is registered to{" "}
             <span className="text-white">&ldquo;{username}&rdquo;</span>.
           </p>
+
           <p className="mt-3 font-utsaha text-xs text-profile-muted">
             If you expected one here, check that your wallet is on a supported
             network.
@@ -202,9 +212,6 @@ export default function ProfilePage() {
             isRevoking={revokeAttestation.isLoading}
             onAttest={() => requireWallet(() => setIsAttestModalOpen(true))}
             onRevoke={() => requireWallet(() => setIsRevokeConfirmOpen(true))}
-            // The edit diff compares against the saved links, so wait for the
-            // current list or an edit could overwrite links it never saw. A
-            // failed refetch keeps the old data but leaves isSuccess false.
             onEdit={
               isLinksLoaded && !isFetchingLinks
                 ? () => setIsEditModalOpen(true)
@@ -266,21 +273,24 @@ export default function ProfilePage() {
         />
       )}
 
-      {isEditModalOpen && profileTokenId && profileLinks && (
-        <CreateProfileModal
-          isOpen
-          onClose={() => setIsEditModalOpen(false)}
-          edit={{
-            tokenId: profileTokenId,
-            profile: profileData,
-            links: profileLinks,
-          }}
-          onSuccess={() => {
-            refetchProfile();
-            refetchLinks();
-          }}
-        />
-      )}
+      {/* Keep the modal mounted while closed so transaction state survives dismissal. */}
+      <CreateProfileModal
+        isOpen={isEditModalOpen && !!profileTokenId && !!profileLinks}
+        onClose={() => setIsEditModalOpen(false)}
+        edit={
+          profileTokenId && profileLinks
+            ? {
+                tokenId: profileTokenId,
+                profile: profileData,
+                links: profileLinks,
+              }
+            : undefined
+        }
+        onSuccess={() => {
+          refetchProfile();
+          refetchLinks();
+        }}
+      />
 
       {isAttestModalOpen && profileTokenId && (
         <AttestModal

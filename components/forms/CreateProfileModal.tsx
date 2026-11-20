@@ -150,16 +150,20 @@ export function CreateProfileModal({
   const isSubmitting = txStatus === "pending" || txStatus === "confirming";
 
   const handleClose = useCallback(() => {
-    setFormData(EMPTY_PROFILE_FORM);
-    setAvatarId(null);
-    setCustomLinks([]);
-    setHasAttemptedSubmit(false);
-    setStep("idle");
-    setDonate(true);
-    createProfile.reset();
-    updateProfile.reset();
+    // Keep transaction state alive while the wallet or blockchain is processing.
+    if (!isSubmitting) {
+      setFormData(EMPTY_PROFILE_FORM);
+      setAvatarId(null);
+      setCustomLinks([]);
+      setHasAttemptedSubmit(false);
+      setStep("idle");
+      setDonate(true);
+      createProfile.reset();
+      updateProfile.reset();
+    }
+
     onClose();
-  }, [onClose, createProfile, updateProfile]);
+  }, [onClose, isSubmitting, createProfile, updateProfile]);
 
   // Keep the latest closer in a ref so the key listener below can stay stable.
   // The ref is written in an effect rather than during render — refs must not
@@ -291,7 +295,7 @@ export function CreateProfileModal({
   return (
     <div
       className="animate-in fade-in fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto bg-black/70 p-4 backdrop-blur-sm duration-200 sm:items-center"
-      onClick={() => !isSubmitting && handleClose()}
+      onClick={handleClose}
       role="presentation"
     >
       <div
@@ -339,11 +343,7 @@ export function CreateProfileModal({
           className="no-scrollbar flex-1 overflow-y-auto px-6 py-6 md:px-8"
         >
           <Section index={1} title="Identity">
-            <AvatarPicker
-              value={avatarId}
-              onChange={setAvatarId}
-              disabled={isSubmitting}
-            />
+            <AvatarPicker value={avatarId} onChange={setAvatarId} />
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <TextField
@@ -516,7 +516,6 @@ export function CreateProfileModal({
             <button
               type="button"
               onClick={handleClose}
-              disabled={isSubmitting}
               className="rounded-xl border border-white/10 px-5 py-2.5 font-utsaha text-gray-300 transition-colors hover:bg-white/5 hover:text-white disabled:opacity-40 sm:w-auto"
             >
               Cancel

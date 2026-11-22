@@ -1,10 +1,43 @@
 import { foundry, sepolia } from "wagmi/chains";
+import { isAddress, type Address } from "viem";
 
-export const IDENTITY_SYSTEM_ADDRESS =
+/** The official v0.0.6 deployment on Sepolia, used when no override is set. */
+export const SEPOLIA_IDENTITY_SYSTEM_ADDRESS =
   "0x15253A56CD3EbC2893914C2139094dc92a42c016" as const;
 
-export const PROFILE_SYSTEM_ADDRESS =
+export const SEPOLIA_PROFILE_SYSTEM_ADDRESS =
   "0x17dc6AA09432d61ca630b523DAF01fB2b98Bd58D" as const;
+
+/**
+ * Resolve a configured address, falling back only when it is missing. An
+ * invalid value throws, so a typo cannot silently target Sepolia.
+ * Exported so the contract-address self-check can exercise it.
+ */
+export function deploymentAddress(
+  value: string | undefined,
+  fallback: Address
+): Address {
+  if (!value) return fallback;
+  if (!isAddress(value)) {
+    throw new Error(`Invalid contract address in .env: ${value}`);
+  }
+  return value;
+}
+
+/**
+ * The deployment the app should talk to. Set the
+ * `NEXT_PUBLIC_*_SYSTEM_ADDRESS` variables in `.env.local` to point the app at
+ * another deployment, such as the deterministic Anvil addresses.
+ */
+export const IDENTITY_SYSTEM_ADDRESS = deploymentAddress(
+  process.env.NEXT_PUBLIC_IDENTITY_SYSTEM_ADDRESS,
+  SEPOLIA_IDENTITY_SYSTEM_ADDRESS
+);
+
+export const PROFILE_SYSTEM_ADDRESS = deploymentAddress(
+  process.env.NEXT_PUBLIC_PROFILE_SYSTEM_ADDRESS,
+  SEPOLIA_PROFILE_SYSTEM_ADDRESS
+);
 
 /**
  * Block IdentitySystem was deployed in, per chain; update it together with the

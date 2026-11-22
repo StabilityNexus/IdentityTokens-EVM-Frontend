@@ -1,3 +1,5 @@
+import { normalize } from "viem/ens";
+
 export type FieldStatus = "idle" | "valid" | "invalid" | "warning" | "checking";
 
 export interface FieldResult {
@@ -193,11 +195,17 @@ export function validateWebsite(value: string): FieldResult {
 export function validateEns(value: string): FieldResult {
   const trimmed = value.trim();
   if (!trimmed) return IDLE;
-  if (trimmed !== trimmed.toLowerCase()) {
-    return warn("ENS names are lowercase.", trimmed.toLowerCase());
-  }
-  if (!/^[a-z0-9-]+\.eth$/.test(trimmed)) {
+  let name: string;
+  try {
+    name = normalize(trimmed);
+  } catch {
     return invalid("ENS names look like yourname.eth.");
+  }
+  if (!name.includes(".")) {
+    return invalid("ENS names look like yourname.eth.");
+  }
+  if (name !== trimmed) {
+    return warn("ENS uses this form.", name);
   }
   return OK;
 }

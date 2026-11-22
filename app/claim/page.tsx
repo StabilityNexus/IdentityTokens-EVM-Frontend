@@ -38,7 +38,9 @@ export default function ClaimPage() {
   const { address, isConnected, chainId } = useAccount();
   const { openConnectModal } = useConnectModal();
   const { switchChainAsync, isPending: isSwitching } = useSwitchChain();
-  const createRoot = useCreateRootIdentity({ chainId: CLAIM_CHAIN.id });
+  const createRoot = useCreateRootIdentity({
+    chainId: CLAIM_CHAIN.id,
+  });
   const validation = validateUsername(username);
 
   const {

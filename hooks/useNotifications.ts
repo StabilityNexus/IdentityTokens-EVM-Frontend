@@ -3,11 +3,7 @@
 import { useCallback, useEffect, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAccount, usePublicClient } from "wagmi";
-import {
-  DEPLOY_BLOCKS,
-  IDENTITY_SYSTEM_ABI,
-  IDENTITY_SYSTEM_ADDRESS,
-} from "@/lib/contracts";
+import { DEPLOY_BLOCKS, IDENTITY_SYSTEM_ABI } from "@/lib/contracts";
 import {
   classify,
   fromAttestations,
@@ -27,6 +23,7 @@ import {
 import { useMultipleTokenDetails } from "./useIdentityReads";
 import { useNotificationContext } from "./useNotificationContext";
 import { useTokenAttesters } from "./useTokenAttesters";
+import { useIdentitySystemAddress } from "./useSystemAddresses";
 import type { TokenTuple } from "./useWalletTokenList";
 
 type Client = NonNullable<ReturnType<typeof usePublicClient>>;
@@ -43,11 +40,12 @@ const BLOCK_BATCH = 10;
 /** Every IdentitySystem log in a block range. */
 function getLogs(
   client: Client,
+  address: `0x${string}`,
   fromBlock: bigint,
   toBlock: bigint
 ): Promise<ContractLog[]> {
   return client.getContractEvents({
-    address: IDENTITY_SYSTEM_ADDRESS,
+    address,
     abi: IDENTITY_SYSTEM_ABI,
     fromBlock,
     toBlock,
@@ -86,6 +84,7 @@ async function blockTimes(
  */
 async function scanNotifications(
   client: Client,
+  address: `0x${string}`,
   key: string,
   deployBlock: bigint,
   context: WalletContext,
@@ -98,7 +97,7 @@ async function scanNotifications(
   if (from > latest) return state;
 
   const { logs, skippedTo } = await scanLogs(
-    (start, end) => getLogs(client, start, end),
+    (start, end) => getLogs(client, address, start, end),
     from,
     latest,
     { range: START_RANGE, budget: REQUEST_BUDGET }
@@ -153,25 +152,32 @@ export function useNotifications() {
   });
 
   const chainId = client?.chain.id;
+  const identity = useIdentitySystemAddress(chainId);
   // Undefined on chains without the contract, which have nothing to scan.
   const deployBlock =
     chainId === undefined ? undefined : DEPLOY_BLOCKS[chainId];
   const key =
-    chainId === undefined
+    chainId === undefined || !identity
       ? undefined
-      : storageKey(chainId, IDENTITY_SYSTEM_ADDRESS, address);
+      : storageKey(chainId, identity, address);
   const queryKey = useMemo(() => ["notifications", key], [key]);
 
   const scan = useQuery({
     queryKey,
-    enabled: !!client && !!key && deployBlock !== undefined && wallet.isReady,
+    enabled:
+      !!client &&
+      !!key &&
+      !!identity &&
+      deployBlock !== undefined &&
+      wallet.isReady,
     refetchInterval: POLL_MS,
     queryFn: () => {
-      if (!client || !key || deployBlock === undefined) {
+      if (!client || !key || !identity || deployBlock === undefined) {
         throw new Error("No client");
       }
       return scanNotifications(
         client,
+        identity,
         key,
         deployBlock,
         wallet.context,

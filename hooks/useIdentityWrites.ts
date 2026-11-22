@@ -108,9 +108,11 @@ export function useCreateToken() {
   } = useWriteContract();
   const { donationFor, isPreparing } = useDonation();
 
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
-    hash: txHash,
-  });
+  const {
+    isLoading: isConfirming,
+    isSuccess,
+    error: receiptError,
+  } = useWaitForTransactionReceipt({ hash: txHash });
 
   const write = async (
     params: {
@@ -144,7 +146,7 @@ export function useCreateToken() {
     isConfirming,
     isSuccess,
     isLoading: isPreparing || isPending || isConfirming,
-    error,
+    error: error ?? receiptError,
     reset,
   };
 }
@@ -160,9 +162,11 @@ export function useAttestToken() {
   } = useWriteContract();
   const { donationFor, isPreparing } = useDonation();
 
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
-    hash: txHash,
-  });
+  const {
+    isLoading: isConfirming,
+    isSuccess,
+    error: receiptError,
+  } = useWaitForTransactionReceipt({ hash: txHash });
 
   const write = async (
     tokenId: bigint,
@@ -185,7 +189,7 @@ export function useAttestToken() {
     isConfirming,
     isSuccess,
     isLoading: isPreparing || isPending || isConfirming,
-    error,
+    error: error ?? receiptError,
     reset,
   };
 }
@@ -201,9 +205,11 @@ export function useRevokeAttestation() {
   } = useWriteContract();
   const { donationFor, isPreparing } = useDonation();
 
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
-    hash: txHash,
-  });
+  const {
+    isLoading: isConfirming,
+    isSuccess,
+    error: receiptError,
+  } = useWaitForTransactionReceipt({ hash: txHash });
 
   const write = async (tokenId: bigint, donate: boolean) => {
     const call = {
@@ -222,7 +228,7 @@ export function useRevokeAttestation() {
     isConfirming,
     isSuccess,
     isLoading: isPreparing || isPending || isConfirming,
-    error,
+    error: error ?? receiptError,
     reset,
   };
 }
@@ -238,9 +244,11 @@ export function useFlagToken() {
   } = useWriteContract();
   const { donationFor, isPreparing } = useDonation();
 
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
-    hash: txHash,
-  });
+  const {
+    isLoading: isConfirming,
+    isSuccess,
+    error: receiptError,
+  } = useWaitForTransactionReceipt({ hash: txHash });
 
   const write = async (tokenId: bigint, donate: boolean) => {
     const call = {
@@ -259,7 +267,7 @@ export function useFlagToken() {
     isConfirming,
     isSuccess,
     isLoading: isPreparing || isPending || isConfirming,
-    error,
+    error: error ?? receiptError,
     reset,
   };
 }
@@ -275,9 +283,11 @@ export function useBurnToken() {
   } = useWriteContract();
   const { donationFor, isPreparing } = useDonation();
 
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
-    hash: txHash,
-  });
+  const {
+    isLoading: isConfirming,
+    isSuccess,
+    error: receiptError,
+  } = useWaitForTransactionReceipt({ hash: txHash });
 
   const write = async (tokenId: bigint, donate: boolean) => {
     const call = {
@@ -296,7 +306,7 @@ export function useBurnToken() {
     isConfirming,
     isSuccess,
     isLoading: isPreparing || isPending || isConfirming,
-    error,
+    error: error ?? receiptError,
     reset,
   };
 }
@@ -312,9 +322,11 @@ export function useTransferToken() {
   } = useWriteContract();
   const { donationFor, isPreparing } = useDonation();
 
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
-    hash: txHash,
-  });
+  const {
+    isLoading: isConfirming,
+    isSuccess,
+    error: receiptError,
+  } = useWaitForTransactionReceipt({ hash: txHash });
 
   const write = async (
     tokenId: bigint,
@@ -337,7 +349,7 @@ export function useTransferToken() {
     isConfirming,
     isSuccess,
     isLoading: isPreparing || isPending || isConfirming,
-    error,
+    error: error ?? receiptError,
     reset,
   };
 }
@@ -355,7 +367,6 @@ export function useCreateProfile() {
   } = useWriteContract();
   const { donationFor, isPreparing } = useDonation();
 
-  // A reverted transaction fails here, not at send time, so surface it too.
   const {
     isLoading: isConfirming,
     isSuccess,

@@ -16,7 +16,7 @@
     "check:regions": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON node_modules/jiti/lib/jiti-cli.mjs scripts/check-regions.mjs",
     "check:devfee": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON node_modules/jiti/lib/jiti-cli.mjs scripts/check-dev-fee.mjs",
     "check:notifications": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON node_modules/jiti/lib/jiti-cli.mjs scripts/check-notifications.mjs",
-    "check:contracts": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON node_modules/jiti/lib/jiti-cli.mjs scripts/check-contract-addresses.mjs",
+    "check:validation": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON node_modules/jiti/lib/jiti-cli.mjs scripts/check-validation.mjs",
     "prepare": "husky"
   },
   "lint-staged": {
